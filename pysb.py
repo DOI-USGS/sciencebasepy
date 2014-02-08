@@ -67,9 +67,23 @@ class SbSession:
             retval = self._getJson(ret)
         else:
             raise Exception("File not found: " + filename)
-        return retval    
-        
+        return retval
+
     #
+    # Upload a file and create a new Item in ScienceBase
+    #
+    def uploadFileAndCreateItem(self, parentid, filename):
+        retval = None
+        url = self._baseUploadFileURL
+        if (os.access(filename, os.F_OK)):
+            files = {'file': open(filename, 'rb')}
+            ret = self._session.post(url, files=files, params={'parentId': parentid})
+            retval = self._getJson(ret)
+        else:
+            raise Exception("File not found: " + filename)
+        return retval
+
+        #
     # Get the ID of the logged-in user's My Items
     #
     def getMyItemsId(self):    
@@ -125,12 +139,12 @@ if __name__ == "__main__":
 
     # Get a public item.  No need to log in.
     itemJson = sb.getSbItem('505bc673e4b08c986b32bf81')
-    print "FIRST ITEM: " + str(itemJson)
+    print "Public Item: " + str(itemJson)
 
     # Get a private item.  Need to log in first.
     sb.loginc(str(raw_input("Username:  ")))
     itemJson = sb.getSbItem(sb.getMyItemsId())
-    print "SECOND ITEM: " + str(itemJson)
+    print "My Items: " + str(itemJson)
 
     # Create a new item.  The minimum required is a title for the new item, and the parent ID
     newItem = {'title': 'This is a new test item', 

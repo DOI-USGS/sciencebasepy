@@ -60,14 +60,28 @@ class SbSession:
     #
     def uploadFileToItem(self, item, filename):
         retval = None
-        url = self._baseUploadFileURL + item['id']
+        url = self._baseUploadFileURL
         if (os.access(filename, os.F_OK)):
             files = {'file': open(filename, 'rb')}
-            ret = self._session.post(url, files=files, params={'item': json.dumps(item)})     
+            ret = self._session.post(url, files=files, params={'id': item['id']})
             retval = self._getJson(ret)
         else:
             raise Exception("File not found: " + filename)
         return retval
+
+    #
+    # Upload multiple files and create a new Item in ScienceBase
+    #
+    def uploadFilesAndCreateItem(self, parentid, filenames):
+        url = self._baseUploadFileURL
+        files = []
+        for filename in filenames:
+            if (os.access(filename, os.F_OK)):
+                files.append(('file', open(filename, 'rb')))
+            else:
+                raise Exception("File not found: " + filename)
+        ret = self._session.post(url, files=files, params={'parentId': parentid})
+        return self._getJson(ret)
 
     #
     # Upload a file and create a new Item in ScienceBase
@@ -147,13 +161,17 @@ if __name__ == "__main__":
     print "My Items: " + str(itemJson)
 
     # Create a new item.  The minimum required is a title for the new item, and the parent ID
-    newItem = {'title': 'This is a new test item', 
+    newItem = {'title': 'This is a new test item',
         'parentId': sb.getMyItemsId(),
         'provenance': {'annotation': 'Python ScienceBase REST test script'}}
     newItem = sb.createSbItem(newItem)
-    print "NEW ITEM: " + str(newItem) 
+    print "NEW ITEM: " + str(newItem)
 
     # Upload a file to the newly created item
     ret = sb.uploadFileToItem(newItem, 'pysb.py')
     print "FILE UPDATE: " + str(ret)
+
+    # Upload multiple files to create a new item
+    ret = sb.uploadFilesAndCreateItem(sb.getMyItemsId(), ['pysb.py','readme.txt'])
+    print str(ret)
 

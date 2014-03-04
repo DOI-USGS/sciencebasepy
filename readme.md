@@ -7,25 +7,25 @@ Module Contents
 ---------------
 The SbSession class provides the following methods:
 
-* login(username, password)
+* `login(username, password)`
 Log into ScienceBase using the username and password.  This causes a cookie to be added to the session
 to be used by subsequent calls.
 
-* loginc(username)
+* `loginc(username)`
 Log into ScienceBase using the given username, and prompt for the password.  The password is not
 echoed to the console.  Provided as a convenience for interactive scripts.
 
-* getSbItem(id)
+* `getSbItem(id)`
 Get the JSON for the ScienceBase item with the given ID.
 
-* createSbItem(sbJson)
+* `createSbItem(sbJson)`
 Create a new ScienceBase item.  Documentation on the sbJson format can be found at
 https://my.usgs.gov/confluence/display/sciencebase/ScienceBase+Item+Core+Model
 
-* uploadFileToItem(sbJson, filename)
+* `uploadFileToItem(sbJson, filename)`
 Upload a file to an existing ScienceBase item.
 
-* getMyItemsId()
+* `getMyItemsId()`
 Get the ID of the logged in user's "My Items"
 
 Example Usage

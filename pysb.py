@@ -8,16 +8,28 @@ import logging
 import httplib
 
 class SbSession:
-    _baseSbURL = "https://www.sciencebase.gov/catalog/"
-    _baseItemURL = _baseSbURL + "item/"
-    _baseUploadFileURL = _baseSbURL + 'file/uploadAndUpsertItem/'
+    _baseSbURL = None
+    _baseItemURL = None
+    _baseItemsURL = None
+    _baseUploadFileURL = None
     _username = None
     _session = None
     
     #
     # Initialize session and set JSON headers
     #
-    def __init__(self):
+    def __init__(self, env=None):
+        if env == 'beta':
+            self._baseSbURL = "https://beta.sciencebase.gov/catalog/"
+        elif env == 'dev':
+            self._baseSbURL = "http://localhost:8090/catalog/"
+        else:
+            self._baseSbURL = "https://www.sciencebase.gov/catalog/"
+
+        self._baseItemURL = self._baseSbURL + "item/"
+        self._baseItemsURL = self._baseSbURL + "items/"
+        self._baseUploadFileURL = self._baseSbURL + 'file/uploadAndUpsertItem/'
+
         self._session = requests.Session()
         self._session.headers.update({'Accept': 'application/json'})
     
@@ -53,6 +65,13 @@ class SbSession:
     #   
     def createSbItem(self, itemJson):
         ret = self._session.post(self._baseItemURL, data=json.dumps(itemJson))
+        return self._getJson(ret)
+
+    #
+    # Update an existing ScienceBase Item
+    #
+    def updateSbItem(self, itemJson):
+        ret = self._session.put(self._baseItemURL + itemJson['id'], data=json.dumps(itemJson))
         return self._getJson(ret)
     
     #
@@ -97,20 +116,53 @@ class SbSession:
             raise Exception("File not found: " + filename)
         return retval
 
-        #
+    #
     # Get the ID of the logged-in user's My Items
     #
     def getMyItemsId(self):    
         if (self._username):
-            url = self._baseSbURL + 'items'
-            ret = self._session.get(url, params={'q': '', 'lq': 'title:"' + self._username + '"'})
-            items = self._getJson(ret)
+            items = self.findSbItemsByTitle(self._username)
             if ('items' in items): 
                 for item in items['items']:
                     if (item['title'] == self._username):
                         return item['id']
-                
-        
+
+    #
+    # Search for ScienceBase items
+    #
+    def findSbItems(self, params):
+        return self._getJson(self._session.get(self._baseItemsURL, params=params))
+
+    #
+    # Get the next set of items from the search
+    #
+    def next(self, items):
+        retVal = None
+        if 'nextlink' in items:
+            retVal = self._getJson(self._session.get(items['nextlink']['url']))
+        return retVal
+
+    #
+    # Get the previous set of items from the search
+    #
+    def previous(self, items):
+        retVal = None
+        if 'prevlink' in items:
+            retVal = self._getJson(self._session.get(items['prevlink']['url']))
+        return retVal
+
+    #
+    # Search for ScienceBase items by free text
+    #
+    def findSbItemsByAnytext(self, text):
+        return self.findSbItems({'q': text})
+
+    #
+    # Search for ScienceBase items by title
+    #
+    def findSbItemsByTitle(self, text):
+        return self.findSbItems({'q': '', 'lq': 'title:"' + text + '"'})
+
     #
     # Check the status code of the response, and parse out the JSON
     #    
@@ -144,7 +196,7 @@ class SbSession:
         requests_log = logging.getLogger("requests.packages.urllib3")
         requests_log.setLevel(logging.DEBUG)
         requests_log.propagate = True
-    
+
 #
 # Main    
 #
@@ -172,6 +224,13 @@ if __name__ == "__main__":
     print "FILE UPDATE: " + str(ret)
 
     # Upload multiple files to create a new item
-    ret = sb.uploadFilesAndCreateItem(sb.getMyItemsId(), ['pysb.py','readme.txt'])
+    ret = sb.uploadFilesAndCreateItem(sb.getMyItemsId(), ['pysb.py','readme.md'])
     print str(ret)
+
+    # Search
+    items = sb.findSbItemsByAnytext('test')
+    while items and 'items' in items:
+        for item in items['items']:
+            print item['title']
+        items = sb.next(items)
 

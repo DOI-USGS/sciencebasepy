@@ -174,12 +174,19 @@ class SbSession:
         return self.findSbItems({'q': '', 'lq': 'title:"' + text + '"'})
 
     #
+    # Get the text response of the given URL
+    #
     def get(self, url):
-        response = self._session.get(url)
-        return self._getText(response)
+        return self._getText(self._session.get(url))
 
     #
-    # Check the status code of the response, and parse out the JSON
+    # Get the JSON response of the given URL
+    #
+    def getJson(self, url):
+        return self._getJson(self._session.get(url))
+
+    #
+    # Check the status code of the response, and return the JSON
     #    
     def _getJson(self, response):     
         self._checkErrors(response)
@@ -188,6 +195,9 @@ class SbSession:
         except:
             raise Exception("Error parsing JSON response")
 
+    #
+    # Check the status code of the response, and return the text
+    #
     def _getText(self, response):
         self._checkErrors(response)
         try:
@@ -195,6 +205,9 @@ class SbSession:
         except:
             raise Exception("Error parsing response")
 
+    #
+    # Check the status code of the response
+    #
     def _checkErrors(self, response):
         if (response.status_code == 404):
             raise Exception("Resource not found, or user does not have access")

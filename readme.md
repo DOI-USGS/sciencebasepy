@@ -26,6 +26,9 @@ Get the ID of the logged in user's "My Items"
 * `get(url)`
 Get the text response of the given URL.
 
+* `getJson(url)`
+Get the JSON response of the given URL.
+
 * `findSbItemsByAnytext(text)`
 Find items containing the given text somewhere in the item.
 

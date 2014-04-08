@@ -8,11 +8,13 @@ import logging
 import httplib
 
 class SbSession:
+    _jossoURL = None
     _baseSbURL = None
     _baseItemURL = None
     _baseItemsURL = None
     _baseUploadFileURL = None
     _username = None
+    _jossosessionid = None
     _session = None
     
     #
@@ -21,10 +23,13 @@ class SbSession:
     def __init__(self, env=None):
         if env == 'beta':
             self._baseSbURL = "https://beta.sciencebase.gov/catalog/"
+            self._jossoURL = "https://my-beta.usgs.gov/josso/signon/usernamePasswordLogin.do"
         elif env == 'dev':
             self._baseSbURL = "http://localhost:8090/catalog/"
+            self._jossoURL = "https://my-beta.usgs.gov/josso/signon/usernamePasswordLogin.do"
         else:
             self._baseSbURL = "https://www.sciencebase.gov/catalog/"
+            self._jossoURL = "https://my.usgs.gov/josso/signon/usernamePasswordLogin.do"
 
         self._baseItemURL = self._baseSbURL + "item/"
         self._baseItemsURL = self._baseSbURL + "items/"
@@ -32,18 +37,23 @@ class SbSession:
 
         self._session = requests.Session()
         self._session.headers.update({'Accept': 'application/json'})
-    
+
     #
     # Log into ScienceBase
     #
     def login(self, username, password):
+        # Save username
         self._username = username
-        self._session.auth = requests.auth.HTTPBasicAuth(username, password)   
-        self._session.get(self._baseSbURL)
-        if ('JSESSIONID' not in self._session.cookies):
+
+        # Login and save JOSSO Session ID
+        ret = self._session.post(self._jossoURL, params={'josso_cmd': 'josso', 'josso_username':username, 'josso_password':password})
+        if ('JOSSO_SESSIONID' not in self._session.cookies):
             raise Exception("Login failed")
+        self._jossosessionid = self._session.cookies['JOSSO_SESSIONID']
+        self._session.params = {'josso':self._jossosessionid}
+
         return self
-        
+
     #
     # Log into ScienceBase, prompting for the password
     #
@@ -164,22 +174,34 @@ class SbSession:
         return self.findSbItems({'q': '', 'lq': 'title:"' + text + '"'})
 
     #
+    def get(self, url):
+        response = self._session.get(url)
+        return self._getText(response)
+
+    #
     # Check the status code of the response, and parse out the JSON
     #    
     def _getJson(self, response):     
-        retval = None
+        self._checkErrors(response)
+        try:
+            return response.json()
+        except:
+            raise Exception("Error parsing JSON response")
+
+    def _getText(self, response):
+        self._checkErrors(response)
+        try:
+            return response.text
+        except:
+            raise Exception("Error parsing response")
+
+    def _checkErrors(self, response):
         if (response.status_code == 404):
-            raise Exception("Resource not found, or user does not have access") 
+            raise Exception("Resource not found, or user does not have access")
         elif (response.status_code == 401):
             raise Exception("Unauthorized access")
         elif (response.status_code != 200):
             raise Exception("Other HTTP error: " + str(response.status_code))
-        else:
-            try:
-                retval = response.json()
-            except:
-                raise Exception("Error parsing JSON response")
-        return retval
         
     #
     # Turn on HTTP logging for debugging purposes

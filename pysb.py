@@ -92,7 +92,7 @@ class SbSession:
         url = self._baseUploadFileURL
         if (os.access(filename, os.F_OK)):
             files = {'file': open(filename, 'rb')}
-            ret = self._session.post(url, files=files, params={'id': item['id']})
+            ret = self._session.post(url, files=files, params={'id': item['id'], 'item': json.dumps(item)})
             retval = self._getJson(ret)
         else:
             raise Exception("File not found: " + filename)

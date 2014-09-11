@@ -45,16 +45,22 @@ Get the next page of results, where *items* is the current search results.
 * `previous(items)`
 Get the previous page of results, where *items* is the current search results.
 
-### Create and Update
+### Create, Update and Delete
 * `createSbItem(sbJson)`
 Create a new ScienceBase item.  Documentation on the sbJson format can be found at
 https://my.usgs.gov/confluence/display/sciencebase/ScienceBase+Item+Core+Model
+
+* `deleteSbItem(sbJson)`
+Delete an existing ScienceBase item.
 
 * `updateSbItem(sbJson)`
 Updates an existing ScienceBase item.
 
 * `uploadFileToItem(sbJson, filename)`
 Upload a file to an existing ScienceBase item.
+
+* `uploadFilesAndCreateItem(sbJson, [filename,...])`
+Upload a set of files and create a ScienceBase item.
 
 Example Usage
 -------------

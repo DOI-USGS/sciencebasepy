@@ -6,6 +6,7 @@ import os
 import getpass
 import logging
 import httplib
+import sys
 
 class SbSession:
     _jossoURL = None
@@ -83,6 +84,14 @@ class SbSession:
     def updateSbItem(self, itemJson):
         ret = self._session.put(self._baseItemURL + itemJson['id'], data=json.dumps(itemJson))
         return self._getJson(ret)
+        
+    #
+    # Delete an existing ScienceBase Item
+    #
+    def deleteSbItem(self, itemJson):
+        ret = self._session.delete(self._baseItemURL + itemJson['id'], data=json.dumps(itemJson))
+        self._checkErrors(ret)
+        return True
     
     #
     # Upload a file to an existing Item in ScienceBase
@@ -257,6 +266,10 @@ if __name__ == "__main__":
     # Upload a file to the newly created item
     ret = sb.uploadFileToItem(newItem, 'pysb.py')
     print "FILE UPDATE: " + str(ret)
+    
+    # Delete the newly created item
+    ret = sb.deleteSbItem(newItem)
+    print "DELETE: " + str(ret)
 
     # Upload multiple files to create a new item
     ret = sb.uploadFilesAndCreateItem(sb.getMyItemsId(), ['pysb.py','readme.md'])

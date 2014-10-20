@@ -225,7 +225,7 @@ class SbSession:
     #
     def getNetCDFOPeNDAPInfoFacet(self, url):
         data = self._getJson(self._session.post(self._baseSbURL + 'items/scrapeNetCDFOPeNDAP', params={'url': url}))
-        
+        facet = {}
         facet['className'] = 'gov.sciencebase.catalog.item.facet.NetCDFOPeNDAPFacet'
         facet['title'] = data['title']
         facet['summary'] = data['summary']
@@ -235,6 +235,7 @@ class SbSession:
         facet['boundingBox']['minY'] = data['boundingBox']['minY']
         facet['boundingBox']['maxY'] = data['boundingBox']['maxY']
         facet['variables'] = data['variables'] 
+        return facet
     
     #
     # Search for ScienceBase items

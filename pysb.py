@@ -7,6 +7,9 @@ import getpass
 import logging
 import httplib
 import sys
+import time
+import urlparse
+import urllib
 
 class SbSession:
     _jossoURL = None
@@ -34,7 +37,8 @@ class SbSession:
 
         self._baseItemURL = self._baseSbURL + "item/"
         self._baseItemsURL = self._baseSbURL + "items/"
-        self._baseUploadFileURL = self._baseSbURL + 'file/uploadAndUpsertItem/'
+        self._baseUploadFileURL = self._baseSbURL + "file/uploadAndUpsertItem/"
+        self._baseDownloadFilesURL = self._baseSbURL + "file/get/"
 
         self._session = requests.Session()
         self._session.headers.update({'Accept': 'application/json'})
@@ -134,7 +138,76 @@ class SbSession:
         else:
             raise Exception("File not found: " + filename)
         return retval
-
+        
+    #
+    # Download all files from a ScienceBase Item as a zip.  The zip is created server-side
+    # and streamed to the client.
+    #
+    def getItemFilesZip(self, item, destination = '.'):
+        #
+        # First check that there are files attached to the item, otherwise the call
+        # to ScienceBase will return an empty zip file
+        #
+        fileInfo = self.getItemFileInfo(item)
+        if not fileInfo:
+            return None
+            
+        #
+        # Download the zip
+        #
+        r = self._session.get(self._baseDownloadFilesURL + item['id'], stream=True) 
+        local_filename = os.path.join(destination, item['id'] + ".zip")
+        
+        with open(local_filename, 'wb') as f:
+            for chunk in r.iter_content(chunk_size=1024): 
+                if chunk: # filter out keep-alive new chunks
+                    f.write(chunk)
+                    f.flush()
+        return local_filename     
+        
+    #
+    # Retrieve file information from a ScienceBase Item.  Returns a list of dictionaries
+    # containing url, name and size of each file.
+    #
+    def getItemFileInfo(self, item):
+        retval = []
+        if item: 
+            #
+            # regular files
+            #
+            if 'files' in item: 
+                for file in item['files']:
+                    retval.append({'url': file['url'], 'name': file['name'], 'size': file['size']})
+            if 'facets' in item:
+                for facet in item['facets']:
+                    for file in facet['files']:
+                        retval.append({'url': file['url'], 'name': file['name'], 'size': file['size']})
+        return retval
+        
+    #
+    # Download file from URL
+    #
+    def downloadFile(self, url, local_filename, destination = '.'):
+        completeName = os.path.join(destination, local_filename) 
+        print "downloading " + url + " to " + completeName
+        r = self._session.get(url, stream=True)        
+        
+        with open(completeName, 'wb') as f:
+            for chunk in r.iter_content(chunk_size=1024): 
+                if chunk: # filter out keep-alive new chunks
+                    f.write(chunk)
+                    f.flush()
+        return completeName          
+        
+    #
+    # Download the individual files attached to a ScienceBase Item
+    #
+    def getItemFiles(self, item, destination = '.'):
+        fileInfo = self.getItemFileInfo(item)
+        for fileInfo in fileInfo:
+            self.downloadFile(fileInfo['url'], fileInfo['name'], destination)
+        return fileInfo
+            
     #
     # Get the ID of the logged-in user's My Items
     #
@@ -145,7 +218,24 @@ class SbSession:
                 for item in items['items']:
                     if (item['title'] == self._username):
                         return item['id']
-
+                        
+    #
+    # WORK IN PROGRESS
+    # Given an OPEeNDAP URL, create a NetCDFOPeNDAP facet from the return data
+    #
+    def getNetCDFOPeNDAPInfoFacet(self, url):
+        data = self._getJson(self._session.post(self._baseSbURL + 'items/scrapeNetCDFOPeNDAP', params={'url': url}))
+        
+        facet['className'] = 'gov.sciencebase.catalog.item.facet.NetCDFOPeNDAPFacet'
+        facet['title'] = data['title']
+        facet['summary'] = data['summary']
+        facet['boundingBox'] = {}    
+        facet['boundingBox']['minX'] = data['boundingBox']['minX']
+        facet['boundingBox']['maxX'] = data['boundingBox']['maxX']
+        facet['boundingBox']['minY'] = data['boundingBox']['minY']
+        facet['boundingBox']['maxY'] = data['boundingBox']['maxY']
+        facet['variables'] = data['variables'] 
+    
     #
     # Search for ScienceBase items
     #
@@ -158,7 +248,7 @@ class SbSession:
     def next(self, items):
         retVal = None
         if 'nextlink' in items:
-            retVal = self._getJson(self._session.get(items['nextlink']['url']))
+            retVal = self._getJson(self._session.get(self._removeJossoParam(items['nextlink']['url'])))
         return retVal
 
     #
@@ -167,7 +257,7 @@ class SbSession:
     def previous(self, items):
         retVal = None
         if 'prevlink' in items:
-            retVal = self._getJson(self._session.get(items['prevlink']['url']))
+            retVal = self._getJson(self._session.get(self._removeJossoParam(items['prevlink']['url'])))
         return retVal
 
     #
@@ -192,7 +282,7 @@ class SbSession:
     # Get the JSON response of the given URL
     #
     def getJson(self, url):
-        return self._getJson(self._session.get(url))
+        return self._getJson(self._session.get(url))        
 
     #
     # Check the status code of the response, and return the JSON
@@ -224,6 +314,14 @@ class SbSession:
             raise Exception("Unauthorized access")
         elif (response.status_code != 200):
             raise Exception("Other HTTP error: " + str(response.status_code))
+            
+    #
+    # Remove josso parameter from URL
+    #
+    def _removeJossoParam(self, url):
+        o = urlparse.urlsplit(url)
+        q = [x for x in urlparse.parse_qsl(o.query) if "josso" not in x]
+        return urlparse.urlunsplit((o.scheme, o.netloc, o.path, urllib.urlencode(q), o.fragment))
         
     #
     # Turn on HTTP logging for debugging purposes
@@ -252,7 +350,10 @@ if __name__ == "__main__":
     print "Public Item: " + str(itemJson)
 
     # Get a private item.  Need to log in first.
-    sb.loginc(str(raw_input("Username:  ")))
+    username = raw_input("Username:  ")
+    sb.loginc(str(username))
+    # Need to wait a bit after the login or errors can occur
+    time.sleep(5)
     itemJson = sb.getSbItem(sb.getMyItemsId())
     print "My Items: " + str(itemJson)
 
@@ -264,9 +365,26 @@ if __name__ == "__main__":
     print "NEW ITEM: " + str(newItem)
 
     # Upload a file to the newly created item
-    ret = sb.uploadFileToItem(newItem, 'pysb.py')
-    print "FILE UPDATE: " + str(ret)
+    newItem = sb.uploadFileToItem(newItem, 'pysb.py')
+    print "FILE UPDATE: " + str(newItem)
     
+    # List file info from the newly created item
+    ret = sb.getItemFileInfo(newItem)
+    for fileinfo in ret:
+        print "File " + fileinfo["name"] + ", " + str(fileinfo["size"]) + "bytes, download URL " + fileinfo["url"]
+    
+    # Download zip of files from the newly created item
+    ret = sb.getItemFilesZip(newItem)
+    print "Downloaded zip file " + str(ret)
+    
+    # Download all files attached to the item as individual files, and place them in the 
+    # tmp directory under the current directory.
+    path = "./tmp"
+    if not os.path.exists(path):
+        os.makedirs(path)
+    ret = sb.getItemFiles(newItem, path)
+    print "Downloaded files " + str(ret)
+        
     # Delete the newly created item
     ret = sb.deleteSbItem(newItem)
     print "DELETE: " + str(ret)
@@ -274,9 +392,9 @@ if __name__ == "__main__":
     # Upload multiple files to create a new item
     ret = sb.uploadFilesAndCreateItem(sb.getMyItemsId(), ['pysb.py','readme.md'])
     print str(ret)
-
+    
     # Search
-    items = sb.findSbItemsByAnytext('test')
+    items = sb.findSbItemsByAnytext(username)
     while items and 'items' in items:
         for item in items['items']:
             print item['title']

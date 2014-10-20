@@ -40,7 +40,7 @@ folder.  Destination defaults to the current directory.  If specified, the desti
 must exist.  This creates the zip file server-side and then streams it to the client.
 
 * `getItemFiles(sbJson, destination)`
-Download all files attached to the ScienceBase item and place it in the destination folder.
+Download all files attached to the ScienceBase item and place them in the destination folder.
 Destination defaults to the current directory.  If specified, the destination folder must 
 exist.  The files are streamed individually.
 
@@ -49,7 +49,7 @@ Get information about all files attached to a ScienceBase item.  Returns a list 
 dictionaries containing url, name and size of each file.
 
 * `downloadFile(url, local_filename, destination)`
-Download an individual file.  Destination defaults to the corrent directory.  If specified,
+Download an individual file.  Destination defaults to the current directory.  If specified,
 the destination folder must exist.
 
 ### Update
@@ -93,7 +93,7 @@ Example Usage
     import pysb
     import os
     
-    sb = SbSession()
+    sb = pysb.SbSession()
 
     # Get a public item.  No need to log in.
     itemJson = sb.getSbItem('505bc673e4b08c986b32bf81')

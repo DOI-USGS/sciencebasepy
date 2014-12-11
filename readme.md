@@ -62,7 +62,7 @@ Upload a file to an existing ScienceBase item.
 * `uploadFileAndCreateItem(parentid, filename)`
 Upload a file and create a ScienceBase item.
 
-* `uploadFilesAndCreateItem(sbJson, [filename,...])`
+* `uploadFilesAndCreateItem(parentid, [filename,...])`
 Upload a set of files and create a ScienceBase item.
 
 ### Delete

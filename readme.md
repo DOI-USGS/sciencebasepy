@@ -29,6 +29,9 @@ Get the JSON for the ScienceBase item with the given ID.
 * `getMyItemsId()`
 Get the ID of the logged in user's "My Items"
 
+* `getChildIds(parentid)`
+Get the IDs of all children of the ScienceBase item with the given ID.
+
 * `get(url)`
 Get the text response of the given URL.
 
@@ -69,6 +72,13 @@ Upload a set of files and create a ScienceBase item.
 ### Delete
 * `deleteSbItem(sbJson)`
 Delete an existing ScienceBase item.
+
+### Move
+* moveSbItem(itemid, parentid)
+Move the ScienceBase Item with the given itemid under the ScienceBase Item with the given parentid. 
+
+* moveSbItems(itemids, parentid)
+Move all of the ScienceBase Items with the given itemids under the ScienceBase Item with the given parentid. 
 
 ### Search
 * `findSbItemsByAnytext(text)`

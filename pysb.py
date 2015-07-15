@@ -6,7 +6,6 @@ import os
 import getpass
 import logging
 import httplib
-import sys
 import time
 import urlparse
 import urllib
@@ -17,6 +16,8 @@ class SbSession:
     _baseItemURL = None
     _baseItemsURL = None
     _baseUploadFileURL = None
+    _baseDownloadFilesURL = None
+    _baseMoveItemURL = None
     _username = None
     _jossosessionid = None
     _session = None
@@ -39,6 +40,7 @@ class SbSession:
         self._baseItemsURL = self._baseSbURL + "items/"
         self._baseUploadFileURL = self._baseSbURL + "file/uploadAndUpsertItem/"
         self._baseDownloadFilesURL = self._baseSbURL + "file/get/"
+        self._baseMoveItemURL = self._baseItemsURL + "move/"
 
         self._session = requests.Session()
         self._session.headers.update({'Accept': 'application/json'})
@@ -96,7 +98,27 @@ class SbSession:
         ret = self._session.delete(self._baseItemURL + itemJson['id'], data=json.dumps(itemJson))
         self._checkErrors(ret)
         return True
-    
+
+    #
+    # Move an existing ScienceBase Item under a new parent
+    #
+    def moveSbItem(self, itemid, parentid):
+        ret = self._session.post(self._baseMoveItemURL, params={'itemId': itemid, 'destId': parentid})
+        self._checkErrors(ret)
+        return self._getJson(ret)
+
+    #
+    # Move ScienceBase Items under a new parent
+    #
+    def moveSbItems(self, itemids, parentid):
+        count = 0
+        if itemids:
+            for itemid in itemids:
+                print 'moving ' + itemid
+                self.moveSbItem(itemid, parentid)
+                count += 1
+        return count
+
     #
     # Upload a file to an existing Item in ScienceBase
     #
@@ -218,6 +240,18 @@ class SbSession:
                 for item in items['items']:
                     if (item['title'] == self._username):
                         return item['id']
+
+    #
+    # Get IDs of all children for a given parent
+    #
+    def getChildIds(self, parentid):
+        retval = []
+        items = self.findSbItems({'parentId': parentid})
+        while items and 'items' in items:
+            for item in items['items']:
+                retval.append(item['id'])
+            items = self.next(items)
+        return retval
                         
     #
     # WORK IN PROGRESS

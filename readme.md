@@ -74,10 +74,10 @@ Upload a set of files and create a ScienceBase item.
 Delete an existing ScienceBase item.
 
 ### Move
-* moveSbItem(itemid, parentid)
+* `moveSbItem(itemid, parentid)`
 Move the ScienceBase Item with the given itemid under the ScienceBase Item with the given parentid. 
 
-* moveSbItems(itemids, parentid)
+* `moveSbItems(itemids, parentid)`
 Move all of the ScienceBase Items with the given itemids under the ScienceBase Item with the given parentid. 
 
 ### Search

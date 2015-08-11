@@ -16,6 +16,7 @@ class SbSession:
     _baseItemURL = None
     _baseItemsURL = None
     _baseUploadFileURL = None
+    _baseUploadFileTmpURL = None
     _baseDownloadFilesURL = None
     _baseMoveItemURL = None
     _username = None
@@ -40,6 +41,7 @@ class SbSession:
         self._baseItemsURL = self._baseSbURL + "items/"
         self._baseUploadFileURL = self._baseSbURL + "file/uploadAndUpsertItem/"
         self._baseDownloadFilesURL = self._baseSbURL + "file/get/"
+        self._baseUploadFileTmpURL = self._baseSbURL + "file/upload/"
         self._baseMoveItemURL = self._baseItemsURL + "move/"
 
         self._session = requests.Session()
@@ -160,6 +162,75 @@ class SbSession:
         else:
             raise Exception("File not found: " + filename)
         return retval
+        
+    #
+    # Upload a file to ScienceBase.  The file will be staged in a temporary area.  In order
+    # to attach it to an Item, the pathOnDisk must be added to an Item files entry, or
+    # one of a facet's file entries.
+    #
+    def uploadFile(self, filename, mimetype=None):
+        retval = None    
+        url = self._baseUploadFileTmpURL
+    
+        if (os.access(filename, os.F_OK)):
+            files = {'file': open(filename, 'rb')}
+            #
+            # if no mimetype was sent in, try to guess
+            #
+            if None == mimetype:
+                mimetype = mimetypes.guess_type(filename)
+            (dir, fname) = os.path.split(filename)
+            ret = self._session.post(url, files=[('files[]', (fname, open(filename, 'rb'), mimetype))])
+            retval = self._getJson(ret)
+        else:
+            raise Exception("File not found: " + filename)
+        return retval
+
+    #
+    # Replace a file on a ScienceBase Item.  This method will replace all files named
+    # the same as the new file, whether they are in the files list or on an extension.
+    #
+    def replaceFile(self, filename, item):
+        (dir, fname) = os.path.split(filename)        
+        #  
+        # replace file in files list
+        #
+        if 'files' in item:  
+            newFiles = []
+            for file in item['files']:
+                if file['name'] == fname:   
+                    file = self._replaceFile(filename, file)      
+                newFiles.append(file)
+            item['files'] = newFiles
+        #
+        # replace file in facets
+        #
+        if 'facets' in item:
+            newFacets=[]
+            for facet in item['facets']:
+                if 'files' in facet:
+                    newFiles = []
+                    for file in facet['files']:
+                        if file['name'] == fname:
+                            file = self._replaceFile(filename, file)                           
+                        newFiles.append(file)
+                    facet['files'] = newFiles
+                    newFacets.append(facet)
+            item['facets'] = newFacets                      
+        self.updateSbItem(item)    
+        
+    #
+    # Upload a file to ScienceBase and update file json with new path on disk.
+    #
+    def _replaceFile(self, filename, file):        
+        #
+        # Upload file and point file JSON at it
+        #
+        upldJson = self.uploadFile(filename, file['contentType'])
+        file['pathOnDisk'] = upldJson[0]['fileKey']
+        file['dateUploaded'] = upldJson[0]['dateUploaded']
+        file['uploadedBy'] = upldJson[0]['uploadedBy'] 
+        return file                         
         
     #
     # Download all files from a ScienceBase Item as a zip.  The zip is created server-side

@@ -188,7 +188,7 @@ class SbSession:
 
     #
     # Replace a file on a ScienceBase Item.  This method will replace all files named
-    # the same as the new file, whether they are in the files list or on an extension.
+    # the same as the new file, whether they are in the files list or on a facet.
     #
     def replaceFile(self, filename, item):
         (dir, fname) = os.path.split(filename)        

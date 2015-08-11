@@ -69,6 +69,14 @@ Upload a file and create a ScienceBase item.
 * `uploadFilesAndCreateItem(parentid, [filename,...])`
 Upload a set of files and create a ScienceBase item.
 
+* `replaceFile(filename, item)`
+Replace a file on a ScienceBase Item.  This method will replace all files named the same as the new file, 
+whether they are in the files list or in a facet.
+
+* `uploadFile(filename, mimetype)`
+(Advanced usage) Upload a file to ScienceBase.  The file will be staged in a temporary area.  In order
+to attach it to an Item, the pathOnDisk must be added to an Item files entry, or one of a facet's file entries.
+
 ### Delete
 * `deleteSbItem(sbJson)`
 Delete an existing ScienceBase item.

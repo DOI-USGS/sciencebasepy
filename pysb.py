@@ -6,9 +6,9 @@ import os
 import getpass
 import logging
 import httplib
-import time
 import urlparse
 import urllib
+import mimetypes
 
 class SbSession:
     _jossoURL = None
@@ -64,11 +64,37 @@ class SbSession:
         return self
 
     #
+    # Log out of ScienceBase
+    #
+    def logout(self):
+        ret = self._session.post(self._baseSbURL + 'j_spring_security_logout')
+        self._session.cookies.clear_session_cookies()
+        self._session.params = {}
+
+    #
     # Log into ScienceBase, prompting for the password
     #
     def loginc(self, username):
         password = getpass.getpass()
         return self.login(username, password)
+
+    #
+    # Return whether the SbSession is logged in and active in ScienceBase
+    #
+    def isLoggedIn(self):
+        return self.getSessionInfo()['isLoggedIn']
+
+    #
+    # Ping ScienceBase.  A very low-cost operation to determine whether ScienceBase is available
+    #
+    def ping(self):
+        return self.getJson(self._baseItemURL + 'ping')
+        
+    #
+    # Return ScienceBase Josso session info
+    #
+    def getSessionInfo(self):
+        return self.getJson(self._baseSbURL + 'jossoHelper/sessionInfo?includeJossoSessionId=true')
 
     #
     # Get the ScienceBase Item JSON with the given ID
@@ -98,6 +124,19 @@ class SbSession:
     #
     def deleteSbItem(self, itemJson):
         ret = self._session.delete(self._baseItemURL + itemJson['id'], data=json.dumps(itemJson))
+        self._checkErrors(ret)
+        return True
+        
+    #
+    # Delete multiple ScienceBase Items.  This is much more
+    # efficient than using deleteSbItem() for mass deletions, as it performs it server-side
+    # in one call to ScienceBase.
+    #
+    def deleteSbItems(self, itemIds):
+        idsJson = []
+        for itemId in itemIds:
+            idsJson.append({'id': itemId})        
+        ret = self._session.delete(self._baseItemsURL, data=json.dumps(idsJson))
         self._checkErrors(ret)
         return True
 
@@ -458,8 +497,7 @@ if __name__ == "__main__":
     # Get a private item.  Need to log in first.
     username = raw_input("Username:  ")
     sb.loginc(str(username))
-    # Need to wait a bit after the login or errors can occur
-    time.sleep(5)
+
     itemJson = sb.getSbItem(sb.getMyItemsId())
     print "My Items: " + str(itemJson)
 
@@ -505,4 +543,7 @@ if __name__ == "__main__":
         for item in items['items']:
             print item['title']
         items = sb.next(items)
+
+    # Logout
+    sb.logout()
 

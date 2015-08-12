@@ -17,6 +17,18 @@ to be used by subsequent calls.
 Log into ScienceBase using the given username, and prompt for the password.  The password is not
 echoed to the console.  Provided as a convenience for interactive scripts.
 
+* `isLoggedIn()`
+Return whether the SbSession is logged in and active in ScienceBase
+
+* `getSessionInfo()`
+Return ScienceBase Josso session info
+
+* `ping()`
+Ping ScienceBase.  A very low-cost operation to determine whether ScienceBase is available.
+
+* `logout()`
+Log out of ScienceBase
+
 ### Create
 * `createSbItem(sbJson)`
 Create a new ScienceBase item.  Documentation on the sbJson format can be found at
@@ -80,6 +92,10 @@ to attach it to an Item, the pathOnDisk must be added to an Item files entry, or
 ### Delete
 * `deleteSbItem(sbJson)`
 Delete an existing ScienceBase item.
+
+* `deleteSbItems(itemIds)`
+Delete multiple ScienceBase Items.  This is much more efficient than using deleteSbItem() for multiple deletions, as it 
+performs the action server-side in one call to ScienceBase.
 
 ### Move
 * `moveSbItem(itemid, parentid)`
@@ -168,6 +184,9 @@ Example Usage
         for item in items['items']:
             print item['title']
         items = sb.next(items)
+        
+    # Logout
+    sb.logout()
 ````
 Copyright and License
 ---------------------

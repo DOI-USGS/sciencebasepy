@@ -348,7 +348,6 @@ class SbSession:
         if (self._username):
             params = {'q': '', 'lq': 'title.untouched:"' + self._username + '"'}
             if self._usersId:
-                print 'using Users to find My Items'
                 params['parentId'] = self._usersId
             items = self.findSbItems(params)
             if ('items' in items): 

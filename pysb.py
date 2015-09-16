@@ -19,6 +19,7 @@ class SbSession:
     _baseUploadFileTmpURL = None
     _baseDownloadFilesURL = None
     _baseMoveItemURL = None
+    _usersId = None
     _username = None
     _jossosessionid = None
     _session = None
@@ -30,12 +31,14 @@ class SbSession:
         if env == 'beta':
             self._baseSbURL = "https://beta.sciencebase.gov/catalog/"
             self._jossoURL = "https://my-beta.usgs.gov/josso/signon/usernamePasswordLogin.do"
+            self._usersId = "4f4e4772e4b07f02db47e231"
         elif env == 'dev':
             self._baseSbURL = "http://localhost:8090/catalog/"
             self._jossoURL = "https://my-beta.usgs.gov/josso/signon/usernamePasswordLogin.do"
         else:
             self._baseSbURL = "https://www.sciencebase.gov/catalog/"
             self._jossoURL = "https://my.usgs.gov/josso/signon/usernamePasswordLogin.do"
+            self._usersId = "4f4e4772e4b07f02db47e231"
 
         self._baseItemURL = self._baseSbURL + "item/"
         self._baseItemsURL = self._baseSbURL + "items/"
@@ -163,16 +166,14 @@ class SbSession:
     #
     # Upload a file to an existing Item in ScienceBase
     #
-    def uploadFileToItem(self, item, filename):
-        retval = None
-        url = self._baseUploadFileURL
-        if (os.access(filename, os.F_OK)):
-            files = {'file': open(filename, 'rb')}
-            ret = self._session.post(url, files=files, data={'id': item['id'], 'item': json.dumps(item)})
-            retval = self._getJson(ret)
-        else:
-            raise Exception("File not found: " + filename)
-        return retval
+    def uploadFileToItem(self, item, filename):        
+        return self.uploadFilesAndUpdateItem(item, [filename])
+        
+    #
+    # Upload a file and create a new Item in ScienceBase
+    #
+    def uploadFileAndCreateItem(self, parentid, filename):        
+        return self.uploadFileAndCreateItem(parentid, [filename])    
 
     #
     # Upload multiple files and create a new Item in ScienceBase
@@ -187,20 +188,20 @@ class SbSession:
                 raise Exception("File not found: " + filename)
         ret = self._session.post(url, files=files, params={'parentId': parentid})
         return self._getJson(ret)
-
+        
     #
-    # Upload a file and create a new Item in ScienceBase
+    # Upload multiple files and update an existing Item in ScienceBase
     #
-    def uploadFileAndCreateItem(self, parentid, filename):
-        retval = None
+    def uploadFilesAndUpdateItem(self, item, filenames):
         url = self._baseUploadFileURL
-        if (os.access(filename, os.F_OK)):
-            files = {'file': open(filename, 'rb')}
-            ret = self._session.post(url, files=files, params={'parentId': parentid})
-            retval = self._getJson(ret)
-        else:
-            raise Exception("File not found: " + filename)
-        return retval
+        files = []
+        for filename in filenames:
+            if (os.access(filename, os.F_OK)):
+                files.append(('file', open(filename, 'rb')))
+            else:
+                raise Exception("File not found: " + filename)
+        ret = self._session.post(url, files=files, data={'id': item['id'], 'item': json.dumps(item)})
+        return self._getJson(ret)
         
     #
     # Upload a file to ScienceBase.  The file will be staged in a temporary area.  In order
@@ -345,7 +346,11 @@ class SbSession:
     #
     def getMyItemsId(self):    
         if (self._username):
-            items = self.findSbItemsByTitle(self._username)
+            params = {'q': '', 'lq': 'title.untouched:"' + self._username + '"'}
+            if self._usersId:
+                print 'using Users to find My Items'
+                params['parentId'] = self._usersId
+            items = self.findSbItems(params)
             if ('items' in items): 
                 for item in items['items']:
                     if (item['title'] == self._username):

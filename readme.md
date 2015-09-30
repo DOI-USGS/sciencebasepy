@@ -100,6 +100,9 @@ Delete an existing ScienceBase item.
 Delete multiple ScienceBase Items.  This is much more efficient than using deleteSbItem() for multiple deletions, as it 
 performs the action server-side in one call to ScienceBase.
 
+* `undeleteSbItem(itemid)`
+Undelete a ScienceBase item.
+
 ### Move
 * `moveSbItem(itemid, parentid)`
 Move the ScienceBase Item with the given itemid under the ScienceBase Item with the given parentid. 

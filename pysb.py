@@ -19,6 +19,7 @@ class SbSession:
     _baseUploadFileTmpURL = None
     _baseDownloadFilesURL = None
     _baseMoveItemURL = None
+    _baseUndeleteItemURL = None
     _usersId = None
     _username = None
     _jossosessionid = None
@@ -46,6 +47,7 @@ class SbSession:
         self._baseDownloadFilesURL = self._baseSbURL + "file/get/"
         self._baseUploadFileTmpURL = self._baseSbURL + "file/upload/"
         self._baseMoveItemURL = self._baseItemsURL + "move/"
+        self._baseUndeleteItemURL = self._baseItemURL + "undelete/"
 
         self._session = requests.Session()
         self._session.headers.update({'Accept': 'application/json'})
@@ -129,6 +131,15 @@ class SbSession:
         ret = self._session.delete(self._baseItemURL + itemJson['id'], data=json.dumps(itemJson))
         self._checkErrors(ret)
         return True
+    
+    #
+    # Undelete a ScienceBase Item
+    #
+    def undeleteSbItem(self, itemid):
+        ret = self._session.post(self._baseUndeleteItemURL, params={'itemId': itemid})
+        self._checkErrors(ret)
+        return self._getJson(ret)
+        
         
     #
     # Delete multiple ScienceBase Items.  This is much more

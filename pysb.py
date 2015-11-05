@@ -184,7 +184,7 @@ class SbSession:
     # Upload a file and create a new Item in ScienceBase
     #
     def uploadFileAndCreateItem(self, parentid, filename):        
-        return self.uploadFileAndCreateItem(parentid, [filename])    
+        return self.uploadFilesAndCreateItem(parentid, [filename])    
 
     #
     # Upload multiple files and create a new Item in ScienceBase

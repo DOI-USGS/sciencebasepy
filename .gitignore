@@ -1,2 +1,4 @@
 .idea/
 pysb.iml
+build/
+pysb.pyc

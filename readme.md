@@ -3,6 +3,7 @@ Python ScienceBase Utilities
 This Python module provides some basic services for interacting with ScienceBase.  It requires the "requests"
 module to be installed, which can be found at 
 [http://docs.python-requests.org/en/latest/](http://docs.python-requests.org/en/latest/)
+If you get security errors also install requests[security]
 
 Module Contents
 ---------------

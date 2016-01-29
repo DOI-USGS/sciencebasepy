@@ -80,8 +80,15 @@ class SbSession:
     # Log into ScienceBase, prompting for the password
     #
     def loginc(self, username):
-        password = getpass.getpass()
-        return self.login(username, password)
+        tries = 0
+        while (tries < 5):
+            password = getpass.getpass()
+            try: 
+                return self.login(username, password)
+            except Exception as e:
+                tries += 1
+                print "Invalid password, try again"
+        raise Exception("Too many invalid password attemps, you may need to wait 15 minutes before trying again")
 
     #
     # Return whether the SbSession is logged in and active in ScienceBase

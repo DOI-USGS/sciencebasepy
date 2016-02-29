@@ -378,7 +378,7 @@ class SbSession:
     #
     def getChildIds(self, parentid):
         retval = []
-        items = self.findSbItems({'filter=parentIdExcludingLinks': parentid})
+        items = self.findSbItems({'filter':'parentIdExcludingLinks=' + parentid})
         while items and 'items' in items:
             for item in items['items']:
                 retval.append(item['id'])
@@ -480,7 +480,11 @@ class SbSession:
         elif (response.status_code == 401):
             raise Exception("Unauthorized access")
         elif (response.status_code != 200):
-            raise Exception("Other HTTP error: " + str(response.status_code) + ": " + response.text)
+            try:
+                messages = self._getText(response)
+
+            except:
+                raise Exception("Other HTTP error: " + str(response.status_code) + ": " + response.text)
             
     #
     # Remove josso parameter from URL

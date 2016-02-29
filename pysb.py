@@ -480,11 +480,7 @@ class SbSession:
         elif (response.status_code == 401):
             raise Exception("Unauthorized access")
         elif (response.status_code != 200):
-            try:
-                messages = self._getText(response)
-
-            except:
-                raise Exception("Other HTTP error: " + str(response.status_code) + ": " + response.text)
+            raise Exception("Other HTTP error: " + str(response.status_code) + ": " + response.text)
             
     #
     # Remove josso parameter from URL

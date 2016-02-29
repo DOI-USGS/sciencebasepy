@@ -378,7 +378,7 @@ class SbSession:
     #
     def getChildIds(self, parentid):
         retval = []
-        items = self.findSbItems({'parentId': parentid})
+        items = self.findSbItems({'filter=parentIdExcludingLinks': parentid})
         while items and 'items' in items:
             for item in items['items']:
                 retval.append(item['id'])

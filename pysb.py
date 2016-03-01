@@ -211,6 +211,12 @@ class SbSession:
     # Upload multiple files and update an existing Item in ScienceBase
     #
     def uploadFilesAndUpdateItem(self, item, filenames):
+        return uploadFilesAndUpsertItem(item, filenames)
+        
+    #
+    # Upload multiple files and create or update an Item in ScienceBase
+    #
+    def uploadFilesAndUpsertItem(self, item, filenames):
         url = self._baseUploadFileURL
         files = []
         for filename in filenames:
@@ -218,7 +224,10 @@ class SbSession:
                 files.append(('file', open(filename, 'rb')))
             else:
                 raise Exception("File not found: " + filename)
-        ret = self._session.post(url, files=files, data={'id': item['id'], 'item': json.dumps(item)})
+        data = {'item': json.dumps(item)}
+        if 'id' in item and item['id']:
+            data['id'] = item['id']
+        ret = self._session.post(url, files=files, data=data)
         return self._getJson(ret)
         
     #

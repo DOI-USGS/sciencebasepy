@@ -85,6 +85,9 @@ Upload a set of files and create a ScienceBase item.
 * `uploadFilesAndUpdateItem(item, [filename,...])`
 Upload a set of files and update an existing ScienceBase item.
 
+* `uploadFilesAndUpsertItem(item, [filename,...])`
+Upload multiple files and create or update a ScienceBase item.
+
 * `replaceFile(filename, item)`
 Replace a file on a ScienceBase Item.  This method will replace all files named the same as the new file, 
 whether they are in the files list or in a facet.

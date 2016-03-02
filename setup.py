@@ -1,9 +1,13 @@
 from distutils.core import setup
 setup(name='pysb',
-      version='1.2.6',
+      version='1.3.0',
+      packages=['pysb',],
       description="Python ScienceBase Utilities",
       author="ScienceBase Development Team",
       author_email="sciencebase@usgs.gov",
       url='https://my.usgs.gov/confluence/display/sciencebase/ScienceBase+Item+Services',
       py_modules=['pysb'],
+      install_requires=[
+        'requests'
+      ]
       )

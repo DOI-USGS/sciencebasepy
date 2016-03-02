@@ -5,10 +5,6 @@ module to be installed, which can be found at
 [http://docs.python-requests.org/en/latest/](http://docs.python-requests.org/en/latest/)
 If you get security errors also install requests[security]
 
-Quick Start
------------
-Check out this project and start editing the `demo.py` file.
-
 Module Contents
 ---------------
 The SbSession class provides the following methods:

@@ -211,7 +211,7 @@ class SbSession:
     # Upload multiple files and update an existing Item in ScienceBase
     #
     def upload_files_and_update_item(self, item, filenames):
-        return upload_files_and_upsert_item(item, filenames)
+        return self.upload_files_and_upsert_item(item, filenames)
 
     #
     # Upload multiple files and create or update an Item in ScienceBase
@@ -303,7 +303,7 @@ class SbSession:
     # Download all files from a ScienceBase Item as a zip.  The zip is created server-side
     # and streamed to the client.
     #
-    def get_item_files_zip(self, item, destination = '.'):
+    def get_item_files_zip(self, item, destination='.'):
         #
         # First check that there are files attached to the item, otherwise the call
         # to ScienceBase will return an empty zip file
@@ -347,7 +347,7 @@ class SbSession:
     #
     # Download file from URL
     #
-    def download_file(self, url, local_filename, destination = '.'):
+    def download_file(self, url, local_filename, destination='.'):
         complete_name = os.path.join(destination, local_filename)
         print "downloading " + url + " to " + complete_name
         r = self._session.get(url, stream=True)
@@ -362,7 +362,7 @@ class SbSession:
     #
     # Download the individual files attached to a ScienceBase Item
     #
-    def get_item_files(self, item, destination = '.'):
+    def get_item_files(self, item, destination='.'):
         file_info = self.get_item_file_info(item)
         for file_info in file_info:
             self.download_file(file_info['url'], file_info['name'], destination)
@@ -514,3 +514,64 @@ class SbSession:
         requests_log = logging.getLogger("requests.packages.urllib3")
         requests_log.setLevel(logging.DEBUG)
         requests_log.propagate = True
+
+    #
+    # Backwards compatibility section
+    # legacy, can be removed in a few years perhaps.
+    #
+    def isLoggedIn(self):
+        return self.is_logged_in()
+    def getSessionInfo(self):
+        return self.get_session_info()
+    def getSbItem(self, item_id):
+        return self.get_item(item_id)
+    def createSbItem(self, item_json):
+        return self.create_item(item_json)
+    def updateSbItem(self, item_json):
+        return self.update_item(item_json)
+    def deleteSbItem(self, item_json):
+        return self.delete_item(item_json)
+    def undeleteSbItem(self, item_id):
+        return self.undelete_item(item_id)
+    def deleteSbItems(self, item_ids):
+        return self.delete_items(item_ids)
+    def moveSbItem(self, item_id, parent_id):
+        return self.move_item(item_id, parent_id)
+    def moveSbItems(self, item_ids, parent_id):
+        return self.move_items(item_ids, parent_id)
+    def uploadFileToItem(self, item, filename):
+        return self.upload_file_to_item(item, filename)
+    def uploadFileAndCreateItem(self, parent_id, filename):
+        return self.upload_file_and_create_item(parent_id, filename)
+    def uploadFilesAndCreateItem(self, parent_id, filenames):
+        return self.upload_files_and_create_item(parent_id, filenames)
+    def uploadFilesAndUpdateItem(self, item, filenames):
+        return self.upload_files_and_update_item(item, filenames)
+    def uploadFilesAndUpsertItem(self, item, filenames):
+        return self.upload_files_and_upsert_item(item, filenames)
+    def uploadFile(self, filename, mimetype=None):
+        return self.upload_file(filename, mimetype)
+    def replaceFile(self, filename, item):
+        return self.replace_file(filename, item)
+    def getItemFilesZip(self, item, destination='.'):
+        return self.get_item_files_zip(item, destination)
+    def getItemFileInfo(self, item):
+        return self.get_item_file_info(item)
+    def downloadFile(self, url, local_filename, destination='.'):
+        return self.download_file(url, local_filename, destination)
+    def getItemFiles(self, item, destination='.'):
+        return self.get_item_files(item, destination)
+    def getMyItemsId(self):
+        return self.get_my_items_id()
+    def getChildIds(self, parent_id):
+        return self.get_child_ids(parent_id)
+    def getNetCDFOPeNDAPInfoFacet(self, url):
+        return self.get_NetCDFOPeNDAP_info_facet(url)
+    def findSbItems(self, params):
+        return self.find_items(params)
+    def findSbItemsByAnytext(self, text):
+        return self.find_items_by_any_text(text)
+    def findSbItemsByTitle(self, text):
+        return self.find_items_by_title(text)
+    def getJson(self, response):
+        return self.get_json(response)

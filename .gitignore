@@ -3,3 +3,4 @@ pysb.iml
 build/
 *.pyc
 pysb/*.pyc
+tmp/

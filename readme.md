@@ -7,7 +7,7 @@ If you get security errors also install requests[security]
 
 Quick Start
 -----------
-Check out this project and start editing the `demo.py` file.
+Install the pysb libraries into your python installation by running `python setup.py install`.  Example usage is contained in `demo.py`.
 
 Module Contents
 ---------------

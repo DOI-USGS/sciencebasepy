@@ -516,8 +516,7 @@ class SbSession:
         requests_log.propagate = True
 
     #
-    # Backwards compatibility section
-    # legacy, can be removed in a few years perhaps.
+    # Backwards compatibility section.  May be removed in future releases.
     #
     def isLoggedIn(self):
         return self.is_logged_in()

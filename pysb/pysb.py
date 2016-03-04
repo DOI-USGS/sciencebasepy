@@ -20,6 +20,8 @@ class SbSession:
     _base_download_files_url = None
     _base_move_item_url = None
     _base_undelete_item_url = None
+    _base_shortcut_item_url = None
+    _base_unlink_item_url = None
     _users_id = None
     _username = None
     _jossosessionid = None
@@ -48,6 +50,8 @@ class SbSession:
         self._base_upload_file_temp_url = self._base_sb_url + "file/upload/"
         self._base_move_item_url = self._base_items_url + "move/"
         self._base_undelete_item_url = self._base_item_url + "undelete/"
+        self._base_shortcut_item_url = self._base_items_url + "addLink/"
+        self._base_unlink_item_url = self._base_items_url + "unlink/"
 
         self._session = requests.Session()
         self._session.headers.update({'Accept': 'application/json'})
@@ -393,6 +397,32 @@ class SbSession:
                 retval.append(item['id'])
             items = self.next(items)
         return retval
+
+    #
+    # Get IDs of all shortcutted items for a given item
+    #
+    def get_shortcut_ids(self, itemid):
+        retval = []
+        items = self.find_items({'filter':'linkParentId=' + itemid})
+        while items and 'items' in items:
+            for item in items['items']:
+                retval.append(item['id'])
+            items = self.next(items)
+        return retval
+
+    #
+    # Create a shortcut to another item
+    #
+    def create_shortcut(self, itemid, parentid):
+        ret = self._session.post(self._base_shortcut_item_url, params={'itemId':itemid, 'destId':parentid})
+        return self._get_json(ret)
+
+    #
+    # Remove a shortcut to another item
+    #
+    def remove_shortcut(self, itemid, parentid):
+        ret = self._session.post(self._base_unlink_item_url, params={'itemId':itemid, 'destId':parentid})
+        return self._get_json(ret)
 
     #
     # WORK IN PROGRESS

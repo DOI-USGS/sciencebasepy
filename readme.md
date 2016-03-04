@@ -135,6 +135,16 @@ Get the next page of results, where *items* is the current search results.
 * `previous(items)`
 Get the previous page of results, where *items* is the current search results.
 
+### Shortcuts
+* `get_shortcut_ids(itemid)`
+Get the IDs of all ScienceBase Items shortcutted from a given item.
+    
+* `create_shortcut(itemid, parentid)`
+Create a shortcut on the ScienceBase Item with the id parentid to another Item with id itemid.
+        
+* `remove_shortcut(itemid, parentid)`
+Remove a shortcut from the ScienceBase Item with the id parentid to another Item with id itemid.
+
 Example Usage
 -------------
 

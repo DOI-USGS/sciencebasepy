@@ -6,7 +6,6 @@ setup(name='pysb',
       author="ScienceBase Development Team",
       author_email="sciencebase@usgs.gov",
       url='https://my.usgs.gov/confluence/display/sciencebase/ScienceBase+Item+Services',
-      py_modules=['pysb'],
       install_requires=[
         'requests'
       ]

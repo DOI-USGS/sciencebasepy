@@ -60,7 +60,7 @@ class SbSession:
         self._username = username
 
         # Login and save JOSSO Session ID
-        ret = self._session.post(self._josso_url, params={'josso_cmd': 'josso', 'josso_username':username, 'josso_password':password})
+        self._session.post(self._josso_url, params={'josso_cmd': 'josso', 'josso_username':username, 'josso_password':password})
         if ('JOSSO_SESSIONID' not in self._session.cookies):
             raise Exception("Login failed")
         self._jossosessionid = self._session.cookies['JOSSO_SESSIONID']
@@ -72,7 +72,7 @@ class SbSession:
     # Log out of ScienceBase
     #
     def logout(self):
-        ret = self._session.post(self._base_sb_url + 'j_spring_security_logout')
+        self._session.post(self._base_sb_url + 'j_spring_security_logout')
         self._session.cookies.clear_session_cookies()
         self._session.params = {}
 
@@ -85,7 +85,7 @@ class SbSession:
             password = getpass.getpass()
             try:
                 return self.login(username, password)
-            except Exception as e:
+            except Exception:
                 tries += 1
                 print "Invalid password, try again"
         raise Exception("Too many invalid password attemps, you may need to wait 15 minutes before trying again")
@@ -244,13 +244,12 @@ class SbSession:
         url = self._base_upload_file_temp_url
 
         if (os.access(filename, os.F_OK)):
-            files = {'file': open(filename, 'rb')}
             #
             # if no mimetype was sent in, try to guess
             #
             if None == mimetype:
                 mimetype = mimetypes.guess_type(filename)
-            (dir, fname) = os.path.split(filename)
+            (path, fname) = os.path.split(filename)
             ret = self._session.post(url, files=[('files[]', (fname, open(filename, 'rb'), mimetype))])
             retval = self._get_json(ret)
         else:
@@ -262,16 +261,16 @@ class SbSession:
     # the same as the new file, whether they are in the files list or on a facet.
     #
     def replace_file(self, filename, item):
-        (dir, fname) = os.path.split(filename)
+        (path, fname) = os.path.split(filename)
         #
         # replace file in files list
         #
         if 'files' in item:
             new_files = []
-            for file in item['files']:
-                if file['name'] == fname:
-                    file = self._replace_file(filename, file)
-                new_files.append(file)
+            for f in item['files']:
+                if f['name'] == fname:
+                    f = self._replace_file(filename, f)
+                new_files.append(f)
             item['files'] = new_files
         #
         # replace file in facets
@@ -281,10 +280,10 @@ class SbSession:
             for facet in item['facets']:
                 if 'files' in facet:
                     new_files = []
-                    for file in facet['files']:
-                        if file['name'] == fname:
-                            file = self._replace_file(filename, file)
-                        new_files.append(file)
+                    for f in facet['files']:
+                        if f['name'] == fname:
+                            f = self._replace_file(filename, f)
+                        new_files.append(f)
                     facet['files'] = new_files
                     new_facets.append(facet)
             item['facets'] = new_facets
@@ -293,15 +292,15 @@ class SbSession:
     #
     # Upload a file to ScienceBase and update file json with new path on disk.
     #
-    def _replace_file(self, filename, file):
+    def _replace_file(self, filename, itemfile):
         #
         # Upload file and point file JSON at it
         #
-        upld_json = self.upload_file(filename, file['contentType'])
-        file['pathOnDisk'] = upld_json[0]['fileKey']
-        file['dateUploaded'] = upld_json[0]['dateUploaded']
-        file['uploadedBy'] = upld_json[0]['uploadedBy']
-        return file
+        upld_json = self.upload_file(filename, itemfile['contentType'])
+        itemfile['pathOnDisk'] = upld_json[0]['fileKey']
+        itemfile['dateUploaded'] = upld_json[0]['dateUploaded']
+        itemfile['uploadedBy'] = upld_json[0]['uploadedBy']
+        return itemfile
 
     #
     # Download all files from a ScienceBase Item as a zip.  The zip is created server-side
@@ -340,12 +339,12 @@ class SbSession:
             # regular files
             #
             if 'files' in item:
-                for file in item['files']:
-                    retval.append({'url': file['url'], 'name': file['name'], 'size': file['size']})
+                for f in item['files']:
+                    retval.append({'url': f['url'], 'name': f['name'], 'size': f['size']})
             if 'facets' in item:
                 for facet in item['facets']:
-                    for file in facet['files']:
-                        retval.append({'url': file['url'], 'name': file['name'], 'size': file['size']})
+                    for f in facet['files']:
+                        retval.append({'url': f['url'], 'name': f['name'], 'size': f['size']})
         return retval
 
     #

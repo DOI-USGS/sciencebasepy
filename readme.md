@@ -7,7 +7,12 @@ If you get security errors also install requests[security]
 
 Quick Start
 -----------
-Install the pysb libraries into your python installation by running `python setup.py install`.  Example usage is contained in `demo.py`.
+If you have git and pip available, pysb can be installed with:
+`pip install git+https://my.usgs.gov/stash/scm/sbe/pysb.git`
+
+Otherwise, download the contents of this repository, and install the pysb libraries into 
+your python installation by running `python setup.py install`.  Example usage is contained 
+in `demo.py`.
 
 Module Contents
 ---------------

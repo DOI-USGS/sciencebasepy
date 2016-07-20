@@ -1,3 +1,3 @@
-from SbSession import SbSession
+from .SbSession import SbSession
 
 __author__ = 'sciencebase'

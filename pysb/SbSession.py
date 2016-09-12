@@ -9,6 +9,7 @@ import httplib
 import urlparse
 import urllib
 import mimetypes
+import pkg_resources
 
 class SbSession:
     _josso_url = None
@@ -55,6 +56,12 @@ class SbSession:
 
         self._session = requests.Session()
         self._session.headers.update({'Accept': 'application/json'})
+        pysb_agent = ' sciencebase-pysb'
+        try:
+            pysb_agent += '/%s' % pkg_resources.get_distribution("pysb").version
+        except pkg_resources.DistributionNotFound:
+            pass
+        self._session.headers.update({'User-Agent': self._session.headers['User-Agent'] + pysb_agent})
 
     #
     # Log into ScienceBase

@@ -1,13 +1,25 @@
 #!/usr/bin/python
 # requests is an optional library that can be found at http://docs.python-requests.org/en/latest/
+from __future__ import print_function
+try:
+    # For Python 3.0 and later
+    import http.client as httplib
+    from urllib.request import urlopen
+    from urllib.parse import urlencode
+    import urllib.parse as urlparse
+except ImportError:
+    # Fall back to Python 2's urllib2
+    import httplib
+    from urllib import urlencode
+    from urllib2 import urlopen
+    import urlparse
+
+
 import requests
 import json
 import os
 import getpass
 import logging
-import httplib
-import urlparse
-import urllib
 import mimetypes
 import pkg_resources
 
@@ -98,7 +110,7 @@ class SbSession:
                 return self.login(username, password)
             except Exception:
                 tries += 1
-                print "Invalid password, try again"
+                print("Invalid password, try again")
         raise Exception("Too many invalid password attemps, you may need to wait 15 minutes before trying again")
 
     #
@@ -194,7 +206,7 @@ class SbSession:
         count = 0
         if itemids:
             for itemid in itemids:
-                print 'moving ' + itemid
+                print('moving ' + itemid)
                 self.move_item(itemid, parentid)
                 count += 1
         return count
@@ -366,7 +378,7 @@ class SbSession:
     #
     def download_file(self, url, local_filename, destination='.'):
         complete_name = os.path.join(destination, local_filename)
-        print "downloading " + url + " to " + complete_name
+        print("downloading " + url + " to " + complete_name)
         r = self._session.get(url, stream=True)
 
         with open(complete_name, 'wb') as f:
@@ -540,7 +552,7 @@ class SbSession:
     def _remove_josso_param(self, url):
         o = urlparse.urlsplit(url)
         q = [x for x in urlparse.parse_qsl(o.query) if "josso" not in x]
-        return urlparse.urlunsplit((o.scheme, o.netloc, o.path, urllib.urlencode(q), o.fragment))
+        return urlparse.urlunsplit((o.scheme, o.netloc, o.path, urlencode(q), o.fragment))
 
     #
     # Turn on HTTP logging for debugging purposes

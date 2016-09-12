@@ -21,7 +21,8 @@ import os
 import getpass
 import logging
 import mimetypes
-import pkg_resources
+from pkg_resources import get_distribution
+from pkg_resources import DistributionNotFound
 
 class SbSession:
     _josso_url = None
@@ -70,8 +71,8 @@ class SbSession:
         self._session.headers.update({'Accept': 'application/json'})
         pysb_agent = ' sciencebase-pysb'
         try:
-            pysb_agent += '/%s' % pkg_resources.get_distribution("pysb").version
-        except pkg_resources.DistributionNotFound:
+            pysb_agent += '/%s' % get_distribution("pysb").version
+        except DistributionNotFound:
             pass
         self._session.headers.update({'User-Agent': self._session.headers['User-Agent'] + pysb_agent})
 

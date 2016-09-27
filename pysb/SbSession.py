@@ -360,6 +360,7 @@ class SbSession:
     # containing url, name and size of each file.
     #
     def get_item_file_info(self, item):
+        print('YES THIS IS THE ONE!!')
         retval = []
         if item:
             #
@@ -367,11 +368,25 @@ class SbSession:
             #
             if 'files' in item:
                 for f in item['files']:
-                    retval.append({'url': f['url'], 'name': f['name'], 'size': f['size']})
+                    finfo = {}
+                    if 'url' in f:
+                        finfo['url'] = f['url']
+                    if 'name' in f:
+                        finfo['name'] = f['name']
+                    if 'size' in f:
+                        finfo['size'] = f['size']
+                    retval.append(finfo)
             if 'facets' in item:
                 for facet in item['facets']:
                     for f in facet['files']:
-                        retval.append({'url': f['url'], 'name': f['name'], 'size': f['size']})
+                        finfo = {}
+                        if 'url' in f:
+                            finfo['url'] = f['url']
+                        if 'name' in f:
+                            finfo['name'] = f['name']
+                        if 'size' in f:
+                            finfo['size'] = f['size']
+                        retval.append(finfo)
         return retval
 
     #

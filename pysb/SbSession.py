@@ -40,6 +40,7 @@ class SbSession:
     _username = None
     _jossosessionid = None
     _session = None
+    _retry = False
 
     #
     # Initialize session and set JSON headers
@@ -89,6 +90,7 @@ class SbSession:
             raise Exception("Login failed")
         self._jossosessionid = self._session.cookies['JOSSO_SESSIONID']
         self._session.params = {'josso':self._jossosessionid}
+        self._session.headers.update({'MYUSGS-JOSSO-SESSION-ID': self._jossosessionid})
 
         return self
 
@@ -552,6 +554,32 @@ class SbSession:
             raise Exception("Error parsing response")
 
     #
+    # Retry in the case of a WAF error (503) or rate limiter (429)
+    #
+    def retry_on_error(f, *args):
+        _retry = True
+        retry_time = 60
+        try:
+            while _retry:        
+                try:
+                    response = f(*args)
+                    _retry = False
+                except:
+                    if response.status_code == '503':
+                        print('\twaiting for WAF...')
+                        time.sleep(retry_time)                        
+                    elif response.status_code == '429':
+                        print('\twaiting for ScienceBase rate limiter...')
+                        time.sleep(retry_time)
+                if not done:
+                    print('\tretrying...')
+                    retry_time *= 2
+        except:
+            raise
+        finally:
+            _retry = False
+                
+    #
     # Check the status code of the response
     #
     def _check_errors(self, response):
@@ -560,7 +588,10 @@ class SbSession:
         elif (response.status_code == 401):
             raise Exception("Unauthorized access")
         elif (response.status_code != 200):
-            raise Exception("Other HTTP error: " + str(response.status_code) + ": " + response.text)
+            if _retry:
+                return response
+            else:
+                raise Exception("Other HTTP error: " + str(response.status_code) + ": " + response.text)
 
     #
     # Remove josso parameter from URL

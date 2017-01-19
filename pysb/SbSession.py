@@ -41,6 +41,7 @@ class SbSession:
     _jossosessionid = None
     _session = None
     _retry = False
+    _max_item_count = 1000
 
     #
     # Initialize session and set JSON headers
@@ -186,12 +187,13 @@ class SbSession:
     # efficient than using delete_item() for mass deletions, as it performs it server-side
     # in one call to ScienceBase.
     #
-    def delete_items(self, itemIds):
-        ids_json = []
-        for itemId in itemIds:
-            ids_json.append({'id': itemId})
-        ret = self._session.delete(self._base_items_url, data=json.dumps(ids_json))
-        self._check_errors(ret)
+    def delete_items(self, itemIds):        
+        for i in range(0, len(itemIds), self._max_item_count):
+            ids_json = []
+            for itemId in itemIds[i:i + self._max_item_count]:
+                ids_json.append({'id': itemId})
+            ret = self._session.delete(self._base_items_url, data=json.dumps(ids_json))
+            self._check_errors(ret)
         return True
 
     #
@@ -434,7 +436,7 @@ class SbSession:
     #
     def get_child_ids(self, parentid):
         retval = []
-        items = self.find_items({'filter':'parentIdExcludingLinks=' + parentid})
+        items = self.find_items({'filter':'parentIdExcludingLinks=' + parentid, 'max': self._max_item_count})
         while items and 'items' in items:
             for item in items['items']:
                 retval.append(item['id'])
@@ -556,14 +558,14 @@ class SbSession:
     #
     # Retry in the case of a WAF error (503) or rate limiter (429)
     #
-    def retry_on_error(f, *args):
-        _retry = True
+    def retry_on_error(self, f, *args):
+        self._retry = True
         retry_time = 60
         try:
-            while _retry:        
+            while self._retry:        
                 try:
                     response = f(*args)
-                    _retry = False
+                    self._retry = False
                 except:
                     if response.status_code == '503':
                         print('\twaiting for WAF...')
@@ -577,7 +579,7 @@ class SbSession:
         except:
             raise
         finally:
-            _retry = False
+            self._retry = False
                 
     #
     # Check the status code of the response
@@ -587,8 +589,10 @@ class SbSession:
             raise Exception("Resource not found, or user does not have access")
         elif (response.status_code == 401):
             raise Exception("Unauthorized access")
+        elif (response.status_code == 429):
+            raise Exception("Too many requests")
         elif (response.status_code != 200):
-            if _retry:
+            if self._retry:
                 return response
             else:
                 raise Exception("Other HTTP error: " + str(response.status_code) + ": " + response.text)

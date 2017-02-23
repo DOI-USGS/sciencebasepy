@@ -79,7 +79,7 @@ Download an individual file.  Destination defaults to the current directory.  If
 the destination folder must exist.
 
 ### Update
-* `update_sb_item(sb_json)`
+* `update_item(sb_json)`
 Updates an existing ScienceBase item.
 
 * `upload_file_to_item(sb_json, filename)`
@@ -104,6 +104,9 @@ whether they are in the files list or in a facet.
 * `upload_file(filename, mimetype)`
 (Advanced usage) Upload a file to ScienceBase.  The file will be staged in a temporary area.  In order
 to attach it to an Item, the pathOnDisk must be added to an Item files entry, or one of a facet's file entries.
+
+* `add_extent(self, item_id, feature_geojson)`
+Add features to the item footprint from Feature or FeatureCollection geojson.
 
 ### Delete
 * `delete_item(sb_json)`

@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # requests is an optional library that can be found at http://docs.python-requests.org/en/latest/
 from __future__ import print_function
 try:
@@ -486,6 +485,30 @@ class SbSession:
         facet['boundingBox']['maxY'] = data['boundingBox']['maxY']
         facet['variables'] = data['variables']
         return facet
+
+    #
+    # Create an extent from Feature or FeatureCollection geojson and add it to the item's footprint.
+    # There are several properties that ScienceBase stores in the master extents
+    # table: name, shortName, description, and promotedForReuse.  If desired,
+    # they are stored in the feature_geojson['properties'] dict.
+    #
+    def add_extent(self, item_id, feature_geojson):
+        features = feature_geojson['features'] if feature_geojson['type'] == "FeatureCollection" else [feature_geojson]
+        # Get the item from ScienceBase
+        item = self.get_item(item_id)
+        # Save the existing item extents
+        extents = item['extents'] if 'extents' in item else []
+        for feature in features:
+            # Create the new extent, which will overwrite the exiting extent ID list
+            item['extents'] = [feature]
+            item = self.update_item(item)
+            extents.extend(item['extents'])
+        # If there were extents on the item, add them back
+        if len(extents) > 1:
+            item['extents'] = extents
+            item = self.update_item(item)
+        # Return the item JSON
+        return item
 
     #
     # Search for ScienceBase items

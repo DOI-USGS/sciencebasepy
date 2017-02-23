@@ -105,7 +105,7 @@ whether they are in the files list or in a facet.
 (Advanced usage) Upload a file to ScienceBase.  The file will be staged in a temporary area.  In order
 to attach it to an Item, the pathOnDisk must be added to an Item files entry, or one of a facet's file entries.
 
-* `add_extent(self, item_id, feature_geojson)`
+* `add_extent(item_id, feature_geojson)`
 Add features to the item footprint from Feature or FeatureCollection geojson.
 
 ### Delete

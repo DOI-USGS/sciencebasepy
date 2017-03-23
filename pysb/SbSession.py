@@ -431,11 +431,23 @@ class SbSession:
                         return item['id']
 
     #
-    # Get IDs of all children for a given parent
+    # Get IDs of all immediate children for a given parent
     #
     def get_child_ids(self, parentid):
         retval = []
         items = self.find_items({'filter':'parentIdExcludingLinks=' + parentid, 'max': self._max_item_count})
+        while items and 'items' in items:
+            for item in items['items']:
+                retval.append(item['id'])
+            items = self.next(items)
+        return retval
+
+    #
+    # Get IDs of all ancestors for a given parent
+    #
+    def get_ancestor_ids(self, parentid):
+        retval = []
+        items = self.find_items({'filter':'ancestorsExcludingLinks=' + parentid, 'max': self._max_item_count})
         while items and 'items' in items:
             for item in items['items']:
                 retval.append(item['id'])

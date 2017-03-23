@@ -52,7 +52,10 @@ Get the JSON for the ScienceBase item with the given ID.
 Get the ID of the logged in user's "My Items"
 
 * `get_child_ids(parentid)`
-Get the IDs of all children of the ScienceBase item with the given ID.
+Get the IDs of all immediate children of the ScienceBase item with the given ID (does not follow shortcuts).
+
+* `get_ancestor_ids(parentid)`
+Get the IDs of all descendants of the ScienceBase item with the given ID (does not follow shortcuts).
 
 * `get(url)`
 Get the text response of the given URL.

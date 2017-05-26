@@ -156,6 +156,13 @@ Create a shortcut on the ScienceBase Item with the id parentid to another Item w
 * `remove_shortcut(itemid, parentid)`
 Remove a shortcut from the ScienceBase Item with the id parentid to another Item with id itemid.
 
+### Helpers
+* `get_directory_contact(party_id)`
+Get the Directory Contact JSON for the contact with the given party ID.
+
+* `get_sbcontact_from_directory_contact(directory_contact, sbcontact_type)`
+Convert the given Directory Contact JSON into valid ScienceBase Item contact JSON.
+
 Example Usage
 -------------
 

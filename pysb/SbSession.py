@@ -35,6 +35,8 @@ class SbSession:
     _base_undelete_item_url = None
     _base_shortcut_item_url = None
     _base_unlink_item_url = None
+    _base_directory_url = None
+    _base_person_url = None
     _users_id = None
     _username = None
     _jossosessionid = None
@@ -48,13 +50,16 @@ class SbSession:
     def __init__(self, env=None):
         if env == 'beta':
             self._base_sb_url = "https://beta.sciencebase.gov/catalog/"
+            self._base_directory_url = "https://beta.sciencebase.gov/directory/"
             self._josso_url = "https://my-beta.usgs.gov/josso/signon/usernamePasswordLogin.do"
             self._users_id = "4f4e4772e4b07f02db47e231"
         elif env == 'dev':
             self._base_sb_url = "http://localhost:8090/catalog/"
+            self._base_directory_url = "https://beta.sciencebase.gov/directory/"
             self._josso_url = "https://my-beta.usgs.gov/josso/signon/usernamePasswordLogin.do"
         else:
             self._base_sb_url = "https://www.sciencebase.gov/catalog/"
+            self._base_directory_url = "https://www.sciencebase.gov/directory/"
             self._josso_url = "https://my.usgs.gov/josso/signon/usernamePasswordLogin.do"
             self._users_id = "4f4e4772e4b07f02db47e231"
 
@@ -67,6 +72,7 @@ class SbSession:
         self._base_undelete_item_url = self._base_item_url + "undelete/"
         self._base_shortcut_item_url = self._base_items_url + "addLink/"
         self._base_unlink_item_url = self._base_items_url + "unlink/"
+        self._base_person_url = self._base_directory_url + "person/"
 
         self._session = requests.Session()
         self._session.headers.update({'Accept': 'application/json'})
@@ -569,6 +575,42 @@ class SbSession:
     #
     def get_json(self, url):
         return self._get_json(self._session.get(url))
+
+    #
+    # Get the Directory Contact JSON for the contact with the given party ID
+    #
+    def get_directory_contact(self, party_id):
+        ret = self._session.get(self._base_person_url + party_id)
+        return self._get_json(ret)
+
+    #
+    # Convert the given Directory Contact JSON into valid ScienceBase Item
+    # contact JSON
+    #
+    def get_sbcontact_from_directory_contact(self, directory_contact, sbcontact_type):
+        sbcontact = {}
+
+        sbcontact['name'] = directory_contact['displayName']
+        sbcontact['oldPartyId'] = directory_contact['id']
+        sbcontact['type'] = sbcontact_type
+        if 'organization' in directory_contact:
+            sbcontact['organization'] = {'displayText': directory_contact['organizationDisplayText']}
+        if 'email' in directory_contact:
+            sbcontact['email'] = directory_contact['email']
+        if 'firstName' in directory_contact:
+            sbcontact['firstName'] = directory_contact['firstName']
+        if 'lastName' in directory_contact:
+            sbcontact['lastName'] = directory_contact['lastName']
+        if 'middleName' in directory_contact:
+            sbcontact['middleName'] = directory_contact['middleName']
+        if 'streetAddress' in directory_contact or 'mailAddress' in directory_contact:
+            sbcontact['primaryLocation'] = {}
+            if 'streetAddress' in directory_contact:
+                sbcontact['primaryLocation']['streetAddress'] = directory_contact['primaryLocation']['streetAddress']
+            if 'mailAddress' in directory_contact:
+                sbcontact['primaryLocation']['mailAddress'] = directory_contact['primaryLocation']['mailAddress']
+
+        return sbcontact
 
     #
     # Check the status code of the response, and return the JSON

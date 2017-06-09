@@ -45,8 +45,10 @@ Create a new ScienceBase item.  Documentation on the sb_json format can be found
 https://my.usgs.gov/confluence/display/sciencebase/ScienceBase+Item+Core+Model
 
 ### Read
-* `get_item(id)`
-Get the JSON for the ScienceBase item with the given ID.
+* `get_item(id, params)`
+Get the JSON for the ScienceBase item with the given ID.  
+params argument is optional and allows you to specify query params, so params={'fields':'title,ancestors'} is for ?fields=title,ancestors 
+similar to find_items.
 
 * `get_my_items_id()`
 Get the ID of the logged in user's "My Items"

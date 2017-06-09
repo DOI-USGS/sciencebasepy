@@ -55,7 +55,8 @@ Get the ID of the logged in user's "My Items"
 Get the IDs of all immediate children of the ScienceBase item with the given ID (does not follow shortcuts).
 
 * `get_ancestor_ids(parentid)`
-Get the IDs of all descendants of the ScienceBase item with the given ID (does not follow shortcuts).
+Get IDs of all descendants of given item excluding those which are linked in (short-cutted). 
+(That is, this finds items by ancestorsExcludingLinks=<parentid> and builds a list of their IDs).
 
 * `get(url)`
 Get the text response of the given URL.

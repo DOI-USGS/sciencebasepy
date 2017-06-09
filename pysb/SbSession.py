@@ -449,7 +449,7 @@ class SbSession:
         return retval
 
     #
-    # Get IDs of all ancestors for a given parent
+    # Get IDs of all descendants of given item excluding those which are linked in (short-cutted). (finds items by ancestorsExcludingLinks)
     #
     def get_ancestor_ids(self, parentid):
         retval = []

@@ -28,7 +28,6 @@ class TestPysbMethods(unittest.TestCase):
         self.assertTrue(isinstance(item['ancestors'], list))
         self.assertTrue(item['parentId'] is not None)
         self.assertTrue(item['parentId'] in item['ancestors'])
-        print(item)
 
 if __name__ == '__main__':
     unittest.main()

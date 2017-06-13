@@ -224,39 +224,31 @@ class SbSession:
     #
     # Upload a file to an existing Item in ScienceBase
     #
-    def upload_file_to_item(self, item, filename):
-        return self.upload_files_and_update_item(item, [filename])
+    def upload_file_to_item(self, item, filename, scrape_file=True):
+        return self.upload_files_and_update_item(item, [filename], scrape_file)
 
     #
     # Upload a file and create a new Item in ScienceBase
     #
-    def upload_file_and_create_item(self, parentid, filename):
-        return self.upload_files_and_create_item(parentid, [filename])
+    def upload_file_and_create_item(self, parentid, filename, scrape_file=True):
+        return self.upload_files_and_create_item(parentid, [filename], scrape_file)
 
     #
     # Upload multiple files and create a new Item in ScienceBase
     #
-    def upload_files_and_create_item(self, parentid, filenames):
-        url = self._base_upload_file_url
-        files = []
-        for filename in filenames:
-            if (os.access(filename, os.F_OK)):
-                files.append(('file', open(filename, 'rb')))
-            else:
-                raise Exception("File not found: " + filename)
-        ret = self._session.post(url, files=files, params={'parentId': parentid})
-        return self._get_json(ret)
+    def upload_files_and_create_item(self, parentid, filenames, scrape_file=True):
+        return self.upload_files_and_upsert_item({'parentId': parentid}, filenames, scrape_file)
 
     #
     # Upload multiple files and update an existing Item in ScienceBase
     #
-    def upload_files_and_update_item(self, item, filenames):
-        return self.upload_files_and_upsert_item(item, filenames)
+    def upload_files_and_update_item(self, item, filenames, scrape_file=True):
+        return self.upload_files_and_upsert_item(item, filenames, scrape_file)
 
     #
     # Upload multiple files and create or update an Item in ScienceBase
     #
-    def upload_files_and_upsert_item(self, item, filenames):
+    def upload_files_and_upsert_item(self, item, filenames, scrape_file=True):
         url = self._base_upload_file_url
         files = []
         for filename in filenames:
@@ -265,9 +257,10 @@ class SbSession:
             else:
                 raise Exception("File not found: " + filename)
         data = {'item': json.dumps(item)}
+        params = {} if scrape_file is True else {'scrapeFile':'false'}
         if 'id' in item and item['id']:
             data['id'] = item['id']
-        ret = self._session.post(url, files=files, data=data)
+        ret = self._session.post(url, params=params, files=files, data=data)
         return self._get_json(ret)
 
     #
@@ -620,7 +613,7 @@ class SbSession:
         try:
             return response.json()
         except:
-            raise Exception("Error parsing JSON response")
+            raise Exception("Error parsing JSON response: " + response.text)
 
     #
     # Check the status code of the response, and return the text

@@ -40,9 +40,22 @@ Ping ScienceBase.  A very low-cost operation to determine whether ScienceBase is
 Log out of ScienceBase
 
 ### Create
+Note: When uploading associated files, such as the various files making up a shapefile, or a 
+raster and its associated SLD, be sure to upload them with a single call to 
+`upload_files_and_create_item`. Otherwise, ScienceBase will not create the appropriate facets, 
+and services will not be created.
+
 * `create_item(sb_json)`
 Create a new ScienceBase item.  Documentation on the sb_json format can be found at
 https://my.usgs.gov/confluence/display/sciencebase/ScienceBase+Item+Core+Model
+
+* `upload_file_and_create_item(parentid, filename)`
+Upload a file and create a ScienceBase item. Add the parameter `scrape_file=False` to bypass ScienceBase metadata
+processing.
+
+* `upload_files_and_create_item(parentid, [filename,...])`
+Upload a set of files and create a ScienceBase item. Add the parameter `scrape_file=False` to bypass ScienceBase
+metadata processing.
 
 ### Read
 * `get_item(id)`
@@ -82,23 +95,24 @@ Download an individual file.  Destination defaults to the current directory.  If
 the destination folder must exist.
 
 ### Update
+Note: When uploading associated files, such as the various files making up a shapefile, or a 
+raster and its associated SLD, be sure to upload them with a single call to one of the `upload_files*` methods.
+Otherwise, ScienceBase will not create the appropriate facets, and services will not be created.
+
 * `update_item(sb_json)`
 Updates an existing ScienceBase item.
 
 * `upload_file_to_item(sb_json, filename)`
-Upload a file to an existing ScienceBase item.
-
-* `upload_file_and_create_item(parentid, filename)`
-Upload a file and create a ScienceBase item.
-
-* `upload_files_age_create_item(parentid, [filename,...])`
-Upload a set of files and create a ScienceBase item.
+Upload a file to an existing ScienceBase item. Add the parameter `scrape_file=False` to bypass ScienceBase 
+metadata processing.
 
 * `upload_files_and_update_item(item, [filename,...])`
-Upload a set of files and update an existing ScienceBase item.
+Upload a set of files and update an existing ScienceBase item. Add the parameter `scrape_file=False` to bypass
+ScienceBase metadata processing.
 
 * `upload_files_and_upsert_item(item, [filename,...])`
-Upload multiple files and create or update a ScienceBase item.
+Upload multiple files and create or update a ScienceBase item. Add the parameter `scrape_file=False` to bypass
+ScienceBase metadata processing.
 
 * `replace_file(filename, item)`
 Replace a file on a ScienceBase Item.  This method will replace all files named the same as the new file,

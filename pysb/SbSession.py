@@ -6,6 +6,7 @@ try:
     from urllib.request import urlopen
     from urllib.parse import urlencode
     import urllib.parse as urlparse
+
 except ImportError:
     # Fall back to Python 2's urllib2
     import httplib
@@ -143,10 +144,14 @@ class SbSession:
     #
     # Get the ScienceBase Item JSON with the given ID
     #
+    # optional params argument allows you to specify query params, such as {'fields':'title,ancestors'} for ?fields=title,ancestors
+    #
     # Returns JSON for the ScienceBase Item with the given ID
     #
-    def get_item(self, itemid):
-        ret = self._session.get(self._base_item_url + itemid)
+    def get_item(self, itemid, params=None):
+        url = self._base_item_url + itemid
+        # if (isinstance(params, dict)):
+        ret = self._session.get(self._base_item_url + itemid, params=params)
         return self._get_json(ret)
 
     #
@@ -442,7 +447,7 @@ class SbSession:
         return retval
 
     #
-    # Get IDs of all ancestors for a given parent
+    # Get IDs of all descendants of given item excluding those which are linked in (short-cutted). (finds items by ancestorsExcludingLinks)
     #
     def get_ancestor_ids(self, parentid):
         retval = []

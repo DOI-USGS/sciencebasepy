@@ -42,7 +42,7 @@ class TestPysbMethods(unittest.TestCase):
         self.assertTrue(item['parentId'] in item['ancestors'])
 
     def test_upload_shapefile_no_scrape(self):
-        sb = SbSession('dev').login(self.TEST_USER, self.TEST_PASSWORD)
+        sb = SbSession('beta').login(self.TEST_USER, self.TEST_PASSWORD)
         file_dir = 'test/data/FHP_Great_Lakes_Basin_boundary'
         files = ["%s/%s" % (file_dir, f) for f in listdir(file_dir) if isfile(join(file_dir, f))]
 
@@ -56,7 +56,7 @@ class TestPysbMethods(unittest.TestCase):
         self.assertFalse('facets' in item)
 
     def test_upload_shapefile_individual_no_scrape(self):
-        sb = SbSession('dev').login(self.TEST_USER, self.TEST_PASSWORD)
+        sb = SbSession('beta').login(self.TEST_USER, self.TEST_PASSWORD)
         file_dir = 'test/data/FHP_Great_Lakes_Basin_boundary'
         files = ["%s/%s" % (file_dir, f) for f in listdir(file_dir) if isfile(join(file_dir, f))]
 

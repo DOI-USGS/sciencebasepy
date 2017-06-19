@@ -3,6 +3,7 @@ import getpass
 from pysb import SbSession
 from os import listdir
 from os.path import isfile, join
+from six.moves import input
 
 class TestPysbMethods(unittest.TestCase):
     SB_CATALOG_ITEM_ID = '4f4e4760e4b07f02db47df9c'
@@ -14,7 +15,7 @@ class TestPysbMethods(unittest.TestCase):
     def setUpClass(cls):
         super(TestPysbMethods, cls).setUpClass()
 
-        cls.TEST_USER = raw_input("Username:  ")
+        cls.TEST_USER = input("Username:  ")
         cls.TEST_PASSWORD = getpass.getpass()
 
     def test_get_item(self):

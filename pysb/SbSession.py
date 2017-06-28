@@ -1,4 +1,5 @@
 # requests is an optional library that can be found at http://docs.python-requests.org/en/latest/
+"""This Python module provides some basic services for interacting with ScienceBase."""
 from __future__ import print_function
 try:
     # For Python 3.0 and later
@@ -14,7 +15,6 @@ except ImportError:
     from urllib2 import urlopen
     import urlparse
 
-
 import requests
 import json
 import os
@@ -25,6 +25,9 @@ from pkg_resources import get_distribution
 from pkg_resources import DistributionNotFound
 
 class SbSession:
+    """SbSession encapsulates a session with ScienceBase, and provides methods for working with ScienceBase Catalog
+    Items.
+    """
     _josso_url = None
     _base_sb_url = None
     _base_item_url = None
@@ -44,11 +47,9 @@ class SbSession:
     _session = None
     _retry = False
     _max_item_count = 1000
-
-    #
-    # Initialize session and set JSON headers
-    #
+    
     def __init__(self, env=None):
+        """Initialize session and set JSON headers"""
         if env == 'beta':
             self._base_sb_url = "https://beta.sciencebase.gov/catalog/"
             self._base_directory_url = "https://beta.sciencebase.gov/directory/"
@@ -84,10 +85,13 @@ class SbSession:
             pass
         self._session.headers.update({'User-Agent': self._session.headers['User-Agent'] + pysb_agent})
 
-    #
-    # Log into ScienceBase
-    #
     def login(self, username, password):
+        """Log into ScienceBase
+
+        :param username: The ScienceBase user to log in as
+        :param password: The ScienceBase password for the given user
+        :return: The SbSession object with the user logged in
+        """
         # Save username
         self._username = username
 
@@ -101,18 +105,18 @@ class SbSession:
 
         return self
 
-    #
-    # Log out of ScienceBase
-    #
     def logout(self):
+        """Log out of ScienceBase"""
         self._session.post(self._base_sb_url + 'j_spring_security_logout')
         self._session.cookies.clear_session_cookies()
         self._session.params = {}
 
-    #
-    # Log into ScienceBase, prompting for the password
-    #
     def loginc(self, username):
+        """Log into ScienceBase, prompting for the password
+        
+        :param username: The ScienceBase user to log in as
+        :return: The SbSession object with the user logged in
+        """
         tries = 0
         while (tries < 5):
             password = getpass.getpass()
@@ -123,81 +127,89 @@ class SbSession:
                 print("Invalid password, try again")
         raise Exception("Too many invalid password attemps, you may need to wait 15 minutes before trying again")
 
-    #
-    # Return whether the SbSession is logged in and active in ScienceBase
-    #
     def is_logged_in(self):
+        """Determine whether the SbSession is logged in and active in ScienceBase
+        
+        :return: Whether the SbSession is logged in and active in ScienceBase.
+        """
         return self.get_session_info()['isLoggedIn']
 
-    #
-    # Ping ScienceBase.  A very low-cost operation to determine whether ScienceBase is available
-    #
     def ping(self):
+        """Ping ScienceBase.  A very low-cost operation to determine whether ScienceBase is available.
+        
+        :return: JSON response from ScienceBase Catalog
+        """
         return self.get_json(self._base_item_url + 'ping')
 
-    #
-    # Return ScienceBase Josso session info
-    #
     def get_session_info(self):
+        """Get the JOSSO session information for the current session
+
+        :return: ScienceBase Josso session info
+        """
         return self.get_json(self._base_sb_url + 'jossoHelper/sessionInfo?includeJossoSessionId=true')
 
-    #
-    # Get the ScienceBase Item JSON with the given ID
-    #
-    # optional params argument allows you to specify query params, such as {'fields':'title,ancestors'} for ?fields=title,ancestors
-    #
-    # Returns JSON for the ScienceBase Item with the given ID
-    #
     def get_item(self, itemid, params=None):
-        url = self._base_item_url + itemid
-        # if (isinstance(params, dict)):
+        """Get the ScienceBase Item JSON with the given ID
+        
+        :param params: Allows you to specify query params, such as {'fields':'title,ancestors'} for ?fields=title,ancestors
+        :return: JSON for the ScienceBase Item with the given ID
+        """
         ret = self._session.get(self._base_item_url + itemid, params=params)
         return self._get_json(ret)
 
-    #
-    # Create a new Item in ScienceBase
-    #
     def create_item(self, item_json):
+        """Create a new Item in ScienceBase
+
+        :param item_json: JSON representing the ScienceBase Catalog item to create
+        :return: Full item JSON from ScienceBase Catalog after creation
+        """
         ret = self._session.post(self._base_item_url, data=json.dumps(item_json))
         return self._get_json(ret)
 
-    #
-    # Update an existing ScienceBase Item
-    #
     def update_item(self, item_json):
+        """Update an existing ScienceBase Item
+
+        :param item_json: JSON representing the ScienceBase Catalog item to update
+        :return: Full item JSON from ScienceBase Catalog after update
+        """
         ret = self._session.put(self._base_item_url + item_json['id'], data=json.dumps(item_json))
         return self._get_json(ret)
 
-    #
-    # Update multiple ScienceBase items (takes an array of items)
-    #
     def update_items(self, items_json):
+        """Update multiple ScienceBase items
+
+        :param items_json: List of ScienceBase Catalog Item JSON to update
+        :return: ScienceBase JSON response
+        """
         ret = self._session.put(self._base_items_url, data=json.dumps(items_json))
         return self._get_json(ret)
 
-    #
-    # Delete an existing ScienceBase Item
-    #
     def delete_item(self, item_json):
+        """Delete an existing ScienceBase Item
+
+        :param item_json: JSON representing the ScienceBase Catalog item to delete
+        :return: True if the item was successfully deleted
+        """
         ret = self._session.delete(self._base_item_url + item_json['id'], data=json.dumps(item_json))
         self._check_errors(ret)
         return True
 
-    #
-    # Undelete a ScienceBase Item
-    #
     def undelete_item(self, itemid):
+        """Undelete a ScienceBase Item
+        :param itemid: ID of the Item to undelete
+        :return: JSON of the undeleted Item
+        """
         ret = self._session.post(self._base_undelete_item_url, params={'itemId': itemid})
         self._check_errors(ret)
         return self._get_json(ret)
 
-
-    #
-    # Delete multiple ScienceBase Items.  This is much more
-    # efficient than using delete_item() for mass deletions, as it performs it server-side
-    # in one call to ScienceBase.
-    #
-    def delete_items(self, itemIds):        
+    def delete_items(self, itemIds):
+        """Delete multiple ScienceBase Items.  This is much more efficient than using delete_item() for mass
+        deletions, as it performs it server-side in one call to ScienceBase.
+        
+        :param itemIds: List of Item IDs to delete
+        :return: True if the items were successfully deleted
+        """
         for i in range(0, len(itemIds), self._max_item_count):
             ids_json = []
             for itemId in itemIds[i:i + self._max_item_count]:
@@ -206,18 +218,24 @@ class SbSession:
             self._check_errors(ret)
         return True
 
-    #
-    # Move an existing ScienceBase Item under a new parent
-    #
     def move_item(self, itemid, parentid):
+        """Move an existing ScienceBase Item under a new parent
+
+        :param itemid: ID of the Item to move
+        :param parentid: ID of the new parent Item
+        :return: The JSON of the moved Item
+        """
         ret = self._session.post(self._base_move_item_url, params={'itemId': itemid, 'destId': parentid})
         self._check_errors(ret)
         return self._get_json(ret)
 
-    #
-    # Move ScienceBase Items under a new parent
-    #
     def move_items(self, itemids, parentid):
+        """Move ScienceBase Items under a new parent
+
+        :param itemids: A list of ScienceBase Catalog Item IDs of the Items to move
+        :param parentid: ScienceBase Catalog Item ID of the new parent Item
+        :return: A count of the number of Items moved
+        """
         count = 0
         if itemids:
             for itemid in itemids:
@@ -226,34 +244,54 @@ class SbSession:
                 count += 1
         return count
 
-    #
-    # Upload a file to an existing Item in ScienceBase
-    #
     def upload_file_to_item(self, item, filename, scrape_file=True):
+        """Upload a file to an existing Item in ScienceBase
+
+        :param item:
+        :param filename: Filenames of the file to upload
+        :param scrape_file: Whether to scrape metadata and create extensions from special files
+        :return: The ScienceBase Catalog Item JSON of the updated Item
+        """
         return self.upload_files_and_update_item(item, [filename], scrape_file)
 
-    #
-    # Upload a file and create a new Item in ScienceBase
-    #
     def upload_file_and_create_item(self, parentid, filename, scrape_file=True):
+        """Upload a file and create a new Item in ScienceBase
+
+        :param parentid: ScienceBase Catalog Item JSON of the Item under which to create the new Item
+        :param filename: Filename of the file to upload
+        :param scrape_file: Whether to scrape metadata and create extensions from special files
+        :return: The ScienceBase Catalog Item JSON of the new Item
+        """
         return self.upload_files_and_create_item(parentid, [filename], scrape_file)
 
-    #
-    # Upload multiple files and create a new Item in ScienceBase
-    #
     def upload_files_and_create_item(self, parentid, filenames, scrape_file=True):
+        """Upload multiple files and create a new Item in ScienceBase
+
+        :param parentid: ScienceBase Catalog Item JSON of the Item under which to create the new Item
+        :param filenames: Filename of the files to upload
+        :param scrape_file: Whether to scrape metadata and create extensions from special files
+        :return: The ScienceBase Catalog Item JSON of the new Item
+        """
         return self.upload_files_and_upsert_item({'parentId': parentid}, filenames, scrape_file)
 
-    #
-    # Upload multiple files and update an existing Item in ScienceBase
-    #
     def upload_files_and_update_item(self, item, filenames, scrape_file=True):
+        """Upload multiple files and update an existing Item in ScienceBase
+
+        :param item: ScienceBase Catalog Item JSON of the Item to update
+        :param filenames: Filenames of the files to upload
+        :param scrape_file: Whether to scrape metadata and create extensions from special files
+        :return: The ScienceBase Catalog Item JSON of the updated Item
+        """
         return self.upload_files_and_upsert_item(item, filenames, scrape_file)
 
-    #
-    # Upload multiple files and create or update an Item in ScienceBase
-    #
     def upload_files_and_upsert_item(self, item, filenames, scrape_file=True):
+        """Upload multiple files and create or update an Item in ScienceBase
+
+        :param item: ScienceBase Catalog Item JSON of the Item to update
+        :param filenames: Filenames of the files to upload
+        :param scrape_file: Whether to scrape metadata and create extensions from special files
+        :return: The ScienceBase Catalog Item JSON of the updated Item
+        """
         url = self._base_upload_file_url
         files = []
         for filename in filenames:
@@ -268,12 +306,15 @@ class SbSession:
         ret = self._session.post(url, params=params, files=files, data=data)
         return self._get_json(ret)
 
-    #
-    # Upload a file to ScienceBase.  The file will be staged in a temporary area.  In order
-    # to attach it to an Item, the pathOnDisk must be added to an Item files entry, or
-    # one of a facet's file entries.
-    #
     def upload_file(self, filename, mimetype=None):
+        """ADVANCED USE -- USE OTHER UPLOAD METHODS IF AT ALL POSSIBLE. Upload a file to ScienceBase.  The file will
+        be staged in a temporary area.  In order to attach it to an Item, the pathOnDisk must be added to an Item
+        files entry, or one of a facet's file entries.
+
+        :param filename: File to upload
+        :param mimetype: MIME type of the file
+        :return: JSON response from ScienceBase
+        """
         retval = None
         url = self._base_upload_file_temp_url
 
@@ -290,11 +331,14 @@ class SbSession:
             raise Exception("File not found: " + filename)
         return retval
 
-    #
-    # Replace a file on a ScienceBase Item.  This method will replace all files named
-    # the same as the new file, whether they are in the files list or on a facet.
-    #
     def replace_file(self, filename, item):
+        """Replace a file on a ScienceBase Item.  This method will replace all files named
+        the same as the new file, whether they are in the files list or on a facet.
+
+        :param filename: Name of the file to replace
+        :param item: ScienceBase Catalog Item JSON of the Item on which to replace the file
+        :return: ScienceBase Catalog Item JSON of the updated Item
+        """
         (path, fname) = os.path.split(filename)
         #
         # replace file in files list
@@ -323,10 +367,13 @@ class SbSession:
             item['facets'] = new_facets
         self.update_item(item)
 
-    #
-    # Upload a file to ScienceBase and update file json with new path on disk.
-    #
     def _replace_file(self, filename, itemfile):
+        """Upload a file to ScienceBase and update file json with new path on disk.
+
+        :param filename: Name of the file to replace
+        :param itemfile: ScienceBase Catalog ItemFile JSON
+        :return: ScienceBase Catalog ItemFile JSON after the replace
+        """
         #
         # Upload file and point file JSON at it
         #
@@ -336,11 +383,14 @@ class SbSession:
         itemfile['uploadedBy'] = upld_json[0]['uploadedBy']
         return itemfile
 
-    #
-    # Download all files from a ScienceBase Item as a zip.  The zip is created server-side
-    # and streamed to the client.
-    #
     def get_item_files_zip(self, item, destination='.'):
+        """Download all files from a ScienceBase Item as a zip.  The zip is created server-side
+        and streamed to the client.
+
+        :param item: ScienceBase Catalog Item JSON of the item from which to download files
+        :param destination:  Destination directory in which to store the zip file
+        :return: The full name and path of the downloaded file
+        """
         #
         # First check that there are files attached to the item, otherwise the call
         # to ScienceBase will return an empty zip file
@@ -362,11 +412,13 @@ class SbSession:
                     f.flush()
         return local_filename
 
-    #
-    # Retrieve file information from a ScienceBase Item.  Returns a list of dictionaries
-    # containing url, name and size of each file.
-    #
     def get_item_file_info(self, item):
+        """Retrieve file information from a ScienceBase Item
+
+        :param item: ScienceBase Catalog Item JSON of the item from which to get file information
+        :return: A list of dictionaries containing url, name and size of each file
+
+        """
         retval = []
         if item:
             #
@@ -396,10 +448,14 @@ class SbSession:
                             retval.append(finfo)
         return retval
 
-    #
-    # Download file from URL
-    #
     def download_file(self, url, local_filename, destination='.'):
+        """Download file from URL
+
+        :param url: ScienceBase Catalog Item file download URL
+        :param local_filename: Name to use for the local file
+        :param destination: Destination directory in which to store the files
+        :return: The full name and path of the downloaded file
+        """
         complete_name = os.path.join(destination, local_filename)
         print("downloading " + url + " to " + complete_name)
         r = self._session.get(url, stream=True)
@@ -411,19 +467,23 @@ class SbSession:
                     f.flush()
         return complete_name
 
-    #
-    # Download the individual files attached to a ScienceBase Item
-    #
     def get_item_files(self, item, destination='.'):
+        """Download the individual files attached to a ScienceBase Item
+
+        :param item: ScienceBase Catalog Item JSON of the item from which to download files
+        :param destination: Destination directory in which to store the files
+        :return: The ScienceBase Catalog file info JSON response
+        """
         file_info = self.get_item_file_info(item)
         for file_info in file_info:
             self.download_file(file_info['url'], file_info['name'], destination)
         return file_info
 
-    #
-    # Get the ID of the logged-in user's My Items
-    #
     def get_my_items_id(self):
+        """Get the ID of the logged-in user's My Items
+
+        :return: The ScienceBase Catalog Item ID of the logged in user's My Items folder
+        """
         if (self._username):
             params = {'q': '', 'lq': 'title.untouched:"' + self._username + '"'}
             if self._users_id:
@@ -434,10 +494,12 @@ class SbSession:
                     if (item['title'] == self._username):
                         return item['id']
 
-    #
-    # Get IDs of all immediate children for a given parent
-    #
     def get_child_ids(self, parentid):
+        """Get IDs of all immediate children for a given parent
+
+        :param parentid: ScienceBase Catalog Item ID of the item for which to look for children
+        :return: A List of ScienceBase Catalog Item IDs of the direct children
+        """
         retval = []
         items = self.find_items({'filter':'parentIdExcludingLinks=' + parentid, 'max': self._max_item_count})
         while items and 'items' in items:
@@ -446,10 +508,13 @@ class SbSession:
             items = self.next(items)
         return retval
 
-    #
-    # Get IDs of all descendants of given item excluding those which are linked in (short-cutted). (finds items by ancestorsExcludingLinks)
-    #
     def get_ancestor_ids(self, parentid):
+        """Get IDs of all descendants of given item excluding those which are linked in (short-cutted).
+        Finds items by ancestorsExcludingLinks.
+
+        :param parentid: ScienceBase Catalog Item ID of the item for which to look for descendants
+        :return: A List of ScienceBase Catalog Item IDs of the descendants
+        """
         retval = []
         items = self.find_items({'filter':'ancestorsExcludingLinks=' + parentid, 'max': self._max_item_count})
         while items and 'items' in items:
@@ -458,10 +523,12 @@ class SbSession:
             items = self.next(items)
         return retval
 
-    #
-    # Get IDs of all shortcutted items for a given item
-    #
     def get_shortcut_ids(self, itemid):
+        """Get IDs of all shortcutted items for a given item
+
+        :param itemid: ScienceBase Catalog Item ID of the item for which to return shortcuts
+        :return: A list of ScienceBase Catalog Item IDs to which the Item is shortcutted
+        """
         retval = []
         items = self.find_items({'filter':'linkParentId=' + itemid})
         while items and 'items' in items:
@@ -470,25 +537,32 @@ class SbSession:
             items = self.next(items)
         return retval
 
-    #
-    # Create a shortcut to another item
-    #
     def create_shortcut(self, itemid, parentid):
+        """Create a shortcut to another item
+
+        :param itemid: ScienceBase Catalog Item ID of shortcutted item
+        :param parentid: ScienceBase Catalog Item ID of item containing the shortcut
+        :return: JSON response from ScienceBase Catalog
+        """
         ret = self._session.post(self._base_shortcut_item_url, params={'itemId':itemid, 'destId':parentid})
         return self._get_json(ret)
 
-    #
-    # Remove a shortcut to another item
-    #
     def remove_shortcut(self, itemid, parentid):
+        """Remove a shortcut to another item
+
+        :param itemid: ScienceBase Catalog Item ID of shortcutted item
+        :param parentid: ScienceBase Catalog Item ID of item containing the shortcut
+        :return: JSON response from ScienceBase Catalog
+        """
         ret = self._session.post(self._base_unlink_item_url, params={'itemId':itemid, 'destId':parentid})
         return self._get_json(ret)
 
-    #
-    # WORK IN PROGRESS
-    # Given an OPEeNDAP URL, create a NetCDFOPeNDAP facet from the return data
-    #
     def get_NetCDFOPeNDAP_info_facet(self, url):
+        """Given an OPeNDAP URL, create a NetCDFOPeNDAP facet from the return data
+
+        :param url: OPeNDAP URL to query
+        :return: ScienceBase Catalog Item facet JSON with information on the OPeNDAP service
+        """
         data = self._get_json(self._session.post(self._base_sb_url + 'items/scrapeNetCDFOPeNDAP', params={'url': url}))
         facet = {}
         facet['className'] = 'gov.sciencebase.catalog.item.facet.NetCDFOPeNDAPFacet'
@@ -502,13 +576,16 @@ class SbSession:
         facet['variables'] = data['variables']
         return facet
 
-    #
-    # Create an extent from Feature or FeatureCollection geojson and add it to the item's footprint.
-    # There are several properties that ScienceBase stores in the master extents
-    # table: name, shortName, description, and promotedForReuse.  If desired,
-    # they are stored in the feature_geojson['properties'] dict.
-    #
     def add_extent(self, item_id, feature_geojson):
+        """Create an extent from Feature or FeatureCollection geojson and add it to the item's footprint.
+        There are several properties that ScienceBase stores in the master extents
+        table: name, shortName, description, and promotedForReuse.  If desired,
+        they are stored in the feature_geojson['properties'] dict.
+
+        :param item_id: ScienceBase Catalog Item ID of the item to which to add the extent
+        :param feature_geojson: GeoJSON describing the extent to create
+        :return: ScienceBase Catalog Item JSON of the updated item.
+        """
         features = feature_geojson['features'] if feature_geojson['type'] == "FeatureCollection" else [feature_geojson]
         # Get the item from ScienceBase
         item = self.get_item(item_id)
@@ -526,66 +603,84 @@ class SbSession:
         # Return the item JSON
         return item
 
-    #
-    # Search for ScienceBase items
-    #
     def find_items(self, params):
+        """Search for ScienceBase items
+
+        :param params: ScienceBase Catalog search parameters
+        :return: ScienceBase Catalog search response object containing the next page of results for the search
+        """
         return self._get_json(self._session.get(self._base_items_url, params=params))
 
-    #
-    # Get the next set of items from the search
-    #
     def next(self, items):
+        """Get the next set of items from the search
+
+        :param items: ScienceBase Catalog search response object from a prior search
+        :return: ScienceBase Catalog search response object containing the next page of results for the search
+        """
         ret_val = None
         if 'nextlink' in items:
             ret_val = self._get_json(self._session.get(self._remove_josso_param(items['nextlink']['url'])))
         return ret_val
 
-    #
-    # Get the previous set of items from the search
-    #
     def previous(self, items):
+        """Get the previous set of items from the search
+
+        :param items: ScienceBase Catalog search response object from a prior search
+        :return: ScienceBase Catalog search response object containing the previous page of results for the search
+        """
         ret_val = None
         if 'prevlink' in items:
             ret_val = self._get_json(self._session.get(self._remove_josso_param(items['prevlink']['url'])))
         return ret_val
 
-    #
-    # Search for ScienceBase items by free text
-    #
     def find_items_by_any_text(self, text):
+        """Search for ScienceBase items by free text
+
+        :param text: Text to search for in all searchable fields of ScienceBase Catalog Items
+        :return: ScienceBase Catalog search response containing results
+        """
         return self.find_items({'q': text})
 
-    #
-    # Search for ScienceBase items by title
-    #
     def find_items_by_title(self, text):
+        """Search for ScienceBase items by title
+
+        :param text: Text to search for in the title field
+        :return: ScienceBase Catalog search response containing results
+        """
         return self.find_items({'q': '', 'lq': 'title:"' + text + '"'})
 
-    #
-    # Get the text response of the given URL
-    #
     def get(self, url):
+        """Get the text response of the given URL
+
+        :param url: URL to request via HTTP GET
+        :return: TEXT response
+        """
         return self._get_text(self._session.get(url))
 
-    #
-    # Get the JSON response of the given URL
-    #
     def get_json(self, url):
+        """Get the JSON response of the given URL
+
+        :param url: URL to request via HTTP GET
+        :return: JSON response
+        """
         return self._get_json(self._session.get(url))
 
-    #
-    # Get the Directory Contact JSON for the contact with the given party ID
-    #
     def get_directory_contact(self, party_id):
+        """Get the Directory Contact JSON for the contact with the given party ID
+
+        :param party_id: ScienceBase Directory Party ID of the contact to get
+        :return: ScienceBase Directory contact JSON
+        """
         ret = self._session.get(self._base_person_url + party_id)
         return self._get_json(ret)
 
-    #
-    # Convert the given Directory Contact JSON into valid ScienceBase Item
-    # contact JSON
-    #
     def get_sbcontact_from_directory_contact(self, directory_contact, sbcontact_type):
+        """Convert the given Directory Contact JSON into valid ScienceBase Item contact JSON
+
+        :param directory_contact: ScienceBase Directory Contact JSON to transform
+        :param sbcontact_type: ScienceBase Item Contact type
+        :return: ScienceBase Catalog contact JSON
+        """
         sbcontact = {}
 
         sbcontact['name'] = directory_contact['displayName']
@@ -610,56 +705,36 @@ class SbSession:
 
         return sbcontact
 
-    #
-    # Check the status code of the response, and return the JSON
-    #
     def _get_json(self, response):
+        """Check the status code of the response, and return the JSON
+
+        :param response: HTTP response to check and parse JSON from
+        :return: The JSON from the HTTP response
+        """
         self._check_errors(response)
         try:
             return response.json()
         except:
             raise Exception("Error parsing JSON response: " + response.text)
 
-    #
-    # Check the status code of the response, and return the text
-    #
     def _get_text(self, response):
+        """Check the status code of the response, and return the text
+
+        :param response:
+        :return:
+        """
         self._check_errors(response)
         try:
             return response.text
         except:
             raise Exception("Error parsing response")
 
-    #
-    # Retry in the case of a WAF error (503) or rate limiter (429)
-    #
-    def retry_on_error(self, f, *args):
-        self._retry = True
-        retry_time = 60
-        try:
-            while self._retry:        
-                try:
-                    response = f(*args)
-                    self._retry = False
-                except:
-                    if response.status_code == '503':
-                        print('\twaiting for WAF...')
-                        time.sleep(retry_time)                        
-                    elif response.status_code == '429':
-                        print('\twaiting for ScienceBase rate limiter...')
-                        time.sleep(retry_time)
-                if not done:
-                    print('\tretrying...')
-                    retry_time *= 2
-        except:
-            raise
-        finally:
-            self._retry = False
-                
-    #
-    # Check the status code of the response
-    #
     def _check_errors(self, response):
+        """Check the status code of the response
+
+        :param response: HTTP response to check
+        :return: HTTP response, provided an error did not occur in the request
+        """
         if (response.status_code == 404):
             raise Exception("Resource not found, or user does not have access")
         elif (response.status_code == 401):
@@ -672,24 +747,24 @@ class SbSession:
             else:
                 raise Exception("Other HTTP error: " + str(response.status_code) + ": " + response.text)
 
-    #
-    # Remove josso parameter from URL
-    #
     def _remove_josso_param(self, url):
+        """Remove JOSSO parameter from URL
+
+        :param url: URL to clean
+        :return: URL with JOSSO parameter removed
+        """
         o = urlparse.urlsplit(url)
         q = [x for x in urlparse.parse_qsl(o.query) if "josso" not in x]
         return urlparse.urlunsplit((o.scheme, o.netloc, o.path, urlencode(q), o.fragment))
 
-    #
-    # Turn on HTTP logging for debugging purposes
-    #
     def debug(self):
-        # This line enables debugging at httplib level (requests->urllib3->httplib)
-        # You will see the REQUEST, including HEADERS and DATA, and RESPONSE with HEADERS but without DATA.
-        # The only thing missing will be the response.body which is not logged.
+        """Turn on HTTP logging for debugging purposes.
+        This enables debugging at httplib level (requests->urllib3->httplib)
+        You will see the REQUEST, including HEADERS and DATA, and RESPONSE with HEADERS but without DATA.
+        The only thing missing will be the response.body which is not logged.
+        """
         httplib.HTTPConnection.debuglevel = 1
 
-        # You must initialize logging, otherwise you'll not see debug output.
         logging.basicConfig()
         logging.getLogger().setLevel(logging.DEBUG)
         requests_log = logging.getLogger("requests.packages.urllib3")
@@ -700,58 +775,113 @@ class SbSession:
     # Backwards compatibility section.  May be removed in future releases.
     #
     def isLoggedIn(self):
+        """Deprecated, use is_logged_in instead"""
         return self.is_logged_in()
+
     def getSessionInfo(self):
+        """Deprecated, use get_session_info instead"""
         return self.get_session_info()
+
     def getSbItem(self, item_id):
+        """Deprecated, use get_item instead"""
         return self.get_item(item_id)
+
     def createSbItem(self, item_json):
+        """Deprecated, use create_item instead"""
         return self.create_item(item_json)
+
     def updateSbItem(self, item_json):
+        """Deprecated, use update_item instead"""
         return self.update_item(item_json)
+
     def deleteSbItem(self, item_json):
+        """Deprecated, use delete_item instead"""
         return self.delete_item(item_json)
+
     def undeleteSbItem(self, item_id):
+        """Deprecated, use undelete_item instead"""
         return self.undelete_item(item_id)
+
     def deleteSbItems(self, item_ids):
+        """Deprecated, use delete_items instead"""
         return self.delete_items(item_ids)
+
     def moveSbItem(self, item_id, parent_id):
+        """Deprecated, use move_item instead"""
         return self.move_item(item_id, parent_id)
+
     def moveSbItems(self, item_ids, parent_id):
+        """Deprecated, use move_items instead"""
         return self.move_items(item_ids, parent_id)
+
     def uploadFileToItem(self, item, filename):
+        """Deprecated, use upload_file_to_item instead"""
         return self.upload_file_to_item(item, filename)
+
     def uploadFileAndCreateItem(self, parent_id, filename):
+        """Deprecated, use upload_file_and_create_item instead"""
         return self.upload_file_and_create_item(parent_id, filename)
+
     def uploadFilesAndCreateItem(self, parent_id, filenames):
+        """Deprecated, use upload_files_and_create_item instead"""
         return self.upload_files_and_create_item(parent_id, filenames)
+
     def uploadFilesAndUpdateItem(self, item, filenames):
+        """Deprecated, use upload_files_and_update_item instead"""
         return self.upload_files_and_update_item(item, filenames)
+
     def uploadFilesAndUpsertItem(self, item, filenames):
+        """Deprecated, use upload_files_and_upsert_item instead"""
         return self.upload_files_and_upsert_item(item, filenames)
+
     def uploadFile(self, filename, mimetype=None):
+        """Deprecated, use upload_file instead"""
         return self.upload_file(filename, mimetype)
+
     def replaceFile(self, filename, item):
+        """Deprecated, use replace_file instead"""
         return self.replace_file(filename, item)
+
     def getItemFilesZip(self, item, destination='.'):
+        """Deprecated, use get_item_files_zip instead"""
         return self.get_item_files_zip(item, destination)
+
     def getItemFileInfo(self, item):
+        """Deprecated, use get_item_file_info instead"""
         return self.get_item_file_info(item)
+
     def downloadFile(self, url, local_filename, destination='.'):
+        """Deprecated, use download_file instead"""
         return self.download_file(url, local_filename, destination)
+
     def getItemFiles(self, item, destination='.'):
+        """Deprecated, use get_item_files instead"""
         return self.get_item_files(item, destination)
+
     def getMyItemsId(self):
+        """Deprecated, use get_my_items_id instead"""
         return self.get_my_items_id()
+
     def getChildIds(self, parent_id):
+        """Deprecated, use get_child_ids instead"""
         return self.get_child_ids(parent_id)
+
     def getNetCDFOPeNDAPInfoFacet(self, url):
+        """Deprecated, use get_NetCDFOPeNDAP_info_facet instead"""
         return self.get_NetCDFOPeNDAP_info_facet(url)
+
     def findSbItems(self, params):
+        """Deprecated, use find_items instead"""
         return self.find_items(params)
+
     def findSbItemsByAnytext(self, text):
+        """Deprecated, use find_items_by_any_text instead"""
         return self.find_items_by_any_text(text)
+
     def findSbItemsByTitle(self, text):
+        """Deprecated, use find_items_by_title instead"""
         return self.find_items_by_title(text)
+
     def getJson(self, response):
+        """Deprecated, use get_json instead"""
         return self.get_json(response)

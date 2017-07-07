@@ -1,4 +1,5 @@
 from .SbSession import SbSession
+from .SbSessionCompatibility import SbSessionCompatibility
 from pkg_resources import get_distribution
 from pkg_resources import DistributionNotFound
 

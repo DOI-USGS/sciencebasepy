@@ -20,7 +20,8 @@ class SbSessionCompatibility:
         :param password: The ScienceBase password for the given user
         :return: The SbSession object with the user logged in
         """
-        return self._sb.login(username, password)
+        self._sb.login(username, password)
+        return self
 
     def loginc(self, username):
         """Log into ScienceBase, prompting for the password
@@ -28,7 +29,8 @@ class SbSessionCompatibility:
         :param username: The ScienceBase user to log in as
         :return: The SbSession object with the user logged in
         """
-        return self._sb.loginc(username)
+        self._sb.loginc(username)
+        return self
 
     def ping(self):
         """Ping ScienceBase.  A very low-cost operation to determine whether ScienceBase is available.

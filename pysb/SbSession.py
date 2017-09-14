@@ -746,7 +746,9 @@ class SbSession:
                 return response
             else:
                 raise Exception("Other HTTP error: " + str(response.status_code) + ": " + response.text)
-
+        if "MyUSGS : Login" in response.text:
+            raise Exception("Not logged in")
+            
     def _remove_josso_param(self, url):
         """Remove JOSSO parameter from URL
 

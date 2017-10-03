@@ -128,6 +128,53 @@ to attach it to an Item, the pathOnDisk must be added to an Item files entry, or
 * `add_extent(item_id, feature_geojson)`
 Add features to the item footprint from Feature or FeatureCollection geojson.
 
+### Item Permissions
+* `get_permissions(item_id)`
+Get permission JSON for the item identified by item_id.
+
+* `set_permissions(item_id, acls)`
+Set permissions for the item identified by item_id. WARNING: Advanced use only. ACL JSON must be created properly. 
+Use one of the ACL helper methods if possible (below).
+
+* `add_acl_user_read(user_name, item_id)`
+Add a READ ACL for the given user on the specified item.
+
+* `remove_acl_user_read(user_name, item_id)`
+Remove the READ ACL for the given user on the specified item.
+
+* `add_acl_user_write(user_name, item_id)`
+Add a WRITE ACL for the given user on the specified item.
+
+* `remove_acl_user_write(user_name, item_id)`
+Remove a WRITE ACL for the given user on the specified item.
+
+* `add_acl_role_read(role_name, item_id)`
+Add a READ ACL for the given role on the specified item.
+
+* `remove_acl_role_read(role_name, item_id)`
+Remove a READ ACL for the given role on the specified item.
+
+* `add_acl_role_write(role_name, item_id)`
+Add a WRITE ACL for the given role on the specified item.
+
+* `remove_acl_role_write(role_name, item_id)`
+Remove a WRITE ACL for the given role on the specified item.
+
+* `set_acls_inherit(read_write, item_id)`
+Set the item to inherit ACLs from its parent item.
+
+* `set_acls_inherit_read(item_id)`
+Set the item to inherit READ ACLs from its parent item.
+
+* `set_acls_inherit_write(item_id)`
+Set the item to inherit WRITE ACLs from its parent item.
+
+* `has_public_read(acls)`
+Return whether the given ACLs include public READ permissions.
+
+* `print_acls(acls)`
+Pretty print the given ACL JSON.
+
 ### Delete
 * `delete_item(sb_json)`
 Delete an existing ScienceBase item.
@@ -172,6 +219,19 @@ Create a shortcut on the ScienceBase Item with the id parentid to another Item w
         
 * `remove_shortcut(itemid, parentid)`
 Remove a shortcut from the ScienceBase Item with the id parentid to another Item with id itemid.
+
+### Relationships (ItemLinks)
+* `get_item_link_types()`
+Get ItemLink type JSON list from the vocabulary server.
+
+* `get_item_link_type_by_name(link_type_name)`
+Get ItemLink type JSON object from the vocabulary server for the given type.
+
+* `create_item_link(from_item_id, to_item_id, link_type_id)`
+Create an ItemLink between the two items of the specified type.
+
+* `create_related_item_link(from_item_id, to_item_id)`
+Create a 'related' ItemLink between the two items.
 
 ### Helpers
 * `get_directory_contact(party_id)`

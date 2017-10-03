@@ -736,7 +736,10 @@ class SbSession:
         :return: HTTP response, provided an error did not occur in the request
         """
         if (response.status_code == 404):
-            raise Exception("Resource not found, or user does not have access")
+            if "The specified URL cannot be found" in response.text:
+                raise Exception("Request blocked by the USGS web application firewall")
+            else:
+                raise Exception("Resource not found, or user does not have access")
         elif (response.status_code == 401):
             raise Exception("Unauthorized access")
         elif (response.status_code == 429):
@@ -772,4 +775,231 @@ class SbSession:
         requests_log = logging.getLogger("requests.packages.urllib3")
         requests_log.setLevel(logging.DEBUG)
         requests_log.propagate = True
+
+    ACL_ADD = "ADD"
+    """ Add ACL """
+
+    ACL_REMOVE = "REMOVE"
+    """ Remove ACL """
+
+    ACL_READ = "read"
+    """ Read ACL """
+
+    ACL_WRITE = "write"
+    """ Write ACL """
+
+    def get_permissions(self, item_id):
+        """Get permission JSON for the item identified by item_id
+
+        :param item_id: The ID of the ScienceBase item
+        :return: The permissions JSON for the given item
+        """
+        return self._get_json(self._session.get(self._base_item_url + item_id + "/permissions/"))
+
+    def set_permissions(self, item_id, acls):
+        """Set permissions for the item identified by item_id. WARNING: Advanced use only. ACL JSON 
+        must be created properly. Use one of the ACL helper methods if at all possible.
+
+        :param item_id: The ID of the ScienceBase item
+        :param acls: ACL JSON
+        :return: The permissions JSON for the given item
+        """
+        return self._get_json(self._session.put(self._base_item_url + item_id + "/permissions/", data=json.dumps(acls)))
+
+    def add_acl_user_read(self, user_name, item_id):
+        """Add a READ ACL for the given user on the specified item.
+
+        :param user_name: User for which to add READ permissions
+        :param item_id: The ID of the ScienceBase item        
+        :return: The permissions JSON for the given item
+        """
+        return self._update_acls(self.ACL_ADD, self.ACL_READ, "USER:%s" % user_name, item_id)
+
+    def remove_acl_user_read(self, user_name, item_id):
+        """Remove the READ ACL for the given user on the specified item.
+
+        :param user_name: User for which to remove READ permissions
+        :param item_id: The ID of the ScienceBase item        
+        :return: The permissions JSON for the given item
+        """
+        return self._update_acls(self.ACL_REMOVE, self.ACL_READ, "USER:%s" % user_name, item_id)
+
+    def add_acl_user_write(self, user_name, item_id):
+        """Add a WRITE ACL for the given user on the specified item.
+
+        :param user_name: User for which to add WRITE permissions
+        :param item_id: The ID of the ScienceBase item        
+        :return: The permissions JSON for the given item
+        """
+        return self._update_acls(self.ACL_ADD, self.ACL_WRITE, "USER:%s" % user_name, item_id)
+
+    def remove_acl_user_write(self, user_name, item_id):
+        """Remove a WRITE ACL for the given user on the specified item.
+
+        :param user_name: User for which to remove WRITE permissions
+        :param item_id: The ID of the ScienceBase item        
+        :return: The permissions JSON for the given item
+        """
+        return self._update_acls(self.ACL_REMOVE, self.ACL_WRITE, "USER:%s" % user_name, item_id)
+
+    def add_acl_role_read(self, role_name, item_id):
+        """Add a READ ACL for the given role on the specified item.
+
+        :param role_name: Role for which to add READ permissions
+        :param item_id: The ID of the ScienceBase item        
+        :return: The permissions JSON for the given item
+        """
+        return self._update_acls(self.ACL_ADD, self.ACL_READ, "ROLE:%s" % role_name, item_id)
+
+    def remove_acl_role_read(self, role_name, item_id):
+        """Remove a READ ACL for the given role on the specified item.
+
+        :param user_name: Role for which to remove READ permissions
+        :param item_id: The ID of the ScienceBase item        
+        :return: The permissions JSON for the given item
+        """
+        return self._update_acls(self.ACL_REMOVE, self.ACL_READ, "ROLE:%s" % role_name, item_id)
+
+    def add_acl_role_write(self, role_name, item_id):
+        """Add a WRITE ACL for the given role on the specified item.
+
+        :param user_name: Role for which to add WRITE permissions
+        :param item_id: The ID of the ScienceBase item        
+        :return: The permissions JSON for the given item
+        """
+        return self._update_acls(self.ACL_ADD, self.ACL_WRITE, "ROLE:%s" % role_name, item_id)
+
+    def remove_acl_role_write(self, role_name, item_id):
+        """Remove a WRITE ACL for the given role on the specified item.
+
+        :param user_name: Role for which to remove WRITE permissions
+        :param item_id: The ID of the ScienceBase item        
+        :return: The permissions JSON for the given item
+        """
+        return self._update_acls(self.ACL_REMOVE, self.ACL_WRITE, "ROLE:%s" % role_name, item_id)
+
+    def _update_acls(self, add_remove, read_write, acl_name, item_id):
+        """Update ACLs for the specified item.
+
+        :param add_remove: ACL_ADD or ACL_REMOVE to specify operation
+        :param read_write: ACL_READ or ACL_WRITE to specify permission type
+        :param acl_name: Role or user update
+        :param item_id: The ID of the ScienceBase item
+        :return: The permissions JSON for the given item
+        """
+        acls = self.get_permissions(item_id)
+        if read_write in acls and 'acl' in acls[read_write]:
+            if add_remove == self.ACL_ADD and acl_name not in acls[read_write]['acl']: 
+                acls[read_write]['acl'].append(acl_name)
+            elif add_remove == self.ACL_REMOVE and acl_name in acls[read_write]['acl']:
+                acls[read_write]['acl'].remove(acl_name)
+            acls[read_write]['inherited'] = False
+            acls.pop('inheritsFromId', None)
+            acls = self.set_permissions(item_id, acls)
+        return acls
+
+    def set_acls_inherit(self, read_write, item_id):
+        """Set the item to inherit ACLs from its parent item.
+
+        :param read_write: ACL_READ or ACL_WRITE to specify permission type
+        :param item_id: The ID of the ScienceBase item
+        :return: The permissions JSON for the given item
+        """
+        acls = self.get_permissions(item_id)
+        acls[read_write]['inherited'] = True
+        return self.set_permissions(item_id, acls)
+
+    def set_acls_inherit_read(self, item_id):
+        """Set the item to inherit READ ACLs from its parent item.
+
+        :param item_id: The ID of the ScienceBase item
+        :return: The permissions JSON for the given item
+        """
+        return self.set_acls_inherit(self.ACL_READ, item_id)
+
+    def set_acls_inherit_write(self, item_id):
+        """Set the item to inherit WRITE ACLs from its parent item.
+
+        :param item_id: The ID of the ScienceBase item
+        :return: The permissions JSON for the given item
+        """
+        return self.set_acls_inherit(self.ACL_WRITE, item_id)
+        
+    def has_public_read(self, acls):
+        """Return whether the given ACLs include public READ permissions.
+
+        :param acls: Item ACL JSON
+        :return: Whether the given ACLs include public READ permissions.
+        """
+        return 'PUBLIC' in acls['read']['acl'] if 'read' in acls and 'acl' in acls['read'] else False
+        
+    def print_acls(self, acls):
+        """Pretty print the given ACL JSON.
+
+        :param acls: Item ACL JSON
+        """
+        print("Read ACLs:")
+        if 'inherited' in acls['read']:
+            print("\tinherited:" + str(acls['read']['inherited']))
+        if 'acl' in acls['read']:
+            for read_acl in acls['read']['acl']:
+                print("\t" + read_acl)
+        
+        print("Write ACLs:")
+        if 'inherited' in acls['write']:
+            print("\tinherited:" + str(acls['write']['inherited']))
+        if 'acl' in acls['write']:
+            for write_acl in acls['write']['acl']:
+                print("\t" + write_acl)
+
+    def get_item_link_types(self):
+        """Get ItemLink type JSON list from the vocabulary server.
+
+        :return: JSON of all available ItemLink types
+        """ 
+        url = "%s%s" % (self._base_sb_url.replace('catalog','vocab'), "4f4e475de4b07f02db47decc/terms")
+        response = self.get_json(url)
+        return response['list'] if response and 'list' in response else []
+
+    def get_item_link_type_by_name(self, link_type_name):
+        """Get ItemLink type JSON object from the vocabulary server for the given type.
+
+        :param link_type_name: Name of the ItemLink type
+        :return: ItemLink type JSON object from the vocabulary server for the given type
+        """ 
+        ret = None
+        types = self.get_item_link_types()
+        for link_type in types:
+            print(link_type['name'])
+            if link_type['name'] == link_type_name:
+                ret = link_type
+                break
+        return ret
+
+    def create_item_link(self, from_item_id, to_item_id, link_type_id):
+        """Create an ItemLink (relationship) between the two items of the specified type.
+
+        :param from_item_id: From item
+        :param to_item_id: To item
+        :param link_type_id: ID of the link type (retrieve using get_item_link_types or get_item_link_type_by_name)
+        :return: JSON response of ItemLink creation
+        """
+        itemLinkJson = {
+            "itemLinkTypeId": link_type_id
+        }
+        itemLinkJson['itemId'] = from_item_id
+        itemLinkJson['relatedItemId'] = to_item_id
+
+        ret = self._session.post('%sitemLink/' % (self._base_sb_url), data=json.dumps(itemLinkJson))
+        return self._get_json(ret)
+
+    def create_related_item_link(self, from_item_id, to_item_id):
+        """Create a 'related' ItemLink (relationship) between the two items.
+
+        :param from_item_id: From item
+        :param to_item_id: To item
+        :return: JSON response of ItemLink creation
+        """
+        related_item_link = self.get_item_link_type_by_name('related')
+        return self.create_item_link(from_item_id, to_item_id, related_item_link['id'])
     

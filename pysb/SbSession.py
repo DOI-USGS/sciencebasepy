@@ -982,7 +982,7 @@ class SbSession:
         :param from_item_id: From item
         :param to_item_id: To item
         :param link_type_id: ID of the link type (retrieve using get_item_link_types or get_item_link_type_by_name)
-        :return: JSON response of ItemLink creation
+        :return: ItemLink JSON
         """
         itemLinkJson = {
             "itemLinkTypeId": link_type_id
@@ -998,7 +998,7 @@ class SbSession:
 
         :param from_item_id: From item
         :param to_item_id: To item
-        :return: JSON response of ItemLink creation
+        :return: ItemLink JSON
         """
         related_item_link = self.get_item_link_type_by_name('related')
         return self.create_item_link(from_item_id, to_item_id, related_item_link['id'])

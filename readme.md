@@ -8,7 +8,7 @@ If you get security errors also install requests[security]
 Quick Start
 -----------
 If you have git and pip available, pysb can be installed with:
-`pip install git+https://my.usgs.gov/stash/scm/sbe/pysb.git`
+`pip install git+https://code.chs.usgs.gov/sciencebase/pysb.git`
 
 Otherwise, download the contents of this repository, and install the pysb libraries into 
 your python installation by running `python setup.py install`.  Example usage is contained 
@@ -227,7 +227,7 @@ Get ItemLink type JSON list from the vocabulary server.
 * `get_item_link_type_by_name(link_type_name)`
 Get ItemLink type JSON object from the vocabulary server for the given type.
 
-* `create_item_link(from_item_id, to_item_id, link_type_id)`
+* `create_item_link(from_item_id, to_item_id, link_type_id, reverse=False)`
 Create an ItemLink between the two items of the specified type.
 
 * `create_related_item_link(from_item_id, to_item_id)`

@@ -976,12 +976,13 @@ class SbSession:
                 break
         return ret
 
-    def create_item_link(self, from_item_id, to_item_id, link_type_id):
+    def create_item_link(self, from_item_id, to_item_id, link_type_id, reverse=False):
         """Create an ItemLink (relationship) between the two items of the specified type.
 
-        :param from_item_id: From item
+        :param from_item_id: From item. This item must be writeable by the caller.
         :param to_item_id: To item
         :param link_type_id: ID of the link type (retrieve using get_item_link_types or get_item_link_type_by_name)
+        :param reverse: Whether to reverse the relationsip
         :return: ItemLink JSON
         """
         itemLinkJson = {
@@ -989,6 +990,8 @@ class SbSession:
         }
         itemLinkJson['itemId'] = from_item_id
         itemLinkJson['relatedItemId'] = to_item_id
+        if reverse:
+            itemLinkJson['reverseRelationship'] = True
 
         ret = self._session.post('%sitemLink/' % (self._base_sb_url), data=json.dumps(itemLinkJson))
         return self._get_json(ret)

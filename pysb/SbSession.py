@@ -878,6 +878,20 @@ class SbSession:
         """
         return self._update_acls(self.ACL_REMOVE, self.ACL_WRITE, "ROLE:%s" % role_name, item_id)
 
+    def publish_item(self, item_id):
+        """Publish the item, adding PUBLIC read permisisons. User must be USGS or in the publisher role.
+        :param item_id: The ID of the ScienceBase item        
+        :return: The permissions JSON for the given item
+        """
+        return self._update_acls(self.ACL_ADD, self.ACL_READ, "PUBLIC", item_id)
+    
+    def unpublish_item(self, item_id):
+        """Unpublish the item, removing PUBLIC read permisisons.
+        :param item_id: The ID of the ScienceBase item        
+        :return: The permissions JSON for the given item
+        """
+        return self._update_acls(self.ACL_REMOVE, self.ACL_READ, "PUBLIC", item_id)
+
     def _update_acls(self, add_remove, read_write, acl_name, item_id):
         """Update ACLs for the specified item.
 

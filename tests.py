@@ -109,13 +109,36 @@ class TestPysbMethods(unittest.TestCase):
         self.assertFalse('ROLE:ScienceBase_DataAdmin' in acls['write']['acl'])
 
         sb.delete_item(item)
-    
+
+    def test_set_permissions(self):
+        sb = SbSession('beta').login(self.TEST_USER, self.TEST_PASSWORD)
+        item = sb.create_item({'title': "ACL Test", 'parentId': sb.get_my_items_id()})
+        acls = sb.get_permissions(item['id'])
+        self.assertFalse('USER:spongebob@bikini_bottom.net' in acls['read']['acl'])
+        acls['read']['acl'].append('USER:spongebob@bikini_bottom.net')
+        sb.set_permissions(item['id'], acls)
+        self.assertTrue('USER:spongebob@bikini_bottom.net' in acls['read']['acl'])
+        
+        sb.delete_item(item)
+
     def test_has_public_read(self):
         sb = SbSession('beta').login(self.TEST_USER, self.TEST_PASSWORD)
         acls = sb.get_permissions(sb.get_my_items_id())
-        self.assertFalse(sb.has_public_read(acls))
-        # smoke test print_acls
+        self.assertFalse(sb.has_public_read(acls))   
+
+    def test_print_acls(self): 
+        sb = SbSession('beta').login(self.TEST_USER, self.TEST_PASSWORD)
+        acls = sb.get_permissions(sb.get_my_items_id())
         sb.print_acls(acls)
+
+    def test_publish_unpublish_item(self):    
+        sb = SbSession('beta').login(self.TEST_USER, self.TEST_PASSWORD)
+        item = sb.create_item({'title': "ACL Test", 'parentId': self.BETA_TEST_COMMUNITY_ID})
+        self.assertFalse(sb.has_public_read(sb.get_permissions(item['id'])))
+        acls = sb.publish_item(item['id'])
+        self.assertTrue(sb.has_public_read(acls))
+        acls = sb.unpublish_item(item['id'])
+        self.assertFalse(sb.has_public_read(item['id']))
 
     def test_relationships(self):
         sb = SbSession('beta').login(self.TEST_USER, self.TEST_PASSWORD)

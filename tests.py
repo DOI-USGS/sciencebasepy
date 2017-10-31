@@ -148,6 +148,9 @@ class TestPysbMethods(unittest.TestCase):
         self.assertTrue(result['itemId'] == item1['id'])
         self.assertTrue(result['relatedItemId'] == item2['id'])
 
+        results = sb.get_item_links(item1['id'])
+        self.assertEqual(len(results), 1)
+
         sb.delete_item(item1)
         sb.delete_item(item2)
 

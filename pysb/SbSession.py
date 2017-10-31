@@ -1017,7 +1017,7 @@ class SbSession:
         if reverse:
             itemLinkJson['reverseRelationship'] = True
 
-        ret = self._session.post('%s%s' % (self._base_item_link_url, self._base_sb_url), data=json.dumps(itemLinkJson))
+        ret = self._session.post('%s' % (self._base_item_link_url), data=json.dumps(itemLinkJson))
         return self._get_json(ret)
 
     def create_related_item_link(self, from_item_id, to_item_id):

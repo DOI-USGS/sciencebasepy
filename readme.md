@@ -169,10 +169,10 @@ Set the item to inherit READ ACLs from its parent item.
 * `set_acls_inherit_write(item_id)`
 Set the item to inherit WRITE ACLs from its parent item.
 
-* `publish_item(item_id`
+* `publish_item(item_id)`
 Publish the item, adding PUBLIC read permisisons. User must be USGS or in the publisher role.
 
-* `unpublish_item(item_id`
+* `unpublish_item(item_id)`
 Unpublish the item, removing PUBLIC read permisisons.
 
 * `has_public_read(acls)`

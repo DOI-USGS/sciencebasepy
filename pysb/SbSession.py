@@ -33,6 +33,7 @@ class SbSession:
     _base_item_url = None
     _base_items_url = None
     _base_upload_file_url = None
+    _base_item_link_url = None
     _base_upload_file_temp_url = None
     _base_download_files_url = None
     _base_move_item_url = None
@@ -70,11 +71,12 @@ class SbSession:
         self._base_upload_file_url = self._base_sb_url + "file/uploadAndUpsertItem/"
         self._base_download_files_url = self._base_sb_url + "file/get/"
         self._base_upload_file_temp_url = self._base_sb_url + "file/upload/"
+        self._base_item_link_url = self._base_sb_url + "itemLink/"
         self._base_move_item_url = self._base_items_url + "move/"
         self._base_undelete_item_url = self._base_item_url + "undelete/"
         self._base_shortcut_item_url = self._base_items_url + "addLink/"
         self._base_unlink_item_url = self._base_items_url + "unlink/"
-        self._base_person_url = self._base_directory_url + "person/"
+        self._base_person_url = self._base_directory_url + "person/"        
 
         self._session = requests.Session()
         self._session.headers.update({'Accept': 'application/json'})
@@ -991,7 +993,7 @@ class SbSession:
         return ret
 
     def get_item_links(self, item_id):
-        return self.get_json('%sitemLink/%s' % (self._base_sb_url, item_id))
+        return self.get_json('%s%s' % (self._base_item_link_url, item_id))
 
     def create_item_link(self, from_item_id, to_item_id, link_type_id, reverse=False):
         """Create an ItemLink (relationship) between the two items of the specified type.
@@ -1010,7 +1012,7 @@ class SbSession:
         if reverse:
             itemLinkJson['reverseRelationship'] = True
 
-        ret = self._session.post('%sitemLink/' % (self._base_sb_url), data=json.dumps(itemLinkJson))
+        ret = self._session.post('%s%s' % (self._base_item_link_url, self._base_sb_url), data=json.dumps(itemLinkJson))
         return self._get_json(ret)
 
     def create_related_item_link(self, from_item_id, to_item_id):

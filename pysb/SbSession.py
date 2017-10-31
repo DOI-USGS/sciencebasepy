@@ -993,6 +993,11 @@ class SbSession:
         return ret
 
     def get_item_links(self, item_id):
+        """Get ItemLink (relationship) JSON describing relationships involving the Item with the given ID.
+
+        :param item_id: Item ID
+        :return: ItemLink JSON
+        """
         return self.get_json('%s%s' % (self._base_item_link_url, item_id))
 
     def create_item_link(self, from_item_id, to_item_id, link_type_id, reverse=False):

@@ -233,6 +233,9 @@ Get ItemLink type JSON list from the vocabulary server.
 * `get_item_link_type_by_name(link_type_name)`
 Get ItemLink type JSON object from the vocabulary server for the given type.
 
+* `get_item_links(item_id)`
+Get ItemLink (relationship) JSON describing relationships involving the Item with the given ID.
+
 * `create_item_link(from_item_id, to_item_id, link_type_id, reverse=False)`
 Create an ItemLink between the two items of the specified type.
 

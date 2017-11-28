@@ -415,40 +415,48 @@ class SbSession:
         return local_filename
 
     def get_item_file_info(self, item):
-        """Retrieve file information from a ScienceBase Item
+    """Retrieve file information from a ScienceBase Item
 
-        :param item: ScienceBase Catalog Item JSON of the item from which to get file information
-        :return: A list of dictionaries containing url, name and size of each file
+    :param item: ScienceBase Catalog Item JSON of the item from which to get file information
+    :return: A list of dictionaries containing url, name and size of each file
 
-        """
-        retval = []
-        if item:
-            #
-            # regular files
-            #
-            if 'files' in item:
-                for f in item['files']:
-                    finfo = {}
-                    if 'url' in f:
-                        finfo['url'] = f['url']
-                    if 'name' in f:
-                        finfo['name'] = f['name']
-                    if 'size' in f:
-                        finfo['size'] = f['size']
-                    retval.append(finfo)
-            if 'facets' in item:
-                for facet in item['facets']:
-                    if 'files' in facet:
-                        for f in facet['files']:
-                            finfo = {}
-                            if 'url' in f:
-                                finfo['url'] = f['url']
-                            if 'name' in f:
-                                finfo['name'] = f['name']
-                            if 'size' in f:
-                                finfo['size'] = f['size']
-                            retval.append(finfo)
-        return retval
+    """
+    retval = []
+    if item:
+        #
+        # regular files
+        #
+        if 'files' in item:
+            for f in item['files']:
+                finfo = {}
+                if 'url' in f:
+                    finfo['url'] = f['url']
+                if 'name' in f:
+                    finfo['name'] = f['name']
+                if 'size' in f:
+                    finfo['size'] = f['size']
+                if 'originalMetadata' in f:
+                    finfo['originalMetadata'] = f['originalMetadata']
+                if 'contentType' in f:
+                    finfo['contentType'] = f['contentType']
+                retval.append(finfo)
+        if 'facets' in item:
+            for facet in item['facets']:
+                if 'files' in facet:
+                    for f in facet['files']:
+                        finfo = {}
+                        if 'url' in f:
+                            finfo['url'] = f['url']
+                        if 'name' in f:
+                            finfo['name'] = f['name']
+                        if 'size' in f:
+                            finfo['size'] = f['size']
+                        if 'originalMetadata' in f:
+                            finfo['originalMetadata'] = f['originalMetadata']
+                        if 'contentType' in f:
+                            finfo['contentType'] = f['contentType']
+                        retval.append(finfo)
+    return retval
 
     def download_file(self, url, local_filename, destination='.'):
         """Download file from URL

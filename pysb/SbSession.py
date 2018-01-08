@@ -914,7 +914,9 @@ class SbSession:
         :return: The permissions JSON for the given item
         """
         acls = self.get_permissions(item_id)
-        if read_write in acls and 'acl' in acls[read_write]:
+        if read_write in acls:
+            if ('acl' not in acls[read_write]):
+                acls[read_write]['acl']=[]
             if add_remove == self.ACL_ADD and acl_name not in acls[read_write]['acl']: 
                 acls[read_write]['acl'].append(acl_name)
             elif add_remove == self.ACL_REMOVE and acl_name in acls[read_write]['acl']:

@@ -98,7 +98,9 @@ class SbSession:
         self._username = username
 
         # Login and save JOSSO Session ID
-        self._session.post(self._josso_url, params={'josso_cmd': 'josso', 'josso_username':username, 'josso_password':password})
+        headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+        payload = {'josso_cmd': 'josso', 'josso_username':username, 'josso_password':password}
+        self._session.post(self._josso_url, data=payload, headers=headers)
         if ('JOSSO_SESSIONID' not in self._session.cookies):
             raise Exception("Login failed")
         self._jossosessionid = self._session.cookies['JOSSO_SESSIONID']

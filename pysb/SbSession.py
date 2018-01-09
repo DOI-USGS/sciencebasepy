@@ -48,9 +48,11 @@ class SbSession:
     _session = None
     _retry = False
     _max_item_count = 1000
+    _env = None
     
     def __init__(self, env=None):
         """Initialize session and set JSON headers"""
+        self._env = env
         if env == 'beta':
             self._base_sb_url = "https://beta.sciencebase.gov/catalog/"
             self._base_directory_url = "https://beta.sciencebase.gov/directory/"
@@ -98,11 +100,12 @@ class SbSession:
         self._username = username
 
         # Login and save JOSSO Session ID
-        self._session.post(self._josso_url, params={'josso_cmd': 'josso', 'josso_username':username, 'josso_password':password})
+        headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+        payload = {'josso_cmd': 'josso', 'josso_username':username, 'josso_password':password}
+        self._session.post(self._josso_url, data=payload, headers=headers)
         if ('JOSSO_SESSIONID' not in self._session.cookies):
             raise Exception("Login failed")
         self._jossosessionid = self._session.cookies['JOSSO_SESSIONID']
-        self._session.params = {'josso':self._jossosessionid}
         self._session.headers.update({'MYUSGS-JOSSO-SESSION-ID': self._jossosessionid})
 
         return self
@@ -912,7 +915,9 @@ class SbSession:
         :return: The permissions JSON for the given item
         """
         acls = self.get_permissions(item_id)
-        if read_write in acls and 'acl' in acls[read_write]:
+        if read_write in acls:
+            if ('acl' not in acls[read_write]):
+                acls[read_write]['acl']=[]
             if add_remove == self.ACL_ADD and acl_name not in acls[read_write]['acl']: 
                 acls[read_write]['acl'].append(acl_name)
             elif add_remove == self.ACL_REMOVE and acl_name in acls[read_write]['acl']:

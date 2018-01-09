@@ -48,9 +48,11 @@ class SbSession:
     _session = None
     _retry = False
     _max_item_count = 1000
+    _env = None
     
     def __init__(self, env=None):
         """Initialize session and set JSON headers"""
+        self._env = env
         if env == 'beta':
             self._base_sb_url = "https://beta.sciencebase.gov/catalog/"
             self._base_directory_url = "https://beta.sciencebase.gov/directory/"

@@ -106,7 +106,6 @@ class SbSession:
         if ('JOSSO_SESSIONID' not in self._session.cookies):
             raise Exception("Login failed")
         self._jossosessionid = self._session.cookies['JOSSO_SESSIONID']
-        self._session.params = {'josso':self._jossosessionid}
         self._session.headers.update({'MYUSGS-JOSSO-SESSION-ID': self._jossosessionid})
 
         return self

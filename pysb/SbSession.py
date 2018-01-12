@@ -632,7 +632,7 @@ class SbSession:
         """
         ret_val = None
         if 'nextlink' in items:
-            ret_val = self._get_json(self._session.get(self._remove_josso_param(items['nextlink']['url'])))
+            ret_val = self._get_json(self._session.get(items['nextlink']['url']))
         return ret_val
 
     def previous(self, items):
@@ -643,7 +643,7 @@ class SbSession:
         """
         ret_val = None
         if 'prevlink' in items:
-            ret_val = self._get_json(self._session.get(self._remove_josso_param(items['prevlink']['url'])))
+            ret_val = self._get_json(self._session.get(items['prevlink']['url']))
         return ret_val
 
     def find_items_by_any_text(self, text):

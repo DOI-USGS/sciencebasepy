@@ -4,6 +4,7 @@ from pysb import SbSession
 from os import listdir
 from os.path import isfile, join
 from six.moves import input
+import tempfile
 
 class TestPysbMethods(unittest.TestCase):
     SB_CATALOG_ITEM_ID = '4f4e4760e4b07f02db47df9c'
@@ -153,6 +154,27 @@ class TestPysbMethods(unittest.TestCase):
 
         sb.delete_item(item1)
         sb.delete_item(item2)
+
+    def test_replace_file(self):
+        sb = SbSession('beta').login(self.TEST_USER, self.TEST_PASSWORD)
+        item = sb.create_item({"title": "Replace File Test", "parentId": sb.get_my_items_id()})
+
+        my_file = tempfile.NamedTemporaryFile()
+        try:
+            my_file.write("This is a test file. ".encode('utf-8'))
+            my_file.flush()
+            item = sb.upload_file_to_item(item, my_file.name, scrape_file=False)
+            self.assertTrue("files" in item)
+            orig_size = item["files"][0]["size"]
+
+            my_file.write("Here is some more text -- update successful".encode('utf-8'))
+            my_file.flush()
+            item = sb.replace_file(my_file.name, item)
+            self.assertGreater(item["files"][0]["size"], orig_size)
+        finally:
+            my_file.close()
+            if item and "id" in item:
+                sb.delete_item(item)
 
 if __name__ == '__main__':
     unittest.main()

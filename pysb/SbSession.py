@@ -370,7 +370,7 @@ class SbSession:
                     facet['files'] = new_files
                     new_facets.append(facet)
             item['facets'] = new_facets
-        self.update_item(item)
+        return self.update_item(item)
 
     def _replace_file(self, filename, itemfile):
         """Upload a file to ScienceBase and update file json with new path on disk.
@@ -382,11 +382,19 @@ class SbSession:
         #
         # Upload file and point file JSON at it
         #
-        upld_json = self.upload_file(filename, itemfile['contentType'])
-        itemfile['pathOnDisk'] = upld_json[0]['fileKey']
-        itemfile['dateUploaded'] = upld_json[0]['dateUploaded']
-        itemfile['uploadedBy'] = upld_json[0]['uploadedBy']
-        return itemfile
+        new_itemfile = {}
+        new_itemfile["contentType"] = itemfile["contentType"] # ScienceBase does not allow this to be null, so guess that it's the same
+        new_itemfile["name"] = itemfile["name"]
+        new_itemfile["title"] = itemfile["title"]
+        new_itemfile["originalMetadata"] = itemfile["originalMetadata"]
+        new_itemfile["useForPreview"] = itemfile["useForPreview"]
+        
+        upld_json = self.upload_file(filename)
+        new_itemfile['pathOnDisk'] = upld_json[0]['fileKey']
+        new_itemfile['dateUploaded'] = upld_json[0]['dateUploaded']
+        new_itemfile['uploadedBy'] = upld_json[0]['uploadedBy']
+
+        return new_itemfile
 
     def get_item_files_zip(self, item, destination='.'):
         """Download all files from a ScienceBase Item as a zip.  The zip is created server-side

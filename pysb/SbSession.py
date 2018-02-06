@@ -162,6 +162,23 @@ class SbSession:
         ret = self._session.get(self._base_item_url + itemid, params=params)
         return self._get_json(ret)
 
+    def get_hiddenProperties(self, itemid):
+        """Get the ScienceBase Item JSON with the given ID
+
+        :param params: Allows you to specify query params, such as {'fields':'title,ancestors'} for ?fields=title,ancestors
+        :return: JSON for the ScienceBase Item with the given ID
+        """
+        ret = self._session.get(self._base_item_url + itemid + '/hiddenProperties')
+        return self._get_json(ret)
+
+    def get_hiddenProperty(self, itemid, hiddenpropertyid):
+        """Get the ScienceBase hidden property JSON with the given item and Hidden Property ID
+
+        :return: JSON for the ScienceBase Item's Hidden Property with the given ID
+        """
+        ret = self._session.get(self._base_item_url + itemid + '/hiddenProperties/' + hiddenpropertyid)
+        return self._get_json(ret)
+
     def create_item(self, item_json):
         """Create a new Item in ScienceBase
 
@@ -171,6 +188,14 @@ class SbSession:
         ret = self._session.post(self._base_item_url, data=json.dumps(item_json))
         return self._get_json(ret)
 
+    def create_hiddenProperties(self, itemid, item_json):
+        """Create a new Hidden Property for an Item in ScienceBase
+
+        :return: Full item JSON from ScienceBase Catalog after creation
+        """
+        ret = self._session.post(self._base_item_url + itemid + '/hiddenProperties/', data=json.dumps(item_json))
+        return self._get_json(ret)
+
     def update_item(self, item_json):
         """Update an existing ScienceBase Item
 
@@ -178,6 +203,14 @@ class SbSession:
         :return: Full item JSON from ScienceBase Catalog after update
         """
         ret = self._session.put(self._base_item_url + item_json['id'], data=json.dumps(item_json))
+        return self._get_json(ret)
+
+    def update_hiddenProperties(self, itemid, hiddenpropertyid, item_json):
+        """Update hiddenproperty for an existing ScienceBase Item
+
+        :return: Full item JSON from ScienceBase Catalog after update
+        """
+        ret = self._session.put(self._base_item_url + itemid + '/hiddenProperties/' + hiddenpropertyid, data=json.dumps(item_json))
         return self._get_json(ret)
 
     def update_items(self, items_json):
@@ -196,6 +229,15 @@ class SbSession:
         :return: True if the item was successfully deleted
         """
         ret = self._session.delete(self._base_item_url + item_json['id'], data=json.dumps(item_json))
+        self._check_errors(ret)
+        return True
+
+    def delete_hiddenProperty(self, itemid, hiddenpropertyid):
+        """Delete an existing Hidden Property from a ScienceBase Item
+
+        :return: True if the item was successfully deleted
+        """
+        ret = self._session.delete(self._base_item_url + itemid + '/hiddenProperties/' + hiddenpropertyid)
         self._check_errors(ret)
         return True
 
@@ -757,7 +799,7 @@ class SbSession:
             raise Exception("Unauthorized access")
         elif (response.status_code == 429):
             raise Exception("Too many requests")
-        elif (response.status_code != 200):
+        elif (response.status_code != 200 and response.status_code != 201):
             if self._retry:
                 return response
             else:

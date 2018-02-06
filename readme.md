@@ -49,6 +49,10 @@ and services will not be created.
 Create a new ScienceBase item.  Documentation on the sb_json format can be found at
 https://my.usgs.gov/confluence/display/sciencebase/ScienceBase+Item+Core+Model
 
+* `create_hiddenProperties(item_id, sb_json)`
+Create a new Hidden Property for a Sciencebase item : POST /catalog/item/<ItemId>/hiddenProperties
+Documentation of the json can be found at https://code.chs.usgs.gov/sciencebase/dev-docs/wikis/APIs/Catalog/Item-Hidden-Properties
+
 * `upload_file_and_create_item(parentid, filename)`
 Upload a file and create a ScienceBase item. Add the parameter `scrape_file=False` to bypass ScienceBase metadata
 processing.
@@ -65,6 +69,12 @@ similar to find_items.
 
 * `get_my_items_id()`
 Get the ID of the logged in user's "My Items"
+
+* `get_hiddenProperties(item_id)`
+List All Hidden Properties for a given Item: GET /catalog/item/<ItemId>/hiddenProperties
+
+* `get_hiddenProperty(item_id, hiddenpropertyid)`
+Get a specific Hidden Property for a given Item : GET /catalog/item/<ItemID>/hiddenProperties/<ID>
 
 * `get_child_ids(parentid)`
 Get the IDs of all immediate children of the ScienceBase item with the given ID (does not follow shortcuts).
@@ -104,6 +114,9 @@ Otherwise, ScienceBase will not create the appropriate facets, and services will
 
 * `update_item(sb_json)`
 Updates an existing ScienceBase item.
+
+* `update_hiddenProperties(item_id, hiddenpropertyid, sb_json)`
+Updates an existing ScienceBase hiddenProperty item.
 
 * `upload_file_to_item(sb_json, filename)`
 Upload a file to an existing ScienceBase item. Add the parameter `scrape_file=False` to bypass ScienceBase 
@@ -188,6 +201,9 @@ Delete an existing ScienceBase item.
 * `delete_items(itemIds)`
 Delete multiple ScienceBase Items.  This is much more efficient than using delete_item() for multiple deletions, as it
 performs the action server-side in one call to ScienceBase.
+
+* `delete_hiddenProperties(item_id, hiddenpropertyid)`
+Delete an existing Item's specific Hidden Property item.
 
 * `undelete_item(itemid)`
 Undelete a ScienceBase item.

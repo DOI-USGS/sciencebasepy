@@ -162,21 +162,23 @@ class SbSession:
         ret = self._session.get(self._base_item_url + itemid, params=params)
         return self._get_json(ret)
 
-    def get_hiddenProperties(self, itemid):
-        """Get the ScienceBase Item JSON with the given ID
+    def get_hidden_properties(self, item_id):
+        """Get the list of all hidden properties for a ScienceBase Item
 
-        :param params: Allows you to specify query params, such as {'fields':'title,ancestors'} for ?fields=title,ancestors
+        :param item_id: ID of the ScienceBase Item
         :return: JSON for the ScienceBase Item with the given ID
         """
-        ret = self._session.get(self._base_item_url + itemid + '/hiddenProperties')
+        ret = self._session.get(self._base_item_url + item_id + '/hiddenProperties')
         return self._get_json(ret)
 
-    def get_hiddenProperty(self, itemid, hiddenpropertyid):
+    def get_hidden_property(self, item_id, hidden_property_id):
         """Get the ScienceBase hidden property JSON with the given item and Hidden Property ID
 
+        :param item_id: ID of the ScienceBase Item
+        :param hidden_property_id: ID of hidden property
         :return: JSON for the ScienceBase Item's Hidden Property with the given ID
         """
-        ret = self._session.get(self._base_item_url + itemid + '/hiddenProperties/' + hiddenpropertyid)
+        ret = self._session.get(self._base_item_url + item_id + '/hiddenProperties/' + hidden_property_id)
         return self._get_json(ret)
 
     def create_item(self, item_json):
@@ -188,12 +190,14 @@ class SbSession:
         ret = self._session.post(self._base_item_url, data=json.dumps(item_json))
         return self._get_json(ret)
 
-    def create_hiddenProperties(self, itemid, item_json):
+    def create_hidden_property(self, item_id, hidden_property_json):
         """Create a new Hidden Property for an Item in ScienceBase
 
-        :return: Full item JSON from ScienceBase Catalog after creation
+        :param item_id: ID of the ScienceBase Item to create a hidden property for
+        :param hidden_property_json: data (for the JSON) representing the hidden property to create
+        :return: JSON of hidden property after creation
         """
-        ret = self._session.post(self._base_item_url + itemid + '/hiddenProperties/', data=json.dumps(item_json))
+        ret = self._session.post(self._base_item_url + item_id + '/hiddenProperties/', data=json.dumps(hidden_property_json))
         return self._get_json(ret)
 
     def update_item(self, item_json):
@@ -205,12 +209,15 @@ class SbSession:
         ret = self._session.put(self._base_item_url + item_json['id'], data=json.dumps(item_json))
         return self._get_json(ret)
 
-    def update_hiddenProperties(self, itemid, hiddenpropertyid, item_json):
-        """Update hiddenproperty for an existing ScienceBase Item
+    def update_hidden_property(self, item_id, hidden_property_id, hidden_property_json):
+        """Update an existing hidden property of a ScienceBase Item
 
+        :param item_id: ID of the ScienceBase Item
+        :param hidden_property_id: ID of hidden property
+        :param hidden_property_json: data for updated hidden property
         :return: Full item JSON from ScienceBase Catalog after update
         """
-        ret = self._session.put(self._base_item_url + itemid + '/hiddenProperties/' + hiddenpropertyid, data=json.dumps(item_json))
+        ret = self._session.put(self._base_item_url + item_id + '/hiddenProperties/' + hidden_property_id, data=json.dumps(hidden_property_json))
         return self._get_json(ret)
 
     def update_items(self, items_json):
@@ -232,12 +239,14 @@ class SbSession:
         self._check_errors(ret)
         return True
 
-    def delete_hiddenProperty(self, itemid, hiddenpropertyid):
+    def delete_hidden_property(self, item_id, hidden_property_id):
         """Delete an existing Hidden Property from a ScienceBase Item
 
+        :param item_id: ID of the ScienceBase Item
+        :param hidden_property_id: ID of hidden property
         :return: True if the item was successfully deleted
         """
-        ret = self._session.delete(self._base_item_url + itemid + '/hiddenProperties/' + hiddenpropertyid)
+        ret = self._session.delete(self._base_item_url + item_id + '/hiddenProperties/' + hidden_property_id)
         self._check_errors(ret)
         return True
 

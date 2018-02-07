@@ -61,29 +61,29 @@ print(str(ret))
 
 
 # Get all hiddenproperties from an item.
-item_json = sb.get_hiddenProperties('505bc673e4b08c986b32bf81')
+item_json = sb.get_hidden_properties('505bc673e4b08c986b32bf81')
 print("Hidden Properties: " + str(item_json))
 
 
 # Get a specific hiddenproperty from an item.
-item_json = sb.get_hiddenProperty('505bc673e4b08c986b32bf81','3607')
+item_json = sb.get_hidden_property('505bc673e4b08c986b32bf81', '3607')
 print("Hidden Property: " + str(item_json))
 
 
 # Create a new hidden property
 new_hidden_property = {'type': 'Note',
     'value': 'test hidden note create'}
-new_hidden_property = sb.create_hiddenProperties('505bc673e4b08c986b32bf81', new_hidden_property)
+new_hidden_property = sb.create_hidden_property('505bc673e4b08c986b32bf81', new_hidden_property)
 print("NEW HIDDEN PROPERTY: " + str(new_hidden_property))
 
 # # Update a new hidden property
 updated_hidden_property = {'type': 'Note2',
     'value': 'test hidden note2'}
-updated_hidden_property = sb.update_hiddenProperties('505bc673e4b08c986b32bf81', str(new_hidden_property.get("id", None)), updated_hidden_property)
+updated_hidden_property = sb.update_hidden_property('505bc673e4b08c986b32bf81', str(new_hidden_property.get("id", None)), updated_hidden_property)
 print("UPDATED HIDDEN PROPERTY: " + str(updated_hidden_property))
 
 # Delete the newly created hidden properties
-ret = sb.delete_hiddenProperty('505bc673e4b08c986b32bf81', str(new_hidden_property.get("id", None)))
+ret = sb.delete_hidden_property('505bc673e4b08c986b32bf81', str(new_hidden_property.get("id", None)))
 print("DELETE: " + str(ret))
 
 # Search

@@ -9,14 +9,12 @@ import pysb
 sb = pysb.SbSession()
 #
 # # Get a public item.  No need to log in.
-# item_json = sb.get_item('505bc673e4b08c986b32bf81')
-# print("Public Item: " + str(item_json))
+item_json = sb.get_item('505bc673e4b08c986b32bf81')
+print("Public Item: " + str(item_json))
 
 # Get a private item.  Need to log in first.
-username = input("jsheflin@contractor.usgs.gov")
-sb.loginc("jsheflin@contractor.usgs.gov")
-# sb.login("jsheflin@contractor.usgs.gov","")
-
+username = raw_input("Username:  ")
+sb.loginc(str(username))
 
 
 item_json = sb.get_item(sb.get_my_items_id())
@@ -65,18 +63,18 @@ item_json = sb.get_hidden_properties('505bc673e4b08c986b32bf81')
 print("Hidden Properties: " + str(item_json))
 
 
-# Get a specific hiddenproperty from an item.
-item_json = sb.get_hidden_property('505bc673e4b08c986b32bf81', '3607')
-print("Hidden Property: " + str(item_json))
-
-
 # Create a new hidden property
 new_hidden_property = {'type': 'Note',
     'value': 'test hidden note create'}
 new_hidden_property = sb.create_hidden_property('505bc673e4b08c986b32bf81', new_hidden_property)
 print("NEW HIDDEN PROPERTY: " + str(new_hidden_property))
 
-# # Update a new hidden property
+
+# Get a specific hiddenproperty from an item.
+item_json = sb.get_hidden_property('505bc673e4b08c986b32bf81', str(new_hidden_property.get("id", None)))
+print("Hidden Property: " + str(item_json))
+
+# Update a new hidden property
 updated_hidden_property = {'type': 'Note2',
     'value': 'test hidden note2'}
 updated_hidden_property = sb.update_hidden_property('505bc673e4b08c986b32bf81', str(new_hidden_property.get("id", None)), updated_hidden_property)

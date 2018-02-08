@@ -49,15 +49,15 @@ and services will not be created.
 Create a new ScienceBase item.  Documentation on the sb_json format can be found at
 https://my.usgs.gov/confluence/display/sciencebase/ScienceBase+Item+Core+Model
 
-* `create_hiddenProperties(item_id, sb_json)`
-Create a new Hidden Property for a Sciencebase item : POST /catalog/item/<ItemId>/hiddenProperties
+* `create_hidden_property(item_id, sb_json)`
+Create a new Hidden Property for a Sciencebase item : POST /catalog/item/<item_id>/hiddenProperties
 Documentation of the json can be found at https://code.chs.usgs.gov/sciencebase/dev-docs/wikis/APIs/Catalog/Item-Hidden-Properties
 
-* `upload_file_and_create_item(parentid, filename)`
+* `upload_file_and_create_item(parent_id, filename)`
 Upload a file and create a ScienceBase item. Add the parameter `scrape_file=False` to bypass ScienceBase metadata
 processing.
 
-* `upload_files_and_create_item(parentid, [filename,...])`
+* `upload_files_and_create_item(parent_id, [filename,...])`
 Upload a set of files and create a ScienceBase item. Add the parameter `scrape_file=False` to bypass ScienceBase
 metadata processing.
 
@@ -70,18 +70,18 @@ similar to find_items.
 * `get_my_items_id()`
 Get the ID of the logged in user's "My Items"
 
-* `get_hiddenProperties(item_id)`
-List All Hidden Properties for a given Item: GET /catalog/item/<ItemId>/hiddenProperties
+* `get_hidden_properties(item_id)`
+List All Hidden Properties for a given Item: GET /catalog/item/<item_id>/hiddenProperties
 
-* `get_hiddenProperty(item_id, hiddenpropertyid)`
-Get a specific Hidden Property for a given Item : GET /catalog/item/<ItemID>/hiddenProperties/<ID>
+* `get_hidden_property(item_id, hiddenpropertyid)`
+Get a specific Hidden Property for a given Item : GET /catalog/item/<item_id>/hiddenProperties/<ID>
 
-* `get_child_ids(parentid)`
+* `get_child_ids(parent_id)`
 Get the IDs of all immediate children of the ScienceBase item with the given ID (does not follow shortcuts).
 
-* `get_ancestor_ids(parentid)`
+* `get_ancestor_ids(parent_id)`
 Get IDs of all descendants of given item excluding those which are linked in (short-cutted). 
-(That is, this finds items by ancestorsExcludingLinks=<parentid> and builds a list of their IDs).
+(That is, this finds items by ancestorsExcludingLinks=<parent_id> and builds a list of their IDs).
 
 * `get(url)`
 Get the text response of the given URL.
@@ -115,8 +115,8 @@ Otherwise, ScienceBase will not create the appropriate facets, and services will
 * `update_item(sb_json)`
 Updates an existing ScienceBase item.
 
-* `update_hiddenProperties(item_id, hiddenpropertyid, sb_json)`
-Updates an existing ScienceBase hiddenProperty item.
+* `update_hidden_property(item_id, hiddenpropertyid, sb_json)`
+Updates an existing ScienceBase Item's Hidden Property.
 
 * `upload_file_to_item(sb_json, filename)`
 Upload a file to an existing ScienceBase item. Add the parameter `scrape_file=False` to bypass ScienceBase 
@@ -198,22 +198,22 @@ Pretty print the given ACL JSON.
 * `delete_item(sb_json)`
 Delete an existing ScienceBase item.
 
-* `delete_items(itemIds)`
+* `delete_items(item_ids)`
 Delete multiple ScienceBase Items.  This is much more efficient than using delete_item() for multiple deletions, as it
 performs the action server-side in one call to ScienceBase.
 
-* `delete_hiddenProperties(item_id, hiddenpropertyid)`
+* `delete_hidden_property(item_id, hiddenpropertyid)`
 Delete an existing Item's specific Hidden Property item.
 
-* `undelete_item(itemid)`
+* `undelete_item(item_id)`
 Undelete a ScienceBase item.
 
 ### Move
-* `move_item(itemid, parentid)`
-Move the ScienceBase Item with the given itemid under the ScienceBase Item with the given parentid.
+* `move_item(item_id, parent_id)`
+Move the ScienceBase Item with the given item_id under the ScienceBase Item with the given parent_id.
 
-* `move_items(itemids, parentid)`
-Move all of the ScienceBase Items with the given itemids under the ScienceBase Item with the given parentid.
+* `move_items(item_ids, parent_id)`
+Move all of the ScienceBase Items with the given item_ids under the ScienceBase Item with the given parent_id.
 
 ### Search
 * `find_items_by_any_text(text)`
@@ -233,14 +233,14 @@ Get the next page of results, where *items* is the current search results.
 Get the previous page of results, where *items* is the current search results.
 
 ### Shortcuts
-* `get_shortcut_ids(itemid)`
+* `get_shortcut_ids(item_id)`
 Get the IDs of all ScienceBase Items shortcutted from a given item.
     
-* `create_shortcut(itemid, parentid)`
-Create a shortcut on the ScienceBase Item with the id parentid to another Item with id itemid.
+* `create_shortcut(item_id, parent_id)`
+Create a shortcut on the ScienceBase Item with the id parent_id to another Item with id item_id.
         
-* `remove_shortcut(itemid, parentid)`
-Remove a shortcut from the ScienceBase Item with the id parentid to another Item with id itemid.
+* `remove_shortcut(item_id, parent_id)`
+Remove a shortcut from the ScienceBase Item with the id parent_id to another Item with id item_id.
 
 ### Relationships (ItemLinks)
 * `get_item_link_types()`
@@ -288,7 +288,7 @@ Example Usage
 
     # Create a new item.  The minimum required is a title for the new item, and the parent ID
     new_item = {'title': 'This is a new test item',
-        'parentId': sb.get_my_items_id(),
+        'parent_id': sb.get_my_items_id(),
         'provenance': {'annotation': 'Python ScienceBase REST test script'}}
     new_item = sb.create_item(new_item)
     print "NEW ITEM: " + str(new_item)

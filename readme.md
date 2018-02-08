@@ -8,7 +8,12 @@ If you get security errors also install requests[security]
 Quick Start
 -----------
 If you have git and pip available, pysb can be installed with:
-`pip install git+https://code.chs.usgs.gov/sciencebase/pysb.git`
+    
+    `pip install git+https://code.chs.usgs.gov/sciencebase/pysb.git`
+
+Or to install using requirements.txt, add this line
+    
+    -e git+https://code.chs.usgs.gov/sciencebase/pysb.git#egg=pysb
 
 Otherwise, download the contents of this repository, and install the pysb libraries into 
 your python installation by running `python setup.py install`.  Example usage is contained 

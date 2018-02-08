@@ -24,6 +24,32 @@ class TestPysbMethods(unittest.TestCase):
         self.assertTrue(item is not None)
         self.assertEqual(item['title'], 'ScienceBase Catalog')
 
+    def test_get_hidden_properties(self):
+        sb = SbSession('beta').login(self.TEST_USER, self.TEST_PASSWORD)
+        hidden_properties = sb.get_hidden_properties(self.SB_CATALOG_ITEM_ID)
+        self.assertTrue(str(hidden_properties.get("value")) is not None)
+
+    def test_create_get_update_delete_hidden_property(self):
+        sb = SbSession('beta').login(self.TEST_USER, self.TEST_PASSWORD)
+        new_hidden_property = {'type': 'Note',
+                               'value': 'test hidden note create'}
+        hidden_property = sb.create_hidden_property(self.SB_CATALOG_ITEM_ID, new_hidden_property)
+        hidden_property_id = hidden_property.get("id", None)
+        self.assertTrue(hidden_property is not None)
+        # print("hiddenpropid"+hidden_property_id)
+        self.assertTrue(isinstance(hidden_property_id, int))
+        get_hidden_property = sb.get_hidden_property(self.SB_CATALOG_ITEM_ID, str(hidden_property_id))
+        self.assertTrue(get_hidden_property is not None)
+        self.assertEqual(get_hidden_property.get("id", None), hidden_property_id)
+        update_hidden_property = {'type': 'Note',
+                       'value': 'test hidden note create'}
+        update_hidden_property = sb.update_hidden_property(self.SB_CATALOG_ITEM_ID, str(hidden_property_id), update_hidden_property)
+        self.assertTrue(update_hidden_property is not None)
+        self.assertEqual(str(update_hidden_property.get("value")), 'test hidden note create')
+        delete_hidden_property = sb.delete_hidden_property(self.SB_CATALOG_ITEM_ID, str(hidden_property_id))
+        self.assertTrue(delete_hidden_property is not None)
+        self.assertEqual(delete_hidden_property, True)
+
     def test_ancestors_field_in_find_items(self):
         sb = SbSession('beta').login(self.TEST_USER, self.TEST_PASSWORD)
         itemsJson = sb.find_items({'parentId':self.BETA_TEST_COMMUNITY_ID, 'fields':'parentId,ancestors'})

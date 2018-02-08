@@ -16,6 +16,7 @@ print("Public Item: " + str(item_json))
 username = raw_input("Username:  ")
 sb.loginc(str(username))
 
+
 item_json = sb.get_item(sb.get_my_items_id())
 print("My Items: " + str(item_json))
 
@@ -25,6 +26,7 @@ new_item = {'title': 'This is a new test item',
     'provenance': {'annotation': 'Python ScienceBase REST test script'}}
 new_item = sb.create_item(new_item)
 print("NEW ITEM: " + str(new_item))
+
 
 # Upload a file to the newly created item
 new_item = sb.upload_file_to_item(new_item, 'demo.py')
@@ -54,6 +56,33 @@ print("DELETE: " + str(ret))
 # Upload multiple files to create a new item
 ret = sb.upload_files_and_create_item(sb.get_my_items_id(), ['demo.py','readme.md'])
 print(str(ret))
+
+
+# Get all hiddenproperties from an item.
+item_json = sb.get_hidden_properties('505bc673e4b08c986b32bf81')
+print("Hidden Properties: " + str(item_json))
+
+
+# Create a new hidden property
+new_hidden_property = {'type': 'Note',
+    'value': 'test hidden note create'}
+new_hidden_property = sb.create_hidden_property('505bc673e4b08c986b32bf81', new_hidden_property)
+print("NEW HIDDEN PROPERTY: " + str(new_hidden_property))
+
+
+# Get a specific hiddenproperty from an item.
+item_json = sb.get_hidden_property('505bc673e4b08c986b32bf81', str(new_hidden_property.get("id", None)))
+print("Hidden Property: " + str(item_json))
+
+# Update a new hidden property
+updated_hidden_property = {'type': 'Note2',
+    'value': 'test hidden note2'}
+updated_hidden_property = sb.update_hidden_property('505bc673e4b08c986b32bf81', str(new_hidden_property.get("id", None)), updated_hidden_property)
+print("UPDATED HIDDEN PROPERTY: " + str(updated_hidden_property))
+
+# Delete the newly created hidden properties
+ret = sb.delete_hidden_property('505bc673e4b08c986b32bf81', str(new_hidden_property.get("id", None)))
+print("DELETE: " + str(ret))
 
 # Search
 items = sb.find_items_by_any_text(username)

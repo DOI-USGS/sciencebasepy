@@ -7,8 +7,8 @@ import pysb
 # Main
 #
 sb = pysb.SbSession()
-#
-# # Get a public item.  No need to log in.
+
+# Get a public item.  No need to log in.
 item_json = sb.get_item('505bc673e4b08c986b32bf81')
 print("Public Item: " + str(item_json))
 
@@ -20,7 +20,7 @@ sb.loginc(str(username))
 item_json = sb.get_item(sb.get_my_items_id())
 print("My Items: " + str(item_json))
 
-#Create a new item.  The minimum required is a title for the new item, and the parent ID
+# Create a new item.  The minimum required is a title for the new item, and the parent ID
 new_item = {'title': 'This is a new test item',
     'parentId': sb.get_my_items_id(),
     'provenance': {'annotation': 'Python ScienceBase REST test script'}}

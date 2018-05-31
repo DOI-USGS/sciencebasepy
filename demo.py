@@ -13,7 +13,7 @@ item_json = sb.get_item('505bc673e4b08c986b32bf81')
 print("Public Item: " + str(item_json))
 
 # Get a private item.  Need to log in first.
-username = raw_input("Username:  ")
+username = input("Username:  ")
 sb.loginc(str(username))
 
 

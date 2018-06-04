@@ -399,6 +399,9 @@ class SbSession:
         #
         # replace file in files list
         #
+        statinfo = os.stat(filename)
+        if statinfo.st_size > 5000000:
+            print("File is too large.  Large files must be replaced with the UI.")
         if 'files' in item:
             new_files = []
             for f in item['files']:
@@ -410,7 +413,7 @@ class SbSession:
         # replace file in facets
         #
         if 'facets' in item:
-            new_facets=[]
+            new_facets = []
             for facet in item['facets']:
                 if 'files' in facet:
                     new_files = []

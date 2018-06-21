@@ -293,7 +293,7 @@ Example Usage
 
     # Create a new item.  The minimum required is a title for the new item, and the parent ID
     new_item = {'title': 'This is a new test item',
-        'parent_id': sb.get_my_items_id(),
+        'parentId': sb.get_my_items_id(),
         'provenance': {'annotation': 'Python ScienceBase REST test script'}}
     new_item = sb.create_item(new_item)
     print "NEW ITEM: " + str(new_item)

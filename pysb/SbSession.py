@@ -190,6 +190,15 @@ class SbSession:
         ret = self._session.post(self._base_item_url, data=json.dumps(item_json))
         return self._get_json(ret)
 
+    def create_items(self, items_json):
+        """Create new Items in ScienceBase
+
+        :param items_json: JSON list representing the ScienceBase Catalog items to create
+        :return: Full items JSON from ScienceBase Catalog after creation
+        """
+        ret = self._session.post(self._base_items_url + "upsert/", data=json.dumps(items_json))
+        return self._get_json(ret)
+
     def create_hidden_property(self, item_id, hidden_property_json):
         """Create a new Hidden Property for an Item in ScienceBase
 
@@ -207,6 +216,15 @@ class SbSession:
         :return: Full item JSON from ScienceBase Catalog after update
         """
         ret = self._session.put(self._base_item_url + item_json['id'], data=json.dumps(item_json))
+        return self._get_json(ret)
+
+    def update_items(self, items_json):
+        """Update an existing ScienceBase Item
+
+        :param item_json: JSON representing the ScienceBase Catalog item to update
+        :return: Full item JSON from ScienceBase Catalog after update
+        """
+        ret = self._session.put(self._base_items_url + "upsert/", data=json.dumps(item_json))
         return self._get_json(ret)
 
     def update_hidden_property(self, item_id, hidden_property_id, hidden_property_json):

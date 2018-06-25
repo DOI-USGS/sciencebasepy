@@ -5,3 +5,7 @@ build/
 pysb/*.pyc
 tmp/
 .DS_Store
+venv/
+.ipynb_checkpoints/
+settings.json
+

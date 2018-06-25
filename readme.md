@@ -221,6 +221,8 @@ Move the ScienceBase Item with the given item_id under the ScienceBase Item with
 Move all of the ScienceBase Items with the given item_ids under the ScienceBase Item with the given parent_id.
 
 ### Search
+For more in-depth search examples, see the `Searching ScienceBase with Pysb.ipynb` notebook in this repo.
+
 * `find_items_by_any_text(text)`
 Find items containing the given text somewhere in the item.
 

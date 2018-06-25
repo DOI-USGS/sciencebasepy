@@ -219,9 +219,9 @@ class SbSession:
         return self._get_json(ret)
 
     def update_items(self, items_json):
-        """Update an existing ScienceBase Item
+        """Update existing ScienceBase Items
 
-        :param item_json: JSON representing the ScienceBase Catalog item to update
+        :param item_json: JSON list representing the ScienceBase Catalog items to update
         :return: Full item JSON from ScienceBase Catalog after update
         """
         ret = self._session.put(self._base_items_url + "upsert/", data=json.dumps(item_json))

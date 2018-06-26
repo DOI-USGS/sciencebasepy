@@ -54,6 +54,9 @@ and services will not be created.
 Create a new ScienceBase item.  Documentation on the sb_json format can be found at
 https://my.usgs.gov/confluence/display/sciencebase/ScienceBase+Item+Core+Model
 
+* `create_items(sb_json)`
+Create multiple new Items in ScienceBase. sb_json: JSON list representing the ScienceBase Catalog items to create.
+
 * `create_hidden_property(item_id, sb_json)`
 Create a new Hidden Property for a Sciencebase item : POST /catalog/item/<item_id>/hiddenProperties
 Documentation of the json can be found at https://code.chs.usgs.gov/sciencebase/dev-docs/wikis/APIs/Catalog/Item-Hidden-Properties
@@ -119,6 +122,9 @@ Otherwise, ScienceBase will not create the appropriate facets, and services will
 
 * `update_item(sb_json)`
 Updates an existing ScienceBase item.
+
+* `update_items(sb_json)`
+Update multiple Items in ScienceBase. sb_json: JSON list representing the ScienceBase Catalog items to update.
 
 * `update_hidden_property(item_id, hiddenpropertyid, sb_json)`
 Updates an existing ScienceBase Item's Hidden Property.

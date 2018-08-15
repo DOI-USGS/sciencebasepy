@@ -1,12 +1,12 @@
 from __future__ import print_function
 
 import os
-import pysb
+import sciencebasepy
 
 #
 # Main
 #
-sb = pysb.SbSession()
+sb = sciencebasepy.SbSession()
 
 # Get a public item.  No need to log in.
 item_json = sb.get_item('505bc673e4b08c986b32bf81')

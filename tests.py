@@ -1,11 +1,11 @@
 import unittest
 import getpass
-from pysb import SbSession
+from sciencebasepy import SbSession
 from os import listdir
 from os.path import isfile, join
 from six.moves import input
 
-class TestPysbMethods(unittest.TestCase):
+class TestsciencebasepyMethods(unittest.TestCase):
     SB_CATALOG_ITEM_ID = '4f4e4760e4b07f02db47df9c'
     BETA_TEST_COMMUNITY_ID = '54d518d8e4b0afcce73d1a65'
     TEST_USER = None
@@ -13,7 +13,7 @@ class TestPysbMethods(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        super(TestPysbMethods, cls).setUpClass()
+        super(TestsciencebasepyMethods, cls).setUpClass()
 
         cls.TEST_USER = input("Username:  ")
         cls.TEST_PASSWORD = getpass.getpass()
@@ -89,7 +89,7 @@ class TestPysbMethods(unittest.TestCase):
 
         # Updating existing item with shapefile, uploading files individually
 
-        item = sb.create_item({'parentId': sb.get_my_items_id(), 'title':'Pysb Shapefile Upload Test'})
+        item = sb.create_item({'parentId': sb.get_my_items_id(), 'title':'sciencebasepy Shapefile Upload Test'})
         for f in files:
             item = sb.upload_file_to_item(item, f, scrape_file=False)
         # Delete the item before the assertions to make sure it gets deleted

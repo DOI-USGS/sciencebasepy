@@ -1,7 +1,7 @@
 from distutils.core import setup
-setup(name='pysb',
+setup(name='sciencebasepy',
       version='1.6.1',
-      packages=['pysb',],
+      packages=['sciencebasepy',],
       description="Python ScienceBase Utilities",
       author="ScienceBase Development Team",
       author_email="sciencebase@usgs.gov",

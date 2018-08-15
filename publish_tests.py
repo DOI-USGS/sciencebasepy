@@ -2,9 +2,9 @@ import unittest
 import getpass
 import json
 
-from pysb import SbSession
+from sciencebasepy import SbSession
 
-class TestPysbMethods(unittest.TestCase):
+class TestsciencebasepyMethods(unittest.TestCase):
     USGS_TEST_USER = None
     USGS_TEST_PASSWORD = None
     MYUSGS_TEST_USER = None
@@ -13,7 +13,7 @@ class TestPysbMethods(unittest.TestCase):
 
     @classmethod
     def setUpClass(self):
-        super(TestPysbMethods, self).setUpClass()
+        super(TestsciencebasepyMethods, self).setUpClass()
 
         self.USGS_TEST_USER = 'jllong@usgs.gov'#input("USGS Username:  ")
         self.USGS_TEST_PASSWORD = #getpass.getpass()

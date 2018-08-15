@@ -7,15 +7,15 @@ If you get security errors also install requests[security]
 
 Quick Start
 -----------
-If you have git and pip available, pysb can be installed with:
+If you have git and pip available, sciencebasepy can be installed with:
     
-    `pip install git+https://code.chs.usgs.gov/sciencebase/pysb.git`
+    `pip install git+https://code.chs.usgs.gov/sciencebase/sciencebasepy.git`
 
 Or to install using requirements.txt, add this line
     
-    -e git+https://code.chs.usgs.gov/sciencebase/pysb.git#egg=pysb
+    -e git+https://code.chs.usgs.gov/sciencebase/sciencebasepy.git#egg=sciencebasepy
 
-Otherwise, download the contents of this repository, and install the pysb libraries into 
+Otherwise, download the contents of this repository, and install the sciencebasepy libraries into 
 your python installation by running `python setup.py install`.  Example usage is contained 
 in `demo.py`.
 
@@ -227,7 +227,7 @@ Move the ScienceBase Item with the given item_id under the ScienceBase Item with
 Move all of the ScienceBase Items with the given item_ids under the ScienceBase Item with the given parent_id.
 
 ### Search
-For more in-depth search examples, see the `Searching ScienceBase with Pysb.ipynb` notebook in this repo.
+For more in-depth search examples, see the `Searching ScienceBase with sciencebasepy.ipynb` notebook in this repo.
 
 * `find_items_by_any_text(text)`
 Find items containing the given text somewhere in the item.
@@ -282,10 +282,10 @@ Example Usage
 -------------
 
 ````python
-    import pysb
+    import sciencebasepy
     import os
 
-    sb = pysb.SbSession()
+    sb = sciencebasepy.SbSession()
 
     # Get a public item.  No need to log in.
     item_json = sb.get_item('505bc673e4b08c986b32bf81')
@@ -307,7 +307,7 @@ Example Usage
     print "NEW ITEM: " + str(new_item)
 
     # Upload a file to the newly created item
-    new_item = sb.upload_file_to_item(new_item, 'pysb.py')
+    new_item = sb.upload_file_to_item(new_item, 'sciencebasepy.py')
     print "FILE UPDATE: " + str(new_item)
 
     # List file info from the newly created item
@@ -332,7 +332,7 @@ Example Usage
     print "DELETE: " + str(ret)
 
     # Upload multiple files to create a new item
-    ret = sb.upload_files_age_create_item(sb.get_my_items_id(), ['pysb.py','readme.md'])
+    ret = sb.upload_files_age_create_item(sb.get_my_items_id(), ['sciencebasepy.py','readme.md'])
     print str(ret)
 
     # Search

@@ -82,12 +82,12 @@ class SbSession:
 
         self._session = requests.Session()
         self._session.headers.update({'Accept': 'application/json'})
-        pysb_agent = ' sciencebase-pysb'
+        sciencebasepy_agent = ' sciencebase-sciencebasepy'
         try:
-            pysb_agent += '/%s' % get_distribution("pysb").version
+            sciencebasepy_agent += '/%s' % get_distribution("sciencebasepy").version
         except DistributionNotFound:
             pass
-        self._session.headers.update({'User-Agent': self._session.headers['User-Agent'] + pysb_agent})
+        self._session.headers.update({'User-Agent': self._session.headers['User-Agent'] + sciencebasepy_agent})
 
     def login(self, username, password):
         """Log into ScienceBase

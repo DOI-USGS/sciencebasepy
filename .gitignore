@@ -1,8 +1,7 @@
 .idea/
-pysb.iml
 build/
 *.pyc
-pysb/*.pyc
+sciencebasepy/*.pyc
 tmp/
 .DS_Store
 venv/

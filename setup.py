@@ -1,12 +1,24 @@
-from distutils.core import setup
-setup(name='sciencebasepy',
+import setuptools
+
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
+setuptools.setup(name='sciencebasepy',
       version='1.6.1',
-      packages=['sciencebasepy',],
-      description="Python ScienceBase Utilities",
-      author="ScienceBase Development Team",
+      author="USGS ScienceBase Development Team",
       author_email="sciencebase@usgs.gov",
-      url='https://my.usgs.gov/confluence/display/sciencebase/ScienceBase+Item+Services',
-      install_requires=[
-        'requests'
-      ]
+      description="Python ScienceBase Utilities",
+      long_description=long_description,
+      url='https://github.com/usgs/sciencebasepy',
+      packages=setuptools.find_packages(),
+      classifiers=[        
+        "License :: Public Domain",
+        "Operating System :: OS Independent",
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.2',
+        'Programming Language :: Python :: 3.3',
+      ],
       )

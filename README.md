@@ -7,13 +7,9 @@ If you get security errors also install requests[security]
 
 Quick Start
 -----------
-If you have git and pip available, sciencebasepy can be installed with:
+sciencebasepy can be installed with pip:
     
-    `pip install git+https://code.chs.usgs.gov/sciencebase/sciencebasepy.git`
-
-Or to install using requirements.txt, add this line
-    
-    -e git+https://code.chs.usgs.gov/sciencebase/sciencebasepy.git#egg=sciencebasepy
+    `pip install sciencebasepy`
 
 Otherwise, download the contents of this repository, and install the sciencebasepy libraries into 
 your python installation by running `python setup.py install`.  Example usage is contained 

@@ -342,3 +342,6 @@ Example Usage
     sb.logout()
 ````
 
+# Developer Notes
+
+To publish to pypi, follow the instructions [here](https://packaging.python.org/tutorials/packaging-projects/)

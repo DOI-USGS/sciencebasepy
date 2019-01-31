@@ -440,7 +440,7 @@ class SbSession:
                             f = self._replace_file(filename, f)
                         new_files.append(f)
                     facet['files'] = new_files
-                    new_facets.append(facet)
+                new_facets.append(facet)
             item['facets'] = new_facets
         self.update_item(item)
 

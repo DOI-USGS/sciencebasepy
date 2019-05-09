@@ -2,7 +2,7 @@ Python ScienceBase Utilities
 ============================
 This Python module provides some basic services for interacting with ScienceBase.  It requires the "requests"
 module to be installed, which can be found at
-[http://docs.python-requests.org/en/latest/](http://docs.python-requests.org/en/latest/)
+[http://docs.python-requests.org/en/latest/](http://docs.python-requests.org/en/latest/).
 If you get security errors also install requests[security]
 
 Quick Start
@@ -79,6 +79,11 @@ List All Hidden Properties for a given Item: GET /catalog/item/<item_id>/hiddenP
 
 * `get_hidden_property(item_id, hiddenpropertyid)`
 Get a specific Hidden Property for a given Item : GET /catalog/item/<item_id>/hiddenProperties/<ID>
+
+* `get_item_ids_by_hidden_property(hidden_property)`
+Get the ScienceBase IDs of Items associated with the given hidden property. Hidden property JSON
+(for the hidden_property parameter) contains two fields, "type" and "value" both of which are
+optional.
 
 * `get_child_ids(parent_id)`
 Get the IDs of all immediate children of the ScienceBase item with the given ID (does not follow shortcuts).
@@ -234,6 +239,17 @@ Find items containing the given text in the title of the item.
 * `find_items(params)`
 Find items meeting the criteria in the specified search parameters.  These are the same parameters that you pass
 to ScienceBase in an advanced search.
+
+* `find_items_by_filter_and_hidden_property(params, hidden_property)`
+Find items meeting the criteria in the specified search parameters and hidden property JSON. Hidden property JSON contains
+two fields, "type" and "value" both of which are optional. **Warning**: Because of the way hidden property results must be 
+joined to ScienceBase Catalog search results, this method returns all matching items. Queries returning too many items may 
+be blocked by ScienceBase.
+
+* `find_hidden_property(hidden_property)`
+Find ScienceBase Items by hidden property value. hidden_property: ScienceBase Item Hidden Property JSON: 
+`{"type": ..., "value": ...}`. Returns Item Hidden Property JSON containing the first page of matching 
+ScienceBase Items. Use the next() method for subsequent pages.
 
 * `next(items)`
 Get the next page of results, where *items* is the current search results.

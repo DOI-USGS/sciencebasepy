@@ -181,6 +181,76 @@ class SbSession:
         ret = self._session.get(self._base_item_url + item_id + '/hiddenProperties/' + hidden_property_id)
         return self._get_json(ret)
 
+    def find_hidden_property(self, hidden_property):
+        """Find ScienceBase Items by hidden property value
+        
+        :param hidden_property: ScienceBase Item Hidden Property JSON: {"type": ..., "value": ...}
+        :return: Item Hidden Property JSON containing the first page of matching ScienceBase Items. Use the next() method for
+        subsequent pages.
+        """
+        ret = {}
+        if hidden_property:
+            params = {"max": 1000}
+            if "type" in hidden_property:
+                params["type"] = hidden_property["type"]
+            if "value" in hidden_property:
+                params["value"] = hidden_property["value"]
+            ret = self.get_json(self._base_sb_url + "itemHiddenProperties", params = params)
+        return ret
+        
+    def find_items_by_filter_and_hidden_property(self, params, hidden_property):
+        """Search for ScienceBase items by filter and hidden property
+
+        Warning: Because of the way hidden property results must be joined to ScienceBase Catalog search results,
+        this method returns all matching items. Queries returning too many items may be blocked by ScienceBase.
+
+        :param params: ScienceBase Catalog search parameters
+        :param hidden_property: ScienceBase Item Hidden Property JSON: {"type": ..., "value": ...}
+        :return: ScienceBase Catalog search response object containing the first page of results for the search
+        """
+        #
+        # Retrieve all of the hidden property results 
+        #
+        ret = []
+        properties = []
+        
+        response = self.find_hidden_property(hidden_property)
+        while response and "itemHiddenProperties" in response:
+            for item_hidden_property in response["itemHiddenProperties"]:
+                properties.append(item_hidden_property)
+            response = self.next(response)
+        #
+        # Save a list of all the ScienceBase Item IDs found, and map properties to their item
+        #
+        ids = []
+        item_props = {}
+        for prop in properties:
+            ids.append(prop["itemId"])
+            item_props[prop["itemId"]] = {prop["type"]: prop["value"]}
+        #
+        # Now perform the ScienceBase Item search part of the query, saving only Items whose
+        # ID is in the list of matching hidden property items
+        #
+        response = self.find_items(params)
+        while response and "items" in response and response["items"]:
+            for item in response["items"]:
+                if item["id"] in ids:
+                    item["hiddenProperties"] = item_props[item["id"]]
+                    ret.append(item)
+            response = self.next(response)
+        return ret
+
+    def get_item_ids_by_hidden_property(self, hidden_property):
+        """Get the ScienceBase IDs of Items associated with the given hidden property
+        
+        :param hidden_property: ScienceBase Item Hidden Property JSON: {"type": ..., "value": ...}
+        :return: List of ScienceBase Item IDs containing the given hidden property
+        """
+        ret = []
+        for item_hidden_property in self.find_hidden_property(hidden_property):
+            ret.append(item_hidden_property["itemId"])
+        return ret
+
     def create_item(self, item_json):
         """Create a new Item in ScienceBase
 
@@ -694,7 +764,7 @@ class SbSession:
         :param params: ScienceBase Catalog search parameters
         :return: ScienceBase Catalog search response object containing the next page of results for the search
         """
-        return self._get_json(self._session.get(self._base_items_url, params=params))
+        return self.get_json(self._base_items_url, params=params)
 
     def next(self, items):
         """Get the next set of items from the search
@@ -703,8 +773,12 @@ class SbSession:
         :return: ScienceBase Catalog search response object containing the next page of results for the search
         """
         ret_val = None
+        # Items response
         if 'nextlink' in items:
-            ret_val = self._get_json(self._session.get(items['nextlink']['url']))
+            ret_val = self.get_json(items['nextlink']['url'])
+        # Hidden properties response
+        elif 'links' in items and 'next' in items['links']:
+            ret_val = self.get_json(items['links']['next'])
         return ret_val
 
     def previous(self, items):
@@ -714,8 +788,12 @@ class SbSession:
         :return: ScienceBase Catalog search response object containing the previous page of results for the search
         """
         ret_val = None
+        # Items response
         if 'prevlink' in items:
-            ret_val = self._get_json(self._session.get(items['prevlink']['url']))
+            ret_val = self.get_json(items['prevlink']['url'])
+        # Hidden properties response
+        elif 'links' in items and 'prev' in items['links']:
+            ret_val = self.get_json(items['links']['prev'])
         return ret_val
 
     def find_items_by_any_text(self, text):
@@ -742,13 +820,18 @@ class SbSession:
         """
         return self._get_text(self._session.get(url))
 
-    def get_json(self, url):
+    def get_json(self, url, params = None):
         """Get the JSON response of the given URL
 
         :param url: URL to request via HTTP GET
         :return: JSON response
         """
-        return self._get_json(self._session.get(url))
+        ret = None
+        if params:
+            ret = self._get_json(self._session.get(url, params=params))
+        else:
+            ret = self._get_json(self._session.get(url))
+        return ret
 
     def get_directory_contact(self, party_id):
         """Get the Directory Contact JSON for the contact with the given party ID
@@ -879,7 +962,7 @@ class SbSession:
         :param item_id: The ID of the ScienceBase item
         :return: The permissions JSON for the given item
         """
-        return self._get_json(self._session.get(self._base_item_url + item_id + "/permissions/"))
+        return self.get_json(self._base_item_url + item_id + "/permissions/")
 
     def set_permissions(self, item_id, acls):
         """Set permissions for the item identified by item_id. WARNING: Advanced use only. ACL JSON 

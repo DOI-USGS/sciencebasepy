@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(name='sciencebasepy',
-      version='1.6.3',
+      version='1.6.4',
       author="USGS ScienceBase Development Team",
       author_email="sciencebase@usgs.gov",
       description="Python ScienceBase Utilities",
@@ -20,5 +20,8 @@ setuptools.setup(name='sciencebasepy',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.2',
         'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6'
       ],
       )

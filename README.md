@@ -240,16 +240,16 @@ Find items containing the given text in the title of the item.
 Find items meeting the criteria in the specified search parameters.  These are the same parameters that you pass
 to ScienceBase in an advanced search.
 
+* `find_hidden_property(hidden_property)`
+Find ScienceBase Items by hidden property value. hidden_property: ScienceBase Item Hidden Property JSON: 
+`{"type": ..., "value": ...}`. Returns Item Hidden Property JSON containing the first page of matching 
+ScienceBase Items. Use the next() method for subsequent pages.
+
 * `find_items_by_filter_and_hidden_property(params, hidden_property)`
 Find items meeting the criteria in the specified search parameters and hidden property JSON. Hidden property JSON contains
 two fields, "type" and "value" both of which are optional. **Warning**: Because of the way hidden property results must be 
 joined to ScienceBase Catalog search results, this method returns all matching items. Queries returning too many items may 
 be blocked by ScienceBase.
-
-* `find_hidden_property(hidden_property)`
-Find ScienceBase Items by hidden property value. hidden_property: ScienceBase Item Hidden Property JSON: 
-`{"type": ..., "value": ...}`. Returns Item Hidden Property JSON containing the first page of matching 
-ScienceBase Items. Use the next() method for subsequent pages.
 
 * `next(items)`
 Get the next page of results, where *items* is the current search results.
@@ -344,7 +344,7 @@ Example Usage
     print "DELETE: " + str(ret)
 
     # Upload multiple files to create a new item
-    ret = sb.upload_files_age_create_item(sb.get_my_items_id(), ['sciencebasepy.py','readme.md'])
+    ret = sb.upload_files_and_create_item(sb.get_my_items_id(), ['sciencebasepy.py','readme.md'])
     print str(ret)
 
     # Search

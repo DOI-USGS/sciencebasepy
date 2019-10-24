@@ -10,6 +10,7 @@ setuptools.setup(
     author_email="sciencebase@usgs.gov",
     description="Python ScienceBase Utilities",
     long_description=long_description,
+    long_description_content_type="text/markdown",
     url='https://github.com/usgs/sciencebasepy',
     packages=setuptools.find_packages(),
     classifiers=[

@@ -439,10 +439,13 @@ class SbSession:
         url = self._base_upload_file_url
         files = []
         for filename in filenames:
-            if (os.access(filename, os.F_OK)):
-                files.append(('file', open(filename, 'rb')))
+            if type(filename) == str:
+                if (os.access(filename, os.F_OK)):
+                    files.append(('file', open(filename, 'rb')))
+                else:
+                    raise Exception("File not found: " + filename)
             else:
-                raise Exception("File not found: " + filename)
+                files.append(('file', filename))
         data = {'item': json.dumps(item)}
         params = {} if scrape_file is True else {'scrapeFile':'false'}
         if 'id' in item and item['id']:

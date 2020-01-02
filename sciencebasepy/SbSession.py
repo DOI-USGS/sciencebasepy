@@ -534,11 +534,11 @@ class SbSession:
         return itemfile
 
     def delete_file(self, sb_filename, item):
-        """Delete a file on a ScienceBase Item.  This method will delete all files named
-        the same as the new file, whether they are in the files list or on a facet.
+        """Delete a file on a ScienceBase Item.  This method will delete all files with the provided
+        name, whether they are in the files list or on a facet.
 
         :param sb_filename: Name of the file to delete
-        :param item: ScienceBase Catalog Item JSON of the Item on which to replace the file
+        :param item: ScienceBase Catalog Item JSON of the Item on which to delete the file
         :return: ScienceBase Catalog Item JSON of the updated Item
         """
         fname = sb_filename

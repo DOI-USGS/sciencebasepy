@@ -533,6 +533,45 @@ class SbSession:
         itemfile['uploadedBy'] = upld_json[0]['uploadedBy']
         return itemfile
 
+    def delete_file(self, sb_filename, item):
+        """Delete a file on a ScienceBase Item.  This method will delete all files named
+        the same as the new file, whether they are in the files list or on a facet.
+
+        :param sb_filename: Name of the file to delete
+        :param item: ScienceBase Catalog Item JSON of the Item on which to replace the file
+        :return: ScienceBase Catalog Item JSON of the updated Item
+        """
+        fname = sb_filename
+        #
+        # remove file in files list
+        #
+
+        if 'files' in item:
+            new_files = []
+            for f in item['files']:
+                if f['name'] == fname:
+                    pass #Drop the deleted file from the SBJSON
+                else:
+                    new_files.append(f)
+            item['files'] = new_files
+        #
+        # remove file in facets
+        #
+        if 'facets' in item:
+            new_facets = []
+            for facet in item['facets']:
+                if 'files' in facet:
+                    new_files = []
+                    for f in facet['files']:
+                        if f['name'] == fname:
+                            pass  # Drop the deleted file from the SBJSON
+                        else:
+                            new_files.append(f)
+                    facet['files'] = new_files
+                new_facets.append(facet)
+            item['facets'] = new_facets
+        self.update_item(item)
+
     def get_item_files_zip(self, item, destination='.'):
         """Download all files from a ScienceBase Item as a zip.  The zip is created server-side
         and streamed to the client.

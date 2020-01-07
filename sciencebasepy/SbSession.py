@@ -861,9 +861,9 @@ class SbSession:
 		:param encoding: Encoding string ("utf-8", "ISO-8859-1", etc.)
         :return: TEXT response
         """
-		response = self._session.get(url)
-		if encoding is not None:
-			response.encoding = encoding
+	response = self._session.get(url)
+	if encoding is not None:
+		response.encoding = encoding
 		
         return self._get_text(response)
 

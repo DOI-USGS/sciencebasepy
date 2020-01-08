@@ -865,7 +865,7 @@ class SbSession:
         if encoding is not None:
             response.encoding = encoding
             
-            return self._get_text(response)
+        return self._get_text(response)
 
     def get_json(self, url, params = None):
         """Get the JSON response of the given URL

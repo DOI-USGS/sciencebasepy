@@ -101,7 +101,13 @@ class SbSession:
 
         # Login and save JOSSO Session ID
         headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-        payload = {'josso_cmd': 'josso', 'josso_username':username, 'josso_password':password}
+        payload = {
+            'josso_cmd': 'josso', 
+            'josso_username':username, 
+            'josso_password':password,
+            'josso_back_to': self._base_sb_url + 'josso_security_check'
+        }
+
         self._session.post(self._josso_url, data=payload, headers=headers)
         if ('JOSSO_SESSIONID' not in self._session.cookies):
             raise Exception("Login failed")
@@ -858,13 +864,12 @@ class SbSession:
         """Get the text response of the given URL
 
         :param url: URL to request via HTTP GET
-		:param encoding: Encoding string ("utf-8", "ISO-8859-1", etc.)
+        :param encoding: Encoding string ("utf-8", "ISO-8859-1", etc.)
         :return: TEXT response
         """
         response = self._session.get(url)
         if encoding is not None:
             response.encoding = encoding
-            
         return self._get_text(response)
 
     def get_json(self, url, params = None):

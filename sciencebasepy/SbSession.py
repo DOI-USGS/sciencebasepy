@@ -15,6 +15,7 @@ except ImportError:
     from urllib2 import urlopen
     import urlparse
 
+import sys
 import requests
 import json
 import os
@@ -662,12 +663,23 @@ class SbSession:
         complete_name = os.path.join(destination, local_filename)
         print("downloading " + url + " to " + complete_name)
         r = self._session.get(url, stream=True)
+        
+        # https://stackoverflow.com/a/15645088/3362993        
+        total_length = int(r.headers.get('content-length'))
+        dl = 0        
 
         with open(complete_name, 'wb') as f:
-            for chunk in r.iter_content(chunk_size=1024):
+            for chunk in r.iter_content(chunk_size=1024):                
                 if chunk: # filter out keep-alive new chunks
+                    dl += len(chunk)
+                    
                     f.write(chunk)
                     f.flush()
+                    
+                    done = int(50 * dl / total_length)
+                    sys.stdout.write("\r[%s%s]" % ('=' * done, ' ' * (50-done)) + " " + str(int(dl / total_length * 100)) + "%")
+                    sys.stdout.flush()
+        sys.stdout.write('\n')                    
         return complete_name
 
     def get_item_files(self, item, destination='.'):

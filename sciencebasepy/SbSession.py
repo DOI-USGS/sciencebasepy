@@ -652,7 +652,7 @@ class SbSession:
                             retval.append(finfo)
         return retval
 
-    def download_file(self, url, local_filename, destination='.'):
+    def download_file(self, url, local_filename, destination='.', progress_bar=False):
         """Download file from URL
 
         :param url: ScienceBase Catalog Item file download URL
@@ -677,9 +677,11 @@ class SbSession:
                     f.flush()
                     
                     done = int(50 * dl / total_length)
-                    sys.stdout.write("\r[%s%s]" % ('=' * done, ' ' * (50-done)) + " " + str(int(dl / total_length * 100)) + "%")
-                    sys.stdout.flush()
-        sys.stdout.write('\n')                    
+                    if progress_bar==True:
+                        sys.stdout.write("\r[%s%s]" % ('=' * done, ' ' * (50-done)) + " " + str(int(dl / total_length * 100)) + "%")
+                        sys.stdout.flush()
+            if progress_bar==True:
+                sys.stdout.write('\n')
         return complete_name
 
     def get_item_files(self, item, destination='.'):

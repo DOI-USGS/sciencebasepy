@@ -214,6 +214,10 @@ Delete an existing ScienceBase item.
 Delete multiple ScienceBase Items.  This is much more efficient than using delete_item() for multiple deletions, as it
 performs the action server-side in one call to ScienceBase.
 
+* `delete_file(sb_filename, item)`
+Delete a file on a ScienceBase Item.  This method will delete all files with 
+the provided name, whether they are in the files list or on a facet.
+
 * `delete_hidden_property(item_id, hiddenpropertyid)`
 Delete an existing Item's specific Hidden Property item.
 

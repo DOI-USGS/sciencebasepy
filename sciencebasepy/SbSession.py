@@ -1,3 +1,4 @@
+# fmt: off
 # requests is an optional library that can be found at http://docs.python-requests.org/en/latest/
 """This Python module provides some basic services for interacting with ScienceBase."""
 from __future__ import print_function
@@ -658,6 +659,7 @@ class SbSession:
         :param url: ScienceBase Catalog Item file download URL
         :param local_filename: Name to use for the local file
         :param destination: Destination directory in which to store the files
+        :param progress_bar: Boolean to turn on progress bar printing
         :return: The full name and path of the downloaded file
         """
         complete_name = os.path.join(destination, local_filename)
@@ -665,19 +667,24 @@ class SbSession:
         r = self._session.get(url, stream=True)
         
         # https://stackoverflow.com/a/15645088/3362993        
-        total_length = int(r.headers.get('content-length'))
-        dl = 0        
+        dl = 0
+        if progress_bar==True:
+            try:
+                total_length = int(r.headers.get('content-length'))
+            except:
+                print("No 'content-length' header found to populate progress bar.")
+                progress_bar=False        
 
         with open(complete_name, 'wb') as f:
             for chunk in r.iter_content(chunk_size=1024):                
-                if chunk: # filter out keep-alive new chunks
+                if chunk: # filter out keep-alive new chunks                    
                     dl += len(chunk)
                     
                     f.write(chunk)
                     f.flush()
                     
-                    done = int(50 * dl / total_length)
                     if progress_bar==True:
+                        done = int(50 * dl / total_length)
                         sys.stdout.write("\r[%s%s]" % ('=' * done, ' ' * (50-done)) + " " + str(int(dl / total_length * 100)) + "%")
                         sys.stdout.flush()
             if progress_bar==True:
@@ -689,10 +696,11 @@ class SbSession:
 
         :param item: ScienceBase Catalog Item JSON of the item from which to download files
         :param destination: Destination directory in which to store the files
+        :param progress_bar: Boolean to turn on progress bar printing
         :return: The ScienceBase Catalog file info JSON response
         """
         file_info = self.get_item_file_info(item)
-        for file_info in file_info:
+        for file_info in file_info:            
             self.download_file(file_info['url'], file_info['name'], destination, progress_bar)
         return file_info
 
@@ -1263,4 +1271,3 @@ class SbSession:
         """
         related_item_link = self.get_item_link_type_by_name('related')
         return self.create_item_link(from_item_id, to_item_id, related_item_link['id'])
-    

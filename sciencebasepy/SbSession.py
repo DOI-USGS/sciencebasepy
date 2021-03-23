@@ -664,7 +664,7 @@ class SbSession:
         """
         complete_name = os.path.join(destination, local_filename)
         print("downloading " + url + " to " + complete_name)
-        r = self._session.get(url, stream=True)
+        r = self._session.get(url, stream=True)        
         
         # https://stackoverflow.com/a/15645088/3362993        
         dl = 0
@@ -672,8 +672,11 @@ class SbSession:
             try:
                 total_length = int(r.headers.get('content-length'))
             except:
-                print("No 'content-length' header found to populate progress bar.")
-                progress_bar=False        
+                try:
+                    total_length = int(requests.head(url, headers={'Accept-Encoding': None}).headers.get("content-length"))
+                except:
+                    print("No 'content-length' header found to populate progress bar.")
+                    progress_bar=False        
 
         with open(complete_name, 'wb') as f:
             for chunk in r.iter_content(chunk_size=1024):                

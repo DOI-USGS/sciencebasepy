@@ -46,14 +46,14 @@ raster and its associated SLD, be sure to upload them with a single call to
 `upload_files_and_create_item`. Otherwise, ScienceBase will not create the appropriate facets, 
 and services will not be created.
 
-* `create_item(sb_json)`
-Create a new ScienceBase item.  Documentation on the sb_json format can be found at
+* `create_item(item_dict)`
+Create a new ScienceBase item.  Documentation on the sbJSON format can be found at
 https://my.usgs.gov/confluence/display/sciencebase/ScienceBase+Item+Core+Model
 
-* `create_items(sb_json)`
-Create multiple new Items in ScienceBase. sb_json: JSON list representing the ScienceBase Catalog items to create.
+* `create_items(item_dict_list)`
+Create multiple new Items in ScienceBase. item_dict_list: list of item_dict objects representing the ScienceBase Catalog items to create.
 
-* `create_hidden_property(item_id, sb_json)`
+* `create_hidden_property(item_id, item_dict)`
 Create a new Hidden Property for a Sciencebase item : POST /catalog/item/<item_id>/hiddenProperties
 Documentation of the json can be found at https://code.chs.usgs.gov/sciencebase/dev-docs/wikis/APIs/Catalog/Item-Hidden-Properties
 
@@ -98,17 +98,17 @@ Get the text response of the given URL.
 * `get_json(url)`
 Get the JSON response of the given URL.
 
-* `get_item_files_zip(sb_json, destination)`
+* `get_item_files_zip(item_dict, destination)`
 Get a zip of all files attached to the ScienceBase item and place it in the destination
 folder.  Destination defaults to the current directory.  If specified, the destination folder
 must exist.  This creates the zip file server-side and then streams it to the client.
 
-* `get_item_files(sb_json, destination)`
+* `get_item_files(item_dict, destination)`
 Download all files attached to the ScienceBase item and place them in the destination folder.
 Destination defaults to the current directory.  If specified, the destination folder must
 exist.  The files are streamed individually.
 
-* `get_item_file_info(sb_json)`
+* `get_item_file_info(item_dict)`
 Get information about all files attached to a ScienceBase item.  Returns a list of
 dictionaries containing url, name and size of each file.
 
@@ -121,28 +121,28 @@ Note: When uploading associated files, such as the various files making up a sha
 raster and its associated SLD, be sure to upload them with a single call to one of the `upload_files*` methods.
 Otherwise, ScienceBase will not create the appropriate facets, and services will not be created.
 
-* `update_item(sb_json)`
+* `update_item(item_dict)`
 Updates an existing ScienceBase item.
 
-* `update_items(sb_json)`
-Update multiple Items in ScienceBase. sb_json: JSON list representing the ScienceBase Catalog items to update.
+* `update_items(item_dict_list)`
+Update multiple Items in ScienceBase. item_dict_list: list of item_dict objects representing the ScienceBase Catalog items to update.
 
-* `update_hidden_property(item_id, hiddenpropertyid, sb_json)`
+* `update_hidden_property(item_id, hiddenpropertyid, item_dict)`
 Updates an existing ScienceBase Item's Hidden Property.
 
-* `upload_file_to_item(sb_json, filename)`
+* `upload_file_to_item(item_dict, filename)`
 Upload a file to an existing ScienceBase item. Add the parameter `scrape_file=False` to bypass ScienceBase 
 metadata processing.
 
-* `upload_files_and_update_item(item, [filename,...])`
+* `upload_files_and_update_item(item_dict, [filename,...])`
 Upload a set of files and update an existing ScienceBase item. Add the parameter `scrape_file=False` to bypass
 ScienceBase metadata processing.
 
-* `upload_files_and_upsert_item(item, [filename,...])`
+* `upload_files_and_upsert_item(item_dict, [filename,...])`
 Upload multiple files and create or update a ScienceBase item. Add the parameter `scrape_file=False` to bypass
 ScienceBase metadata processing.
 
-* `replace_file(filename, item)`
+* `replace_file(filename, item_dict)`
 Replace a file on a ScienceBase Item.  This method will replace all files named the same as the new file,
 whether they are in the files list or in a facet.
 
@@ -207,12 +207,16 @@ Return whether the given ACLs include public READ permissions.
 Pretty print the given ACL JSON.
 
 ### Delete
-* `delete_item(sb_json)`
+* `delete_item(item_dict)`
 Delete an existing ScienceBase item.
 
 * `delete_items(item_ids)`
 Delete multiple ScienceBase Items.  This is much more efficient than using delete_item() for multiple deletions, as it
 performs the action server-side in one call to ScienceBase.
+
+* `delete_file(sb_filename, item_dict)`
+Delete a file on a ScienceBase Item.  This method will delete all files with 
+the provided name, whether they are in the files list or on a facet.
 
 * `delete_hidden_property(item_id, hiddenpropertyid)`
 Delete an existing Item's specific Hidden Property item.
@@ -251,11 +255,11 @@ two fields, "type" and "value" both of which are optional. **Warning**: Because 
 joined to ScienceBase Catalog search results, this method returns all matching items. Queries returning too many items may 
 be blocked by ScienceBase.
 
-* `next(items)`
-Get the next page of results, where *items* is the current search results.
+* `next(results)`
+Get the next page of results, where *results* is the current search results.
 
-* `previous(items)`
-Get the previous page of results, where *items* is the current search results.
+* `previous(results)`
+Get the previous page of results, where *results* is the current search results.
 
 ### Shortcuts
 * `get_shortcut_ids(item_id)`

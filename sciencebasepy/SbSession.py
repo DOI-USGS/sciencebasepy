@@ -684,7 +684,7 @@ class SbSession:
                 sys.stdout.write('\n')
         return complete_name
 
-    def get_item_files(self, item, destination='.'):
+    def get_item_files(self, item, destination='.', progress_bar=False):
         """Download the individual files attached to a ScienceBase Item
 
         :param item: ScienceBase Catalog Item JSON of the item from which to download files
@@ -693,7 +693,7 @@ class SbSession:
         """
         file_info = self.get_item_file_info(item)
         for file_info in file_info:
-            self.download_file(file_info['url'], file_info['name'], destination)
+            self.download_file(file_info['url'], file_info['name'], destination, progress_bar)
         return file_info
 
     def get_my_items_id(self):

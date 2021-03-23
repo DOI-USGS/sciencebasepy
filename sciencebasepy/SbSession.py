@@ -1,4 +1,3 @@
-# fmt: off
 # requests is an optional library that can be found at http://docs.python-requests.org/en/latest/
 """This Python module provides some basic services for interacting with ScienceBase."""
 from __future__ import print_function

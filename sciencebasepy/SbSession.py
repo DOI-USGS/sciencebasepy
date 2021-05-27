@@ -1098,6 +1098,12 @@ class SbSession:
         """
         return self._update_acls(self.ACL_REMOVE, self.ACL_WRITE, "ROLE:%s" % role_name, item_id)
 
+    def publish_to_public_bucket(self, item_id):
+        """ call publish end point from catalog
+            this should publish all files to public s3 publish bucket
+        """
+        return self._session.post(self._base_item_url + item_id + "/publishFilesToS3")
+
     def publish_item(self, item_id):
         """Publish the item, adding PUBLIC read permisisons. User must be USGS or in the publisher role.
         :param item_id: The ID of the ScienceBase item        

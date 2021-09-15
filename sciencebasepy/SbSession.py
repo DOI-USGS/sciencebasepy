@@ -300,7 +300,7 @@ class SbSession:
         :param item_json: JSON list representing the ScienceBase Catalog items to update
         :return: Full item JSON from ScienceBase Catalog after update
         """
-        ret = self._session.put(self._base_items_url + "upsert/", data=json.dumps(item_json))
+        ret = self._session.put(self._base_items_url + "upsert/", data=json.dumps(items_json))
         return self._get_json(ret)
 
     def update_hidden_property(self, item_id, hidden_property_id, hidden_property_json):

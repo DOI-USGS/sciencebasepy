@@ -1,43 +1,4 @@
 
-import json
-
-meQuery = """
-    me {
-        username
-        myFolderExists
-        myFolder {
-          id
-        }
-        roles
-    }
-"""
-
-#             createUploadSession({itemIdStr}, files : [{{ {filenameStr}, {fileContentType}}}]){{
-def createUploadSessionQuery(itemStr, itemIdStr, filenameStr, fileContentType):
-  return f'''
-        {{
-            item({itemStr}) {{
-                id
-                title
-            }}
-            createUploadSession({itemIdStr}, files : [{{ {filenameStr}}}]){{
-                uploads {{
-                    name
-                    url
-                }}
-            }}
-        }}'''
-
-
-def getItemQuery(itemId, params):
-    paramStr = make_param(params)
-    return f'''
-        query {{
-            item(id: "{itemId}")
-                {paramStr}
-        }}
-    '''
-
 def createMultipartUploadSession(s3FilePath):
     return f'''
         query {{
@@ -65,14 +26,3 @@ def completeMultiPartUpload(itemStr, upload_id, etag_payload):
         }}
         
     '''
-
-
-def make_param(mlist):
-	mystr = '{ '
-	for x in mlist:
-		if type(x) == list:
-			mystr = mystr  +  make_param(x)
-		else:
-			mystr = ' ' + mystr + ' ' + x + ' '
-	mystr = mystr + ' }'
-	return mystr

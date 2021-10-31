@@ -12,28 +12,18 @@
 #
 #############################################################################################################################
 
-import logging
-
-from sb3 import SbSessionEx
-from pprint import pprint
-import time
+import sciencebasepy
 
 FILE_PATH = '/Users/hshakya/Downloads/ORI_n6630w15515P_1.tif'
 FILE_NAME = 'ORI_n6630w15515P_2ABCD.tif'
 ITEM_ID = '601abc90d34e5bff6edfa4e1'
 
-#
-# Main
-#
-# sb = SbSessionEx.SbSessionEx()
-sb = SbSessionEx.SbSessionEx('beta')
-# sb.setLoggingEx(level=logging.INFO)
+sb = sciencebasepy.SbSession()
 
 
 # Get a private item.  Need to log in first.
-username =  'hshakya@contractor.usgs.gov'
-# username =  input("Username:  ")
-sb.logincEx(str(username))
+username = input("Username:  ")
+sb.loginc(str(username))
 
 # Upload a File using GraphQL
-sb.upload_large_file_upload_session(ITEM_ID, FILE_NAME, FILE_PATH)
+sb.upload_large_file(ITEM_ID, FILE_PATH, FILE_NAME)

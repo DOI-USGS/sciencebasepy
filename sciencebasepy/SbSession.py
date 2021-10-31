@@ -1,6 +1,9 @@
 # requests is an optional library that can be found at http://docs.python-requests.org/en/latest/
 """This Python module provides some basic services for interacting with ScienceBase."""
 from __future__ import print_function
+
+from sb3.SbSessionEx import SbSessionEx
+
 try:
     # For Python 3.0 and later
     import http.client as httplib
@@ -49,6 +52,7 @@ class SbSession:
     _retry = False
     _max_item_count = 1000
     _env = None
+    _sbSessionEx = None
     
     def __init__(self, env=None):
         """Initialize session and set JSON headers"""
@@ -113,6 +117,8 @@ class SbSession:
             raise Exception("Login failed")
         self._jossosessionid = self._session.cookies['JOSSO_SESSIONID']
         self._session.headers.update({'MYUSGS-JOSSO-SESSION-ID': self._jossosessionid})
+
+        self._sbSessionEx = SbSessionEx.loginEx(username, password)
 
         return self
 
@@ -413,6 +419,9 @@ class SbSession:
         :return: The ScienceBase Catalog Item JSON of the new Item
         """
         return self.upload_files_and_create_item(parentid, [filename], scrape_file)
+
+    def upload_large_file(self, itemId, local_path, file_name):
+        return self._sbSessionEx.upload_large_file_upload_session(itemId, file_name, local_path)
 
     def upload_files_and_create_item(self, parentid, filenames, scrape_file=True):
         """Upload multiple files and create a new Item in ScienceBase

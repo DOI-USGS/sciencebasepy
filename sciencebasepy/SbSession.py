@@ -118,7 +118,8 @@ class SbSession:
         self._jossosessionid = self._session.cookies['JOSSO_SESSIONID']
         self._session.headers.update({'MYUSGS-JOSSO-SESSION-ID': self._jossosessionid})
 
-        self._sbSessionEx = SbSessionEx.loginEx(username, password)
+        sb = SbSessionEx()
+        self._sbSessionEx = sb.loginEx(username, password)
 
         return self
 

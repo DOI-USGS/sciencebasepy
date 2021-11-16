@@ -3,16 +3,14 @@ import json
 import logging
 from sb3 import auth, client
 from datetime import datetime
-from sciencebasepy import SbSession
 
 
-class SbSessionEx(SbSession):
+class SbSessionEx:
     """SbSessionEx encapsulates a session with ScienceBase, and provides extra methods for working with ScienceBase Catalog
     Items using GraphQL as well as authentication using keycloak.
     """
 
     def __init__(self, env=None):
-        super().__init__(env)
         self._env = env
         self._logging = logging
         if env == "beta":
@@ -40,6 +38,7 @@ class SbSessionEx(SbSession):
         try:
             authenticator = _keycloak_login(username, password)
 
+            self._logging("info")
             self._logging.info(authenticator)
 
             self._token = authenticator.get_access_token()
@@ -54,7 +53,7 @@ class SbSessionEx(SbSession):
                 self._token_expire + (datetime.today()).timestamp()
             )
         except Exception:
-            self._logging.error("logging failed for %s" % (username,))
+            self._logging.error("login failed for %s" % (username,))
 
         return self
 
@@ -135,6 +134,7 @@ def _keycloak_login(username, password):
 
     authenticator = auth.DirectAccessAuthenticator(keycloak_client_config)
 
+    print("auth token")
     print(authenticator)
     authenticator.authenticate(username, password)
 

@@ -82,19 +82,24 @@ class DirectAccessAuthenticator:
             "username": username,
             "password": password,
         }
+        print(payload)
 
         print("self.keycloak_client_config._token_server_uri", self.keycloak_client_config._token_server_uri)
         token_resp = requests.post(
             self.keycloak_client_config._token_server_uri, data=payload
         )
         token_resp_json = token_resp.json()
+        print(token_resp.status_code)
+        print(token_resp_json)
 
         if debug:
             pp.pprint(token_resp_json)
         if token_resp.status_code != 200:
+            print("failed")
             raise Exception("Authentication Failed")
 
         self.auth_token = token_resp_json
+        #print(self.auth_token)
 
     def __str__(self):
         return json.dumps(self.auth_token)

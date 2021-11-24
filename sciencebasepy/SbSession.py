@@ -1114,6 +1114,14 @@ class SbSession:
         """
         return self._session.post(self._base_item_url + item_id + "/publishFilesToS3")
 
+    # TODO: need to add /publishArrayOfFilesToS3 publish endpoint similar to /publishFilesToS3 to handle publishing array of files from item to either public publish bucket or public Dremio bucket
+    def publish_array_to_public_bucket(self, item_id, filenames, dremiobucket=False):
+        """ call publish end point from catalog
+            this should publish all files to public s3 publish bucket or public s3 Dremio bucket
+        """
+        data = {"filenames": filenames, "publish_to_dremio_bucket": dremiobucket}
+        return self._session.post(self._base_item_url + item_id + "/publishArrayOfFilesToS3", data=json.dumps(data))
+
     def publish_item(self, item_id):
         """Publish the item, adding PUBLIC read permisisons. User must be USGS or in the publisher role.
         :param item_id: The ID of the ScienceBase item        

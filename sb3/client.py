@@ -30,6 +30,8 @@ def upload_large_file_upload_session(itemId, filename, file_path, session):
         json={"query": queryCreateMultiPart},
     )
 
+    print(sb_resp.json())
+
     session.getLogger().info(
         f"get_item query response, status code: {sb_resp.status_code}"
     )
@@ -75,6 +77,9 @@ def upload_large_file_upload_session(itemId, filename, file_path, session):
                 headers=session.get_header(),
                 json={"query": queryCreatePresignedUrlPart},
             )
+
+            print(sb_resp.json())
+
             if sb_resp.status_code == 200:
                 sb_resp_json = sb_resp.json()
                 session.getLogger().info(sb_resp_json)
@@ -116,6 +121,9 @@ def upload_large_file_upload_session(itemId, filename, file_path, session):
         headers=session.get_header(),
         json={"query": queryCreateMultiPart},
     )
+
+    print("sb_resp")
+    print(sb_resp.json())
 
     if sb_resp.status_code == 200:
         sb_resp_json = sb_resp.json()

@@ -33,13 +33,20 @@ class SbSessionEx:
         :param password: The ScienceBase password for the given user
         :return: The SbSessionEx object with the user logged in
         """
+        print("calling loginEx")
         self._username = username
 
         try:
+            print("try login")
             authenticator = _keycloak_login(username, password)
 
-            self._logging("info")
-            self._logging.info(authenticator)
+            print(authenticator)
+            print(authenticator.get_token_expire())
+
+            print("gotaccesstoken")
+            #self._logging("info")
+            #self._logging.info(authenticator)
+
 
             self._token = authenticator.get_access_token()
             self._refresh_token = authenticator.get_refresh_token()
@@ -48,10 +55,14 @@ class SbSessionEx:
                 authenticator.keycloak_client_config._token_server_uri
             )
             self._token_expire = authenticator.get_token_expire()
+            print("token expire")
+            print(self._token_expire)
             self._token_expire_refresh = authenticator.get_refresh_token_expire()
             self._token_expire_time = (
                 self._token_expire + (datetime.today()).timestamp()
             )
+            print("loginEx")
+            print(self._token_expire_time)
         except Exception:
             self._logging.error("login failed for %s" % (username,))
 
@@ -127,15 +138,14 @@ def _keycloak_login(username, password):
         "realm": "ScienceBase-B",
         "auth-server-url": "https://www.sciencebase.gov/auth",
         "ssl-required": "external",
-        "resource": "sb-steve-test-2",      
+        "resource": "sb-steve-test-2",
         "public-client": True,
         "confidential-port": 0,
     }
 
     authenticator = auth.DirectAccessAuthenticator(keycloak_client_config)
 
-    print("auth token")
-    print(authenticator)
     authenticator.authenticate(username, password)
 
+    #print(authenticator)
     return authenticator

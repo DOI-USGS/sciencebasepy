@@ -5,7 +5,7 @@ FILE_PATH = 'C:/Apogee Engineering/testupload.txt'
 FILE_NAME = 'testupload.txt'
 ITEM_ID = '619c1c66d34eb622f692fe99'
 
-sb = sciencebasepy.SbSession()
+sb = sciencebasepy.SbSession('beta')
 
 
 # Get a private item.  Need to log in first.
@@ -19,4 +19,3 @@ time.sleep(5)
 
 # Upload a File using GraphQL
 print(sb.upload_large_file(ITEM_ID, FILE_PATH, FILE_NAME))
-

@@ -135,10 +135,10 @@ class SbSessionEx:
 def _keycloak_login(username, password):
     # TODO : check if resource is required
     keycloak_client_config = {
-        "realm": "ScienceBase-B",
+        "realm": "ScienceBase",
         "auth-server-url": "https://www.sciencebase.gov/auth",
         "ssl-required": "external",
-        "resource": "sb-steve-test-2",
+        "resource": "sciencebasepy",
         "public-client": True,
         "confidential-port": 0,
     }

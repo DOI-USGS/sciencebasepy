@@ -5,7 +5,7 @@ FILE_PATH = 'C:/Apogee Engineering/testupload.txt'
 FILE_NAME = 'testupload.txt'
 ITEM_ID = '619c1c66d34eb622f692fe99'
 
-sb = sciencebasepy.SbSession('beta')
+sb = sciencebasepy.SbSession()
 
 
 # Get a private item.  Need to log in first.

@@ -10,8 +10,8 @@ sb = sciencebasepy.SbSession()
 
 # Get a private item.  Need to log in first.
 print("going to log in")
-username = "kraja@contractor.usgs.gov"
-sb.loginc(username)
+username = input("Username:  ")
+sb.loginc(str(username))
 print("logged in")
 print("My Items ID:" + str(sb.get_my_items_id()))
 

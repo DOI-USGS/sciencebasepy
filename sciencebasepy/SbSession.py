@@ -1114,13 +1114,42 @@ class SbSession:
         """
         return self._session.post(self._base_item_url + item_id + "/publishFilesToS3")
 
-    # TODO: need to add /publishArrayOfFilesToS3 publish endpoint similar to /publishFilesToS3 to handle publishing array of files from item to either public publish bucket or public Dremio bucket
-    def publish_array_to_public_bucket(self, item_id, filenames, dremiobucket=False):
+   
+    def publish_array_to_public_bucket(self, item_id, filenames):
         """ call publish end point from catalog
-            this should publish all files to public s3 publish bucket or public s3 Dremio bucket
+            this should publish list of files to public s3 publish bucket
         """
-        data = {"filenames": filenames, "publish_to_dremio_bucket": dremiobucket}
-        return self._session.post(self._base_item_url + item_id + "/publishArrayOfFilesToS3", data=json.dumps(data))
+        for filename in filenames:
+            item = self.get_item(item_id)
+            pathOnDisk = ""
+            
+            if 'files' in item:
+                for f in item['files']:
+                    if 'name' in f:
+                        if f['name'] == filename:
+                            if 'pathOnDisk' in f:
+                                pathOnDisk = f['pathOnDisk']
+                                break
+            if pathOnDisk == "":
+                if 'facets' in item:
+                    for facet in item['facets']:
+                        if 'files' in facet:
+                            for f in facet['files']:
+                                if f['name'] == filename:
+                                    if 'pathOnDisk' in f:
+                                        pathOnDisk = f['pathOnDisk']
+                                        break         
+            
+            publishDict = {
+                "filename": filename,
+                "actionValue": "publish",
+                "cuid": None,
+                "pathOnDisk": pathOnDisk
+            }
+            
+            print(self._session.post(self._base_item_url + item_id + "/publishSingleFileToS3", data=json.dumps(publishDict)))
+        
+            
 
     def publish_item(self, item_id):
         """Publish the item, adding PUBLIC read permisisons. User must be USGS or in the publisher role.

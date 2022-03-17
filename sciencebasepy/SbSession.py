@@ -1,6 +1,9 @@
 # requests is an optional library that can be found at http://docs.python-requests.org/en/latest/
 """This Python module provides some basic services for interacting with ScienceBase."""
 from __future__ import print_function
+
+from sb3.SbSessionEx import SbSessionEx
+
 try:
     # For Python 3.0 and later
     import http.client as httplib
@@ -50,6 +53,7 @@ class SbSession:
     _retry = False
     _max_item_count = 1000
     _env = None
+    _sbSessionEx = None
     
     def __init__(self, env=None):
         """Initialize session and set JSON headers"""
@@ -114,6 +118,9 @@ class SbSession:
             raise Exception("Login failed")
         self._jossosessionid = self._session.cookies['JOSSO_SESSIONID']
         self._session.headers.update({'MYUSGS-JOSSO-SESSION-ID': self._jossosessionid})
+
+        sb = SbSessionEx()
+        self._sbSessionEx = sb.loginEx(username, password)
 
         return self
 
@@ -414,6 +421,9 @@ class SbSession:
         :return: The ScienceBase Catalog Item JSON of the new Item
         """
         return self.upload_files_and_create_item(parentid, [filename], scrape_file)
+
+    def upload_large_file(self, itemId, local_path, file_name):
+        return self._sbSessionEx.upload_large_file_upload_session(itemId, file_name, local_path)
 
     def upload_files_and_create_item(self, parentid, filenames, scrape_file=True):
         """Upload multiple files and create a new Item in ScienceBase
@@ -1121,6 +1131,20 @@ class SbSession:
         :return: The permissions JSON for the given item
         """
         return self._update_acls(self.ACL_REMOVE, self.ACL_WRITE, "ROLE:%s" % role_name, item_id)
+
+    def publish_to_public_bucket(self, item_id):
+        """ call publish end point from catalog
+            this should publish all files to public s3 publish bucket
+        """
+        return self._session.post(self._base_item_url + item_id + "/publishFilesToS3")
+
+    # TODO: need to add /publishArrayOfFilesToS3 publish endpoint similar to /publishFilesToS3 to handle publishing array of files from item to either public publish bucket or public Dremio bucket
+    def publish_array_to_public_bucket(self, item_id, filenames, dremiobucket=False):
+        """ call publish end point from catalog
+            this should publish all files to public s3 publish bucket or public s3 Dremio bucket
+        """
+        data = {"filenames": filenames, "publish_to_dremio_bucket": dremiobucket}
+        return self._session.post(self._base_item_url + item_id + "/publishArrayOfFilesToS3", data=json.dumps(data))
 
     def publish_item(self, item_id):
         """Publish the item, adding PUBLIC read permisisons. User must be USGS or in the publisher role.

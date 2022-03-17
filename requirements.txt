@@ -55,6 +55,6 @@ toml==0.10.1
 traitlets==5.0.5
 typed-ast==1.4.1
 typing-extensions==3.7.4.3
-urllib3==1.25.11
+urllib3==1.26.5
 wily==1.19.0
 wrapt==1.12.1

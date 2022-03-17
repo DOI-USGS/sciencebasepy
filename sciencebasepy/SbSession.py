@@ -15,6 +15,7 @@ except ImportError:
     from urllib2 import urlopen
     import urlparse
 
+import sys
 import requests
 import json
 import os
@@ -651,35 +652,58 @@ class SbSession:
                             retval.append(finfo)
         return retval
 
-    def download_file(self, url, local_filename, destination='.'):
+    def download_file(self, url, local_filename, destination='.', progress_bar=False):
         """Download file from URL
 
         :param url: ScienceBase Catalog Item file download URL
         :param local_filename: Name to use for the local file
         :param destination: Destination directory in which to store the files
+        :param progress_bar: Boolean to turn on progress bar printing
         :return: The full name and path of the downloaded file
         """
         complete_name = os.path.join(destination, local_filename)
         print("downloading " + url + " to " + complete_name)
-        r = self._session.get(url, stream=True)
+        r = self._session.get(url, stream=True)        
+        
+        # https://stackoverflow.com/a/15645088/3362993        
+        dl = 0
+        if progress_bar==True:
+            try:
+                total_length = int(r.headers.get('content-length'))
+            except:
+                try:
+                    total_length = int(requests.head(url, headers={'Accept-Encoding': None}).headers.get("content-length"))
+                except:
+                    print("No 'content-length' header found to populate progress bar.")
+                    progress_bar=False        
 
         with open(complete_name, 'wb') as f:
-            for chunk in r.iter_content(chunk_size=1024):
-                if chunk: # filter out keep-alive new chunks
+            for chunk in r.iter_content(chunk_size=1024):                
+                if chunk: # filter out keep-alive new chunks                    
+                    dl += len(chunk)
+                    
                     f.write(chunk)
                     f.flush()
+                    
+                    if progress_bar==True:
+                        done = int(50 * dl / total_length)
+                        sys.stdout.write("\r[%s%s]" % ('=' * done, ' ' * (50-done)) + " " + str(int(dl / total_length * 100)) + "%")
+                        sys.stdout.flush()
+            if progress_bar==True:
+                sys.stdout.write('\n')
         return complete_name
 
-    def get_item_files(self, item, destination='.'):
+    def get_item_files(self, item, destination='.', progress_bar=False):
         """Download the individual files attached to a ScienceBase Item
 
         :param item: ScienceBase Catalog Item JSON of the item from which to download files
         :param destination: Destination directory in which to store the files
+        :param progress_bar: Boolean to turn on progress bar printing
         :return: The ScienceBase Catalog file info JSON response
         """
         file_info = self.get_item_file_info(item)
-        for file_info in file_info:
-            self.download_file(file_info['url'], file_info['name'], destination)
+        for file_info in file_info:            
+            self.download_file(file_info['url'], file_info['name'], destination, progress_bar)
         return file_info
 
     def get_my_items_id(self):
@@ -1249,4 +1273,3 @@ class SbSession:
         """
         related_item_link = self.get_item_link_type_by_name('related')
         return self.create_item_link(from_item_id, to_item_id, related_item_link['id'])
-    

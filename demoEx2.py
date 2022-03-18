@@ -1,21 +1,18 @@
-import sciencebasepy
-import time
+from sciencebasepy import SbSession
 
-FILE_PATH = 'C:/Apogee Engineering/testupload.txt'
-FILE_NAME = 'testupload.txt'
-ITEM_ID = '619c1c66d34eb622f692fe99'
+FILE_NAME = 'tests/resources/sample_error.png'
 
-sb = sciencebasepy.SbSession()
+sb = SbSession()
 
-
-# Get a private item.  Need to log in first.
-print("going to log in")
+# Login to ScienceBase
 username = input("Username:  ")
 sb.loginc(str(username))
-print("logged in")
-print("My Items ID:" + str(sb.get_my_items_id()))
 
-time.sleep(5)
+# Create test item
+new_item = {'title': 'Cloud Upload Test',
+    'parentId': sb.get_my_items_id(),
+    'provenance': {'annotation': 'Python ScienceBase REST test script'}}
+new_item = sb.create_item(new_item)
 
-# Upload a File using GraphQL
-print(sb.upload_large_file(ITEM_ID, FILE_PATH, FILE_NAME))
+# Upload a File using GraphQL to the test item
+print(sb.upload_cloud_file_to_item(new_item['id'], FILE_NAME))

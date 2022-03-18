@@ -1,36 +1,25 @@
-# requests is an optional library that can be found at http://docs.python-requests.org/en/latest/
 """This Python module provides some basic services for interacting with ScienceBase."""
 from __future__ import print_function
 
-from sb3.SbSessionEx import SbSessionEx
-
-try:
-    # For Python 3.0 and later
-    import http.client as httplib
-    from urllib.request import urlopen
-    from urllib.parse import urlencode
-    import urllib.parse as urlparse
-
-except ImportError:
-    # Fall back to Python 2's urllib2
-    import httplib
-    from urllib import urlencode
-    from urllib2 import urlopen
-    import urlparse
-
+# For Python 3.0 and later
+import http.client as httplib
+from urllib.parse import urlencode
+import urllib.parse as urlparse
 import sys
-import requests
+import logging
 import json
 import os
 import getpass
-import logging
 import mimetypes
+import requests
+
 from pkg_resources import get_distribution
 from pkg_resources import DistributionNotFound
+from sb3.SbSessionEx import SbSessionEx
 
 class SbSession:
-    """SbSession encapsulates a session with ScienceBase, and provides methods for working with ScienceBase Catalog
-    Items.
+    """SbSession encapsulates a session with ScienceBase, and provides methods for working with
+    ScienceBase Catalog Items.
     """
     _josso_url = None
     _base_sb_url = None
@@ -54,7 +43,7 @@ class SbSession:
     _max_item_count = 1000
     _env = None
     _sbSessionEx = None
-    
+
     def __init__(self, env=None):
         """Initialize session and set JSON headers"""
         self._env = env
@@ -83,13 +72,13 @@ class SbSession:
         self._base_undelete_item_url = self._base_item_url + "undelete/"
         self._base_shortcut_item_url = self._base_items_url + "addLink/"
         self._base_unlink_item_url = self._base_items_url + "unlink/"
-        self._base_person_url = self._base_directory_url + "person/"        
+        self._base_person_url = self._base_directory_url + "person/"
 
         self._session = requests.Session()
         self._session.headers.update({'Accept': 'application/json'})
         sciencebasepy_agent = ' sciencebase-sciencebasepy'
         try:
-            sciencebasepy_agent += '/%s' % get_distribution("sciencebasepy").version
+            sciencebasepy_agent += f'/{get_distribution("sciencebasepy").version}'
         except DistributionNotFound:
             pass
         self._session.headers.update({'User-Agent': self._session.headers['User-Agent'] + sciencebasepy_agent})
@@ -119,8 +108,8 @@ class SbSession:
         self._jossosessionid = self._session.cookies['JOSSO_SESSIONID']
         self._session.headers.update({'MYUSGS-JOSSO-SESSION-ID': self._jossosessionid})
 
-        sb = SbSessionEx()
-        self._sbSessionEx = sb.loginEx(username, password)
+        # Login to Keycloak for SB3 calls
+        self._sbSessionEx = SbSessionEx(self._env).login(username, password)
 
         return self
 
@@ -137,7 +126,7 @@ class SbSession:
         :return: The SbSession object with the user logged in
         """
         tries = 0
-        while (tries < 5):
+        while tries < 5:
             password = getpass.getpass()
             try:
                 return self.login(username, password)
@@ -302,15 +291,6 @@ class SbSession:
         ret = self._session.put(self._base_item_url + item_json['id'], data=json.dumps(item_json))
         return self._get_json(ret)
 
-    def update_items(self, items_json):
-        """Update existing ScienceBase Items
-
-        :param item_json: JSON list representing the ScienceBase Catalog items to update
-        :return: Full item JSON from ScienceBase Catalog after update
-        """
-        ret = self._session.put(self._base_items_url + "upsert/", data=json.dumps(items_json))
-        return self._get_json(ret)
-
     def update_hidden_property(self, item_id, hidden_property_id, hidden_property_json):
         """Update an existing hidden property of a ScienceBase Item
 
@@ -405,12 +385,24 @@ class SbSession:
     def upload_file_to_item(self, item, filename, scrape_file=True):
         """Upload a file to an existing Item in ScienceBase
 
-        :param item:
+        :param item: ScienceBase Catalog Item JSON of the Item to update
         :param filename: Filenames of the file to upload
         :param scrape_file: Whether to scrape metadata and create extensions from special files
         :return: The ScienceBase Catalog Item JSON of the updated Item
         """
         return self.upload_files_and_update_item(item, [filename], scrape_file)
+
+    def upload_cloud_file_to_item(self, itemid, filename):
+        """Upload a file to cloud storage on an existing Item in ScienceBase
+
+        :param itemid: ScienceBase Catalog Item ID of the Item to update
+        :param filename: Filenames of the file to upload
+        :return: The ScienceBase Catalog Item JSON of the updated Item
+        """
+        (path, fname) = os.path.split(filename)
+        response = self._sbSessionEx.upload_cloud_file_upload_session(itemid, fname, filename)
+        # TODO: check response
+        return self.get_item(itemid)
 
     def upload_file_and_create_item(self, parentid, filename, scrape_file=True):
         """Upload a file and create a new Item in ScienceBase
@@ -420,10 +412,7 @@ class SbSession:
         :param scrape_file: Whether to scrape metadata and create extensions from special files
         :return: The ScienceBase Catalog Item JSON of the new Item
         """
-        return self.upload_files_and_create_item(parentid, [filename], scrape_file)
-
-    def upload_large_file(self, itemId, local_path, file_name):
-        return self._sbSessionEx.upload_large_file_upload_session(itemId, file_name, local_path)
+        return self.upload_files_and_create_item(parentid, [filename], scrape_file)    
 
     def upload_files_and_create_item(self, parentid, filenames, scrape_file=True):
         """Upload multiple files and create a new Item in ScienceBase
@@ -456,7 +445,7 @@ class SbSession:
         url = self._base_upload_file_url
         files = []
         for filename in filenames:
-            if type(filename) == str:
+            if isinstance(filename, str):
                 if (os.access(filename, os.F_OK)):
                     files.append(('file', open(filename, 'rb')))
                 else:
@@ -482,11 +471,11 @@ class SbSession:
         retval = None
         url = self._base_upload_file_temp_url
 
-        if (os.access(filename, os.F_OK)):
+        if os.access(filename, os.F_OK):
             #
             # if no mimetype was sent in, try to guess
             #
-            if None == mimetype:
+            if mimetype is None:
                 mimetype = mimetypes.guess_type(filename)
             (path, fname) = os.path.split(filename)
             ret = self._session.post(url, files=[('files[]', (fname, open(filename, 'rb'), mimetype))])
@@ -673,33 +662,31 @@ class SbSession:
         """
         complete_name = os.path.join(destination, local_filename)
         print("downloading " + url + " to " + complete_name)
-        r = self._session.get(url, stream=True)        
-        
-        # https://stackoverflow.com/a/15645088/3362993        
-        dl = 0
-        if progress_bar==True:
+        response = self._session.get(url, stream=True)
+
+        # https://stackoverflow.com/a/15645088/3362993
+        download_length = 0
+        if progress_bar is True:
             try:
-                total_length = int(r.headers.get('content-length'))
-            except:
+                total_length = int(response.headers.get('content-length'))
+            except Exception:
                 try:
                     total_length = int(requests.head(url, headers={'Accept-Encoding': None}).headers.get("content-length"))
-                except:
+                except Exception:
                     print("No 'content-length' header found to populate progress bar.")
-                    progress_bar=False        
+                    progress_bar=False
 
         with open(complete_name, 'wb') as f:
-            for chunk in r.iter_content(chunk_size=1024):                
-                if chunk: # filter out keep-alive new chunks                    
-                    dl += len(chunk)
-                    
+            for chunk in response.iter_content(chunk_size=1024):
+                if chunk: # filter out keep-alive new chunks
+                    download_length += len(chunk)
                     f.write(chunk)
                     f.flush()
-                    
-                    if progress_bar==True:
-                        done = int(50 * dl / total_length)
-                        sys.stdout.write("\r[%s%s]" % ('=' * done, ' ' * (50-done)) + " " + str(int(dl / total_length * 100)) + "%")
+                    if progress_bar is True:
+                        done = int(50 * download_length / total_length)
+                        sys.stdout.write("\r[%s%s]" % ('=' * done, ' ' * (50-done)) + " " + str(int(download_length / total_length * 100)) + "%")
                         sys.stdout.flush()
-            if progress_bar==True:
+            if progress_bar is True:
                 sys.stdout.write('\n')
         return complete_name
 
@@ -712,8 +699,8 @@ class SbSession:
         :return: The ScienceBase Catalog file info JSON response
         """
         file_info = self.get_item_file_info(item)
-        for file_info in file_info:            
-            self.download_file(file_info['url'], file_info['name'], destination, progress_bar)
+        for finfo in file_info:            
+            self.download_file(finfo['url'], finfo['name'], destination, progress_bar)
         return file_info
 
     def get_my_items_id(self):
@@ -721,15 +708,18 @@ class SbSession:
 
         :return: The ScienceBase Catalog Item ID of the logged in user's My Items folder
         """
-        if (self._username):
+        ret = None
+        if self._username:
             params = {'q': '', 'lq': 'title.untouched:"' + self._username + '"'}
             if self._users_id:
                 params['parentId'] = self._users_id
             items = self.find_items(params)
-            if ('items' in items):
+            if 'items' in items:
                 for item in items['items']:
-                    if (item['title'] == self._username):
-                        return item['id']
+                    if item['title'] == self._username:
+                        ret = item['id']
+                        break
+        return ret
 
     def get_child_ids(self, parentid):
         """Get IDs of all immediate children for a given parent
@@ -968,8 +958,8 @@ class SbSession:
         self._check_errors(response)
         try:
             return response.json()
-        except:
-            raise Exception("Error parsing JSON response: " + response.text)
+        except Exception as exc:
+            raise Exception("Error parsing JSON response: " + response.text) from exc
 
     def _get_text(self, response):
         """Check the status code of the response, and return the text
@@ -980,8 +970,8 @@ class SbSession:
         self._check_errors(response)
         try:
             return response.text
-        except:
-            raise Exception("Error parsing response")
+        except Exception as exc:
+            raise Exception("Error parsing response") from exc
 
     def _check_errors(self, response):
         """Check the status code of the response
@@ -989,16 +979,16 @@ class SbSession:
         :param response: HTTP response to check
         :return: HTTP response, provided an error did not occur in the request
         """
-        if (response.status_code == 404):
+        if response.status_code == 404:
             if "The specified URL cannot be found" in response.text:
                 raise Exception("Request blocked by the USGS web application firewall")
             else:
                 raise Exception("Resource not found, or user does not have access")
-        elif (response.status_code == 401):
+        elif response.status_code == 401:
             raise Exception("Unauthorized access")
-        elif (response.status_code == 429):
+        elif response.status_code == 429:
             raise Exception("Too many requests")
-        elif (response.status_code != 200 and response.status_code != 201):
+        elif response.status_code != 200 and response.status_code != 201:
             if self._retry:
                 return response
             else:
@@ -1135,27 +1125,20 @@ class SbSession:
     def publish_to_public_bucket(self, item_id):
         """ call publish end point from catalog
             this should publish all files to public s3 publish bucket
+            TODO: Fix documentation
         """
         return self._session.post(self._base_item_url + item_id + "/publishFilesToS3")
 
-    # TODO: need to add /publishArrayOfFilesToS3 publish endpoint similar to /publishFilesToS3 to handle publishing array of files from item to either public publish bucket or public Dremio bucket
-    def publish_array_to_public_bucket(self, item_id, filenames, dremiobucket=False):
-        """ call publish end point from catalog
-            this should publish all files to public s3 publish bucket or public s3 Dremio bucket
-        """
-        data = {"filenames": filenames, "publish_to_dremio_bucket": dremiobucket}
-        return self._session.post(self._base_item_url + item_id + "/publishArrayOfFilesToS3", data=json.dumps(data))
-
     def publish_item(self, item_id):
-        """Publish the item, adding PUBLIC read permisisons. User must be USGS or in the publisher role.
-        :param item_id: The ID of the ScienceBase item        
+        """Publish the item, adding PUBLIC read permissions. User must be USGS or in the publisher role.
+        :param item_id: The ID of the ScienceBase item
         :return: The permissions JSON for the given item
         """
         return self._update_acls(self.ACL_ADD, self.ACL_READ, "PUBLIC", item_id)
     
     def unpublish_item(self, item_id):
-        """Unpublish the item, removing PUBLIC read permisisons.
-        :param item_id: The ID of the ScienceBase item        
+        """Unpublish the item, removing PUBLIC read permissions.
+        :param item_id: The ID of the ScienceBase item
         :return: The permissions JSON for the given item
         """
         return self._update_acls(self.ACL_REMOVE, self.ACL_READ, "PUBLIC", item_id)
@@ -1277,15 +1260,15 @@ class SbSession:
         :param reverse: Whether to reverse the relationsip
         :return: ItemLink JSON
         """
-        itemLinkJson = {
+        item_link_json = {
             "itemLinkTypeId": link_type_id
         }
-        itemLinkJson['itemId'] = from_item_id
-        itemLinkJson['relatedItemId'] = to_item_id
+        item_link_json['itemId'] = from_item_id
+        item_link_json['relatedItemId'] = to_item_id
         if reverse:
-            itemLinkJson['reverseRelationship'] = True
+            item_link_json['reverseRelationship'] = True
 
-        ret = self._session.post('%s' % (self._base_item_link_url), data=json.dumps(itemLinkJson))
+        ret = self._session.post(f'{self._base_item_link_url}', data=json.dumps(item_link_json))
         return self._get_json(ret)
 
     def create_related_item_link(self, from_item_id, to_item_id):

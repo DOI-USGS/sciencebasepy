@@ -1,9 +1,9 @@
+'''Unit Test Suite for scinecebasepy'''
 import unittest
 import getpass
-from sciencebasepy import SbSession
 from os import listdir
 from os.path import isfile, join
-from six.moves import input
+from sciencebasepy import SbSession
 
 class TestsciencebasepyMethods(unittest.TestCase):
     SB_CATALOG_ITEM_ID = '4f4e4760e4b07f02db47df9c'

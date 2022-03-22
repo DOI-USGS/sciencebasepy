@@ -69,6 +69,11 @@ class SbSessionEx:
 
         return self
 
+    def get_current_user(self):
+        '''get_current_user
+        '''
+        return self._username
+
     def get_logger(self):
         '''get_logger
         '''
@@ -124,10 +129,10 @@ class SbSessionEx:
         current_time = (datetime.today()).timestamp() + refresh_amount
         return self._token_expire_time - current_time
 
-    def upload_cloud_file_upload_session(self, itemId, filename, filepath):
+    def upload_cloud_file_upload_session(self, item_id, filename, mimetype):
         '''upload_large_file_upload_session
         '''
-        return client.upload_cloud_file_upload_session(itemId, filename, filepath, self)
+        return client.upload_cloud_file_upload_session(item_id, filename, mimetype, self)
 
     def get_header(self):
         '''get_header

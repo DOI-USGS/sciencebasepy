@@ -399,10 +399,10 @@ class SbSession:
         :param filename: Filenames of the file to upload
         :return: The ScienceBase Catalog Item JSON of the updated Item
         """
-        (path, fname) = os.path.split(filename)
-        response = self._sbSessionEx.upload_cloud_file_upload_session(itemid, fname, filename)
-        # TODO: check response
-        return self.get_item(itemid)
+        response = self._sbSessionEx.upload_cloud_file_upload_session(itemid, filename, self._guess_mimetype(filename))
+        if 'data' in response and 'completeMultiPartUpload' in response['data'] and 'Successful' in response['data']['completeMultiPartUpload']:
+            return self.get_item(itemid)
+        raise Exception('Cloud upload failed for', filename)
 
     def upload_file_and_create_item(self, parentid, filename, scrape_file=True):
         """Upload a file and create a new Item in ScienceBase
@@ -476,10 +476,11 @@ class SbSession:
             # if no mimetype was sent in, try to guess
             #
             if mimetype is None:
-                mimetype = mimetypes.guess_type(filename)
-            (path, fname) = os.path.split(filename)
-            ret = self._session.post(url, files=[('files[]', (fname, open(filename, 'rb'), mimetype))])
-            retval = self._get_json(ret)
+                mimetype = self._guess_mimetype(filename)
+            fname = os.path.basename(filename)
+            with open(filename, 'rb') as f:
+                ret = self._session.post(url, files=[('files[]', (fname, f, mimetype))])
+                retval = self._get_json(ret)
         else:
             raise Exception("File not found: " + filename)
         return retval
@@ -1005,6 +1006,17 @@ class SbSession:
         o = urlparse.urlsplit(url)
         q = [x for x in urlparse.parse_qsl(o.query) if "josso" not in x]
         return urlparse.urlunsplit((o.scheme, o.netloc, o.path, urlencode(q), o.fragment))
+    
+    def _guess_mimetype(self, filename):
+        """Guess mimetype of file
+
+        :param filename: Name of file for which to guess mimetype
+        :return: mimetype of file, or None if it cannot be guessed
+        """
+        mimetype, _ = mimetypes.guess_type(filename)
+        if mimetype is None:
+            mimetype = 'application/octet-stream'
+        return mimetype
 
     def debug(self):
         """Turn on HTTP logging for debugging purposes.

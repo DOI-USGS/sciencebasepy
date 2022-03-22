@@ -119,21 +119,20 @@ class SbSession:
         self._session.cookies.clear_session_cookies()
         self._session.params = {}
 
-    def loginc(self, username):
+    def loginc(self, username, tries=3):
         """Log into ScienceBase, prompting for the password
         
         :param username: The ScienceBase user to log in as
         :return: The SbSession object with the user logged in
         """
-        tries = 0
-        while tries < 5:
+        while tries > 0:
             password = getpass.getpass()
             try:
                 return self.login(username, password)
             except Exception:
-                tries += 1
+                tries -= 1
                 print("Invalid password, try again")
-        raise Exception("Too many invalid password attemps, you may need to wait 15 minutes before trying again")
+        raise Exception("Too many invalid password attemps")
 
     def is_logged_in(self):
         """Determine whether the SbSession is logged in and active in ScienceBase
@@ -399,10 +398,17 @@ class SbSession:
         :param filename: Filenames of the file to upload
         :return: The ScienceBase Catalog Item JSON of the updated Item
         """
-        response = self._sbSessionEx.upload_cloud_file_upload_session(itemid, filename, self._guess_mimetype(filename))
-        if 'data' in response and 'completeMultiPartUpload' in response['data'] and 'Successful' in response['data']['completeMultiPartUpload']:
-            return self.get_item(itemid)
-        raise Exception('Cloud upload failed for', filename)
+        ret = None
+        if not self._sbSessionEx.is_logged_in():
+            print(f'{self._username} not logged into Keycloak -- cloud services not available')
+        else:
+            mimetype = self._guess_mimetype(filename)
+            response = self._sbSessionEx.upload_cloud_file_upload_session(itemid, filename, mimetype)
+            if 'data' in response and 'completeMultiPartUpload' in response['data'] and 'Successful' in response['data']['completeMultiPartUpload']:
+                ret = self.get_item(itemid)
+            else:
+                raise Exception('Cloud upload failed for', filename)
+        return ret
 
     def upload_file_and_create_item(self, parentid, filename, scrape_file=True):
         """Upload a file and create a new Item in ScienceBase
@@ -493,7 +499,7 @@ class SbSession:
         :param item: ScienceBase Catalog Item JSON of the Item on which to replace the file
         :return: ScienceBase Catalog Item JSON of the updated Item
         """
-        (path, fname) = os.path.split(filename)
+        fname = os.path.basename(filename)
         #
         # replace file in files list
         #

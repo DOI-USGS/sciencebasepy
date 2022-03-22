@@ -22,6 +22,7 @@ class SbSessionEx:
     _token_expire = None
     _token_expire_refresh = None
     _token_expire_time = None
+    _is_logged_in = False
 
     def __init__(self, env=None):
         self._env = env
@@ -64,10 +65,17 @@ class SbSessionEx:
             self._token_expire_time = (
                 self._token_expire + (datetime.today()).timestamp()
             )
+            self._is_logged_in = True
         except Exception:
-            self._logging.error(f"login failed for {username}")
+            self._logging.error(f"Keycloak login failed for {username} -- cloud services not available")
+            self._is_logged_in = False
 
         return self
+
+    def is_logged_in(self):
+        '''is_logged_in
+        '''
+        return self._is_logged_in
 
     def get_current_user(self):
         '''get_current_user

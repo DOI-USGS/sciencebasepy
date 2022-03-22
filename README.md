@@ -5,6 +5,8 @@ module to be installed, which can be found at
 [http://docs.python-requests.org/en/latest/](http://docs.python-requests.org/en/latest/).
 If you get security errors also install requests[security]
 
+As of version 2.0.0, Python 2.x is no longer supported.
+
 Quick Start
 -----------
 sciencebasepy can be installed with pip:
@@ -14,6 +16,12 @@ sciencebasepy can be installed with pip:
 Otherwise, download the contents of this repository, and install the sciencebasepy libraries into 
 your python installation by running `python setup.py install`.  Example usage is contained 
 in `demo.py`.
+
+There are several iPython notebooks in this repository with example code. For more in-depth information and 
+examples on searching, see 
+[Searching ScienceBase with ScienceBasePy.ipynb](https://github.com/usgs/sciencebasepy/blob/master/Searching%20ScienceBase%20with%20ScienceBasePy.ipynb).
+For batch processing, see 
+[Batch Processing.ipynb](https://github.com/usgs/sciencebasepy/blob/master/Batch%20Processing.ipynb).
 
 Module Contents
 ---------------

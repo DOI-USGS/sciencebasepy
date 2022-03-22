@@ -2,8 +2,8 @@ from sciencebasepy import SbSession
 
 FILE_NAME = 'tests/resources/sample_error.png'
 
-sb = SbSession('beta')
-CREATE_ITEM = False
+sb = SbSession()
+CREATE_ITEM = True
 
 # Login to ScienceBase
 username = input("Username:  ")
@@ -21,7 +21,7 @@ if CREATE_ITEM:
 else:
     # Set this to a known writeable item ID and CREATE_ITEM to False for testing
     # without creating a new item
-    item_id = "6239f649d34e3b6239720927"
+    item_id = "some_item_id"
 
 # Upload a File using GraphQL to the test item
 print(sb.upload_cloud_file_to_item(item_id, FILE_NAME))

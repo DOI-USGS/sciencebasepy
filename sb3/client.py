@@ -20,7 +20,7 @@ def upload_cloud_file_upload_session(itemid, file_path, mimetype, sb_session_ex)
     sb_session_ex.get_logger().info("upload_large_file_upload_session....")
     total_size = Path(file_path).stat().st_size
     total_chunks = int(total_size / _CHUNK_SIZE) + 1
-    fpath = os.path.join(itemid, os.path.basename(file_path))
+    fpath = f'{itemid}/{os.path.basename(file_path)}'
 
     query_create_multi_part = querys.create_multipart_upload_session(fpath, mimetype, sb_session_ex.get_current_user())
 

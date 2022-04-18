@@ -12,6 +12,9 @@ import os
 import getpass
 import mimetypes
 import requests
+import textwrap
+import dremio_client
+from bs4 import BeautifulSoup
 
 from pkg_resources import get_distribution
 from pkg_resources import DistributionNotFound
@@ -1298,3 +1301,111 @@ class SbSession:
         """
         related_item_link = self.get_item_link_type_by_name('related')
         return self.create_item_link(from_item_id, to_item_id, related_item_link['id'])
+
+    def populate_dremio_info_from_XML(self, dremio_username, personal_access_token, base_url, source_XML,
+                                      is_local_filepath,
+                                      target_resource_list):
+        """Populate tags and wiki for each resource in Dremio target resource list using source XML metadata
+
+        :params dremio_username: user's Dremio username
+        :param personal_access_token: user's Dremio personal access token (generate in Dremio console)
+        :param base_url: Dremio base URL
+        :param source_XML: local file path or URL of a source XML metadata file
+        :param is_local_filepath: True if source_XML is a local filepath, False if source_XML is a URL
+        :param target_resource_list: list of target Dremio resources on which to populate tags and wiki, where
+        each target resource is a dictionary with Dremio space, folder, and filename as keys
+        """
+        if base_url == "https://dremio-dev.chs.usgs.gov":
+            os.environ["DREMIO_HOSTNAME"] = "10.12.67.236"
+        elif base_url == "https://dremio.chs.usgs.gov":
+            os.environ["DREMIO_HOSTNAME"] = "10.12.77.162"
+
+        os.environ["DREMIO_AUTH_TYPE"] = "basic"
+        os.environ["DREMIO_AUTH_USERNAME"] = dremio_username
+        os.environ["DREMIO_AUTH_PASSWORD"] = personal_access_token
+        os.environ["DREMIO_AUTH_TIMEOUT"] = "10"
+        os.environ["DREMIO_PORT"] = "9047"
+        os.environ["DREMIO_SSL"] = "False"
+
+        client = dremio_client.init()  # initialise connectivity to Dremio using environment config variables
+
+        token = dremio_client.auth.basic.login(base_url, dremio_username, personal_access_token)  # get Dremio token
+
+        if is_local_filepath:
+            xml_file = open(source_XML, "r")
+            data = xml_file.read()
+            xml_file.close()
+        else:
+            req = urllib.request.Request(source_XML)
+            try:
+                with urllib.request.urlopen(req) as resp:
+                    data = resp.read()
+            except urllib.error.HTTPError as e:
+                print(e.__dict__)
+            except urllib.error.URLError as e:
+                print(e.__dict__)
+
+        if data:
+            xml_data = BeautifulSoup(data, "xml")
+
+            keywords_list = []
+
+            # collect theme and place tags
+            theme_keywords = xml_data.find_all('themekey')
+            place_keywords = xml_data.find_all('placekey')
+
+            for i in range(0, len(theme_keywords)):
+                keywords_list.append(theme_keywords[i].next)
+
+            for i in range(0, len(place_keywords)):
+                keywords_list.append(place_keywords[i].next)
+
+            # collect ISO tags
+            level1 = xml_data.find_all('gmd:descriptiveKeywords')
+            for key in level1:
+                level2 = key.find_all('gco:CharacterString')
+                for elem in level2:
+                    keywords_list.append(elem.text)
+
+            # Dremio wiki has 100,000 character limit
+            if len(data) > 100000:
+                abstract = xml_data.find_all('abstract')
+                purpose = xml_data.find_all('purpose')
+                supplemental_info = xml_data.find_all('supplinf')
+
+                wiki_text = ""
+
+                for wiki_part in [abstract, purpose, supplemental_info]:
+                    if len(wiki_part) > 0:
+                        wiki_part = str(wiki_part[0])
+                        wiki_text += wiki_part + "\n"
+
+            else:
+                # indent entire XML text so that it will be formatted as XML in Dremio's Github-style markdown wiki
+                wiki_text = textwrap.indent(data, "\t")
+        else:
+            print("Error: cannot read XML from source")
+
+        for resource in target_resource_list:
+
+            space = resource['space']
+            folder = resource['folder']
+            file = resource['file']
+
+            if folder == "":
+                path = [space, file]
+            else:
+                path = [space, folder, file]
+
+            # get ID of dataset on which to add wiki
+            dataset_id = dremio_client.catalog_item(token=token, base_url=base_url, path=path)["id"]
+
+            # add tags to Dremio dataset
+            dremio_client.model.endpoints.set_collaboration_tags(token=token, base_url=base_url, cid=dataset_id,
+                                                                       tags=keywords_list)
+
+            # add wiki to Dremio dataset
+            dremio_client.model.endpoints.set_collaboration_wiki(token=token, base_url=base_url, cid=dataset_id,
+                                                                       wiki=wiki_text)
+            print("Added tags and wiki to target resource: {}/{}/{}".format(space, folder, file))
+

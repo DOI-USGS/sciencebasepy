@@ -1409,3 +1409,51 @@ class SbSession:
                                                                        wiki=wiki_text)
             print("Added tags and wiki to target resource: {}/{}/{}".format(space, folder, file))
 
+    def publish_files_to_dremio(self, item_id, filenames, bucket):
+        """Publish files on an item to a Dremio connected bucket
+
+               :params item_id: SB item ID
+               :param filenames: list of filenames on the item to be published to Dremio bucket
+               :param bucket: Dremio connected bucket name
+        """
+        if self.is_logged_in():
+
+            item = self.get_item(item_id)
+
+            file_urls = []
+
+            for filename in filenames:
+                download_URL = ""
+
+                if 'files' in item:
+                    for f in item['files']:
+                        if 'name' in f:
+                            if f['name'] == filename:
+                                if 'downloadUri' in f:
+                                    download_URL = f['downloadUri']
+                                    break
+                if download_URL == "":
+                    if 'facets' in item:
+                        for facet in item['facets']:
+                            if 'files' in facet:
+                                for f in facet['files']:
+                                    if f['name'] == filename:
+                                        if 'downloadUri' in f:
+                                            download_URL = f['downloadUri']
+                                            break
+
+                file_urls.append(download_URL)
+
+            publish_dict = {
+                "file_urls": file_urls,
+                "filenames": filenames,
+                "bucket": bucket
+            }
+
+            print(self._session.post(self._base_item_url + item_id + "/publishFilesToDremio",
+                                     data=json.dumps(publish_dict)))
+
+        else:
+            print("Please log in before calling publish_files_to_dremio()")
+
+

@@ -37,3 +37,20 @@ def complete_multipart_upload(item_str, upload_id, etag_payload):
         }}
         
     '''
+
+
+def bulk_cloud_download(selected_rows):
+    '''
+    '''
+
+    selected_rows = str(selected_rows).replace("'", "")
+
+    return f'''
+        query {{
+            getS3DownloadUrl(
+                    input: {selected_rows}
+            )
+        }}
+
+    '''
+

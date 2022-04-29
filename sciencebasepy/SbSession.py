@@ -410,6 +410,67 @@ class SbSession:
                 raise Exception('Cloud upload failed for', filename)
         return ret
 
+    def bulk_cloud_download(self, itemid, filenames):
+        """generate bulk cloud download tokens
+
+        :param itemid: ScienceBase Catalog Item ID of the Item
+        :param filename: Filenames of the files to download
+        :return:
+        """
+        ret = None
+        if not self._sbSessionEx.is_logged_in():
+            print(f'{self._username} not logged into Keycloak -- cloud services not available')
+        else:
+            item = self.get_item(itemid)
+            selected_rows = []
+
+            for filename in filenames:
+                cuid = ""
+                key = ""
+                title = ""
+                useForPreview = False
+
+                if 'files' in item:
+                    for f in item['files']:
+                        if 'name' in f:
+                            if f['name'] == filename:
+                                if 'cuid' in f:
+                                    cuid = f['cuid']
+                                if 'key' in f:
+                                    key = f['key']
+                                if 'title' in f:
+                                    title = f['title']
+                                if 'useForPreview' in f:
+                                    useForPreview = f['useForPreview']
+                                break
+
+                if cuid == "":
+                    if 'facets' in item:
+                        for facet in item['facets']:
+                            if 'files' in facet:
+                                for f in facet['files']:
+                                    if f['name'] == filename:
+                                        if 'cuid' in f:
+                                            cuid = f['cuid']
+                                        if 'key' in f:
+                                            key = f['key']
+                                        if 'title' in f:
+                                            title = f['title']
+                                        if 'useForPreview' in f:
+                                            useForPreview = f['useForPreview']
+                                        break
+
+                selected_row = {'cuid': cuid, 'key': key, 'title': title, 'useForPreview': useForPreview}
+
+                selected_rows.append(selected_row)
+
+            response = self._sbSessionEx.bulk_cloud_download(selected_rows)
+            if response:
+                ret = response.json()
+            else:
+                raise Exception('Bulk cloud download failed for ', itemid)
+        return ret
+
     def upload_file_and_create_item(self, parentid, filename, scrape_file=True):
         """Upload a file and create a new Item in ScienceBase
 

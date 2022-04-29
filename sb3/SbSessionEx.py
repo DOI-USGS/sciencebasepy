@@ -142,6 +142,11 @@ class SbSessionEx:
         '''
         return client.upload_cloud_file_upload_session(item_id, filename, mimetype, self)
 
+    def bulk_cloud_download(self, selected_rows):
+        '''generate bulk cloud download tokenized links
+        '''
+        return client.bulk_cloud_download(selected_rows, self)
+
     def get_header(self):
         '''get_header
         '''

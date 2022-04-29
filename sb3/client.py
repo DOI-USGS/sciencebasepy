@@ -147,34 +147,24 @@ def _read_in_chunks(file_object, chunk_size=_CHUNK_SIZE):
 
 def bulk_cloud_download(selected_rows, sb_session_ex):
     query = """
-          getS3DownloadUrl ($input:SaveFileInputs) {
-            getS3DownloadUrl(input: $input) {
-              downloadUri
-            }
-          }
+          query getS3DownloadUrl($input: SaveFileInputs){
+              getS3DownloadUrl(input: $input){
+                downloadUri
+              }
         """
 
-    selected_rows = {'selectedRows': selected_rows}
-
-    query_bulk_download = querys.bulk_cloud_download(selected_rows)
-    print(query_bulk_download)
-
-    #variables = {'input': {'selectedRows': selected_rows}}
+    variables = {"input": {"selectedRows": selected_rows}}
 
     requests_session = requests.session()
 
     sb_resp = requests_session.post(
                 sb_session_ex.get_graphql_url(),
                 headers=sb_session_ex.get_header(),
-                json={'query': query_bulk_download}
+                json={'query': query, 'variables': variables}
             )
 
-    if sb_resp.status_code == 200:
+    if sb_resp.status_code != 200:
         sb_resp_json = sb_resp.json()
-        sb_session_ex.get_logger().info(sb_resp_json)
-    else:
-        sb_resp_json = sb_resp.json()
-        print(sb_resp_json)
         sb_session_ex.get_logger().error(sb_resp_json)
         raise Exception("Not status 200")
 

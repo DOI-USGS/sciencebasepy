@@ -410,14 +410,15 @@ class SbSession:
                 raise Exception('Cloud upload failed for', filename)
         return ret
 
-    def bulk_cloud_download(self, itemid, filenames):
-        """generate bulk cloud download tokens
+    def generate_S3_download_links(self, itemid, filenames):
+        """generate list of bulk cloud file download tokens
 
         :param itemid: ScienceBase Catalog Item ID of the Item
-        :param filename: Filenames of the files to download
-        :return:
+        :param filenames: Filenames of the files to download
+        :return: List of tokenized S3 download links
         """
-        ret = None
+        download_links = []
+
         if not self._sbSessionEx.is_logged_in():
             print(f'{self._username} not logged into Keycloak -- cloud services not available')
         else:
@@ -462,14 +463,32 @@ class SbSession:
 
                 selected_row = {'cuid': cuid, 'key': key, 'title': title, 'useForPreview': useForPreview}
 
+                if cuid is None:
+                    raise Exception('On-premise file detected: ' + filename)
+
                 selected_rows.append(selected_row)
 
             response = self._sbSessionEx.bulk_cloud_download(selected_rows)
             if response:
-                ret = response.json()
+                for uri in response['data']['getS3DownloadUrl']:
+                    download_links.append(uri['downloadUri'])
             else:
-                raise Exception('Bulk cloud download failed for ', itemid)
-        return ret
+                raise Exception('Tokenized S3 link generation failed for ' + itemid)
+        return download_links
+
+    def download_cloud_files(self, filenames, download_links, destination='.'):
+        """download list of ScienceBase files using tokenized S3 download links
+        :param filenames: Filenames of the files to download
+        :param download_links: List of tokenized S3 download links
+        :param destination: Local destination where files are to be downloaded
+        """
+        if len(filenames) != len(download_links):
+            raise Exception('Error: number of filenames not consistent with number of download links')
+
+        for i in range(len(download_links)):
+            filename = filenames[i]
+            link = download_links[i]
+            self.download_file(link, filename, destination)
 
     def upload_file_and_create_item(self, parentid, filename, scrape_file=True):
         """Upload a file and create a new Item in ScienceBase

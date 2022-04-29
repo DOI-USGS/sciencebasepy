@@ -1544,7 +1544,7 @@ class SbSession:
             print("Error retrieving Dremio resource ID")
             return
 
-        encoded_id = urllib.parse.quote(file_id, safe='')
+        encoded_id = urlparse.quote(file_id, safe='')
 
         if not encoded_id:
             print("Error encoding Dremio resource ID")

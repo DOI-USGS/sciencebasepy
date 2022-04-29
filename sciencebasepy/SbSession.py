@@ -1302,19 +1302,29 @@ class SbSession:
         related_item_link = self.get_item_link_type_by_name('related')
         return self.create_item_link(from_item_id, to_item_id, related_item_link['id'])
 
-    def populate_dremio_info_from_XML(self, dremio_username, personal_access_token, base_url, source_XML,
+    def populate_dremio_info_from_XML(self, dremio_username, personal_access_token, dremio_env, source_XML,
                                       is_local_filepath,
                                       target_resource_list):
         """Populate tags and wiki for each resource in Dremio target resource list using source XML metadata
 
         :params dremio_username: user's Dremio username
         :param personal_access_token: user's Dremio personal access token (generate in Dremio console)
-        :param base_url: Dremio base URL
+        :param dremio_env: Dremio environment - can be 'dev' or 'prod'
         :param source_XML: local file path or URL of a source XML metadata file
         :param is_local_filepath: True if source_XML is a local filepath, False if source_XML is a URL
         :param target_resource_list: list of target Dremio resources on which to populate tags and wiki, where
         each target resource is a dictionary with Dremio space, folder, and filename as keys
         """
+        if dremio_env == 'dev':
+            base_url = "https://dremio-dev.chs.usgs.gov"
+
+        elif dremio_env == 'prod':
+            base_url = "https://dremio.chs.usgs.gov"
+
+        else:
+            print("Error in Dremio env name")
+            return
+
         if base_url == "https://dremio-dev.chs.usgs.gov":
             os.environ["DREMIO_HOSTNAME"] = "10.12.67.236"
         elif base_url == "https://dremio.chs.usgs.gov":
@@ -1331,10 +1341,18 @@ class SbSession:
 
         token = dremio_client.auth.basic.login(base_url, dremio_username, personal_access_token)  # get Dremio token
 
+        if not token:
+            print("Error logging in to Dremio")
+            return
+
         if is_local_filepath:
-            xml_file = open(source_XML, "r")
-            data = xml_file.read()
-            xml_file.close()
+            try:
+                with open(source_XML, "r") as xml_file:
+                    data = xml_file.read()
+                    xml_file.close()
+            except IOError:
+                print("Cannot open source XML file")
+
         else:
             req = urllib.request.Request(source_XML)
             try:
@@ -1400,13 +1418,18 @@ class SbSession:
             # get ID of dataset on which to add wiki
             dataset_id = dremio_client.catalog_item(token=token, base_url=base_url, path=path)["id"]
 
+            if not dataset_id:
+                print("Error retrieving Dremio dataset ID for resource: {}/{}/{}".format(space, folder, file))
+                return
+
             # add tags to Dremio dataset
-            dremio_client.model.endpoints.set_collaboration_tags(token=token, base_url=base_url, cid=dataset_id,
-                                                                       tags=keywords_list)
+            print(dremio_client.model.endpoints.set_collaboration_tags(token=token, base_url=base_url, cid=dataset_id,
+                                                                       tags=keywords_list))
 
             # add wiki to Dremio dataset
-            dremio_client.model.endpoints.set_collaboration_wiki(token=token, base_url=base_url, cid=dataset_id,
-                                                                       wiki=wiki_text)
+            print(dremio_client.model.endpoints.set_collaboration_wiki(token=token, base_url=base_url, cid=dataset_id,
+                                                                       wiki=wiki_text))
+
             print("Added tags and wiki to target resource: {}/{}/{}".format(space, folder, file))
 
     def publish_files_to_dremio(self, username, password, item_id, filenames, bucket):
@@ -1458,3 +1481,101 @@ class SbSession:
 
             print(self._session.post(self._base_item_url + item_id + "/publishFilesToDremio",
                                      data=json.dumps(publish_dict)))
+
+    def promote_dremio_resource_to_PDS(self, dremio_username, personal_access_token, dremio_env, source, folder,
+                                       filename, field_delimiter=",", line_delimiter="\n", skip_first_line=False,
+                                       extract_header=True, trim_header=True, autogenerate_column_names=False):
+        """Promote a Dremio file or folder to PDS(s) so that queries can be run on the dataset(s)
+
+        :params dremio_username: user's Dremio username
+        :param personal_access_token: user's Dremio personal access token (generate in Dremio console)
+        :param dremio_env: Dremio environment - can be 'dev' or 'prod'
+        :param source: Dremio source where file is located
+        :param folder: Dremio folder where file is located; use "" empty string if file is not in a folder
+        :param filename: filename of Dremio resource; use "" empty string if promoting a folder
+        :param field_delimiter: file field delimiter - default assumes CSV
+        :param line_delimiter: file line delimiter - default uses newline
+        :param skip_first_line: whether Dremio should skip first line when converting file to PDS; default False
+        :param extract_header: whether Dremio should use the first line of the file as the header; default True
+        :param trim_header: whether Dremio should trim whitespace from header; default True
+        :param autogenerate_column_names: whether Dremio should autogenerate column names for PDS; default False
+        """
+        if dremio_env == 'dev':
+            base_url = "https://dremio-dev.chs.usgs.gov"
+
+        elif dremio_env == 'prod':
+            base_url = "https://dremio.chs.usgs.gov"
+
+        else:
+            print("Error in Dremio env name")
+            return
+
+        if base_url == "https://dremio-dev.chs.usgs.gov":
+            os.environ["DREMIO_HOSTNAME"] = "10.12.67.236"
+
+        elif base_url == "https://dremio.chs.usgs.gov":
+            os.environ["DREMIO_HOSTNAME"] = "10.12.77.162"
+
+        os.environ["DREMIO_AUTH_TYPE"] = "basic"
+        os.environ["DREMIO_AUTH_USERNAME"] = dremio_username
+        os.environ["DREMIO_AUTH_PASSWORD"] = personal_access_token
+        os.environ["DREMIO_AUTH_TIMEOUT"] = "10"
+        os.environ["DREMIO_PORT"] = "9047"
+        os.environ["DREMIO_SSL"] = "False"
+
+        client = dremio_client.init()  # initialise connectivity to Dremio using environment config variables
+
+        token = dremio_client.auth.basic.login(base_url, dremio_username, personal_access_token)  # get Dremio token
+
+        if not token:
+            print("Error logging in to Dremio")
+            return
+
+        if folder == "":
+            file_id = dremio_client.catalog_item(token=token, base_url=base_url, path=[source, filename])['id']
+
+        elif filename == "":
+            file_id = dremio_client.catalog_item(token=token, base_url=base_url, path=[source, folder])['id']
+
+        else:
+            file_id = dremio_client.catalog_item(token=token, base_url=base_url, path=[source, folder, filename])['id']
+
+        if not file_id:
+            print("Error retrieving Dremio resource ID")
+            return
+
+        encoded_id = urllib.parse.quote(file_id, safe='')
+
+        if not encoded_id:
+            print("Error encoding Dremio resource ID")
+            return
+
+        params = {
+            "entityType": "dataset",
+            "id": file_id,
+            "path": [source,
+                     folder,
+                     filename],
+
+            "type": "PHYSICAL_DATASET",
+            "format": {
+                "type": "Text",
+                "fieldDelimiter": field_delimiter,
+                "lineDelimiter": line_delimiter,
+                "escape": "\"",
+                "skipFirstLine": skip_first_line,
+                "extractHeader": extract_header,
+                "trimHeader": trim_header,
+                "autoGenerateColumnNames": autogenerate_column_names
+            }
+        }
+
+        if folder == "":
+            params["path"] = [source, filename]
+
+        if filename == "":
+            params["path"] = [source, folder]
+
+        client = init()
+        print(client.simple().promote_catalog(cid=encoded_id, json=params))
+        print("Promoted resource {}/{}/{} to PDS".format(source, folder, filename))

@@ -124,6 +124,12 @@ dictionaries containing url, name and size of each file.
 Download an individual file.  Destination defaults to the current directory.  If specified,
 the destination folder must exist.
 
+* `generate_S3_download_links(itemid, filenames)`
+Generates a list of tokenized S3 download links for files in the ScienceBase S3 standard bucket or public bucket (does not work for on-premise files).
+
+* `download_cloud_files(filenames, download_links, destination)`
+Downloads a list of ScienceBase S3 files using tokenized S3 download links.  Destination defaults to the current directory.  If specified, the destination folder must exist.
+
 ### Update
 Note: When uploading associated files, such as the various files making up a shapefile, or a 
 raster and its associated SLD, be sure to upload them with a single call to one of the `upload_files*` methods.

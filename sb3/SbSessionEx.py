@@ -147,6 +147,11 @@ class SbSessionEx:
         '''
         return client.bulk_cloud_download(selected_rows, self)
 
+    def unpublish_from_public_bucket(self, input):
+        '''unpublish file from public S3 bucket
+        '''
+        return client.unpublish_from_public_bucket(input, self)
+
     def get_header(self):
         '''get_header
         '''

@@ -169,3 +169,32 @@ def bulk_cloud_download(selected_rows, sb_session_ex):
         raise Exception("Not status 200")
 
     return sb_resp.json()
+
+
+def unpublish_from_public_bucket(input, sb_session_ex):
+    query = """
+                mutation unpublishFile($input: UnpublishFileInput!){
+                    unpublishFile(input: $input){
+                      itemFile {
+                        key
+                      }
+                    }
+                }
+            """
+
+    variables = {"input": input}
+
+    requests_session = requests.session()
+
+    sb_resp = requests_session.post(
+        sb_session_ex.get_graphql_url(),
+        headers=sb_session_ex.get_header(),
+        json={'query': query, 'variables': variables}
+    )
+
+    if sb_resp.status_code != 200:
+        sb_resp_json = sb_resp.json()
+        sb_session_ex.get_logger().error(sb_resp_json)
+        raise Exception("Not status 200")
+
+    return sb_resp.json()

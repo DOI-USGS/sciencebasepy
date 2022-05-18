@@ -1227,6 +1227,101 @@ class SbSession:
         """
         return self._session.post(self._base_item_url + item_id + "/publishFilesToS3")
 
+    def publish_array_to_public_bucket(self, item_id, filenames):
+        """
+            this should publish a list of files from an item to the public s3 publish bucket
+        """
+        for filename in filenames:
+            item = self.get_item(item_id)
+            pathOnDisk = ""
+            cuid = ""
+
+            if 'files' in item:
+                for f in item['files']:
+                    if 'name' in f:
+                        if f['name'] == filename:
+                            if 'pathOnDisk' in f:
+                                pathOnDisk = f['pathOnDisk']
+                            if 'cuid' in f:
+                                cuid = f['cuid']
+                            break
+            if pathOnDisk == "":
+                if 'facets' in item:
+                    for facet in item['facets']:
+                        if 'files' in facet:
+                            for f in facet['files']:
+                                if f['name'] == filename:
+                                    if 'pathOnDisk' in f:
+                                        pathOnDisk = f['pathOnDisk']
+                                    if 'cuid' in f:
+                                        cuid = f['cuid']
+                                    break
+
+            publishDict = {
+                "filename": filename,
+                "actionValue": "publish",
+                "cuid": cuid,
+                "pathOnDisk": pathOnDisk
+            }
+
+            response = self._session.post(self._base_item_url + item_id + "/publishSingleFileToS3",
+                                          data=json.dumps(publishDict))
+            print(response)
+
+            if response:
+                print("Successfully published filename " + filename + " to public S3 bucket")
+            else:
+                print("Failed to publish file " + filename + " to public S3 bucket")
+
+
+
+    def unpublish_array_from_public_bucket(self, item_id, filenames):
+        """
+            this should unpublish a list of files on an item from the public s3 publish bucket
+        """
+        if not self._sbSessionEx.is_logged_in():
+            print(f'{self._username} not logged into Keycloak -- cloud services not available')
+        else:
+            item = self.get_item(item_id)
+
+            for filename in filenames:
+                cuid = ""
+                key = ""
+
+                if 'files' in item:
+                    for f in item['files']:
+                        if 'name' in f:
+                            if f['name'] == filename:
+                                if 'cuid' in f:
+                                    cuid = f['cuid']
+                                if 'key' in f:
+                                    key = f['key']
+                                break
+
+                if cuid == "":
+                    if 'facets' in item:
+                        for facet in item['facets']:
+                            if 'files' in facet:
+                                for f in facet['files']:
+                                    if f['name'] == filename:
+                                        if 'cuid' in f:
+                                            cuid = f['cuid']
+                                        if 'key' in f:
+                                            key = f['key']
+                                        break
+
+                if cuid is None:
+                    cuid = ""
+
+                input = {"cuid": cuid, "key": key}
+
+                response = self._sbSessionEx.unpublish_from_public_bucket(input)
+
+                if response:
+                    print("Successfully unpublished filename " + filename + " from public S3 bucket")
+                else:
+                    print("Failed to unpublish file " + filename + " from public S3 bucket")
+
     def publish_item(self, item_id):
         """Publish the item, adding PUBLIC read permissions. User must be USGS or in the publisher role.
         :param item_id: The ID of the ScienceBase item

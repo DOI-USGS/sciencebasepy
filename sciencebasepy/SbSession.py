@@ -1228,8 +1228,10 @@ class SbSession:
         return self._session.post(self._base_item_url + item_id + "/publishFilesToS3")
 
     def publish_array_to_public_bucket(self, item_id, filenames):
-        """
-            this should publish a list of files from an item to the public s3 publish bucket
+        """ publish a list of files on an item to the public s3 publish bucket
+
+        :param item_id: The ID of the ScienceBase item
+        :param filenames: a list of filenames to be published
         """
         for filename in filenames:
             item = self.get_item(item_id)
@@ -1276,8 +1278,10 @@ class SbSession:
 
 
     def unpublish_array_from_public_bucket(self, item_id, filenames):
-        """
-            this should unpublish a list of files on an item from the public s3 publish bucket
+        """unpublish a list of files on an item from the public s3 publish bucket
+
+        :param item_id: The ID of the ScienceBase item
+        :param filenames: a list of filenames to be unpublished
         """
         if not self._sbSessionEx.is_logged_in():
             print(f'{self._username} not logged into Keycloak -- cloud services not available')

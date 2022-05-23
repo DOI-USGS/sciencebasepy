@@ -173,6 +173,12 @@ to attach it to an Item, the pathOnDisk must be added to an Item files entry, or
 * `add_extent(item_id, feature_geojson)`
 Add features to the item footprint from Feature or FeatureCollection geojson.
 
+* `publish_array_to_public_bucket(item_id, filenames)`
+Publish a list of files on an item to the public S3 publish bucket.
+
+* `unpublish_array_from_public_bucket(item_id, filenames)`
+Unpublish a list of files on an item from the public S3 publish bucket.
+
 ### Item Permissions
 * `get_permissions(item_id)`
 Get permission JSON for the item identified by item_id.

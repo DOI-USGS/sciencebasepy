@@ -10,4 +10,4 @@ settings.json
 *.gz
 sciencebasepy.egg-info/
 dist/
-
+.vscode/

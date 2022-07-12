@@ -151,6 +151,7 @@ def bulk_cloud_download(selected_rows, sb_session_ex):
               getS3DownloadUrl(input: $input){
                 downloadUri
               }
+          }
         """
 
     variables = {"input": {"selectedRows": selected_rows}}

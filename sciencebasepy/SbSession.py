@@ -1338,6 +1338,8 @@ class SbSession:
         else:
             is_published = False
 
+            item = self.get_item(item_id)
+
             if 'files' in item:
                 for f in item['files']:
                     if 'name' in f:
@@ -1367,12 +1369,9 @@ class SbSession:
 
                 start_spatial_service_url = "https://rwxatj0usl.execute-api.us-west-2.amazonaws.com/prod/startSpatialService"
 
-                response = self._session.post(start_spatial_service_url, json=params)
+                self._session.post(start_spatial_service_url, json=params)
 
-                if response:
-                    print("Triggered spatial service creation in ArcGIS Online.")
-                else:
-                    print("Error triggering spatial service creation.")
+                print("Triggered spatial service creation in ArcGIS Online.")
 
     def publish_item(self, item_id):
         """Publish the item, adding PUBLIC read permissions. User must be USGS or in the publisher role.

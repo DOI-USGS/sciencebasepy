@@ -1365,9 +1365,9 @@ class SbSession:
                     "email": self._username
                 }
 
-                start_spatial_service_lambda_url = ""
+                start_spatial_service_url = "https://rwxatj0usl.execute-api.us-west-2.amazonaws.com/prod/startSpatialService"
 
-                response = self._session.post(start_spatial_service_lambda_url, json=params)
+                response = self._session.post(start_spatial_service_url, json=params)
 
                 if response:
                     print("Triggered spatial service creation in ArcGIS Online.")

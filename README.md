@@ -173,6 +173,9 @@ to attach it to an Item, the pathOnDisk must be added to an Item files entry, or
 * `add_extent(item_id, feature_geojson)`
 Add features to the item footprint from Feature or FeatureCollection geojson.
 
+* `start_spatial_service(item_id, filename)`
+Creates a spatial service on a published ScienceBase service definition (.sd) file in ArcGIS Online.
+
 * `publish_array_to_public_bucket(item_id, filenames)`
 Publish a list of files on an item to the public S3 publish bucket.
 

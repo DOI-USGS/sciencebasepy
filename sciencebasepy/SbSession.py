@@ -1326,6 +1326,53 @@ class SbSession:
                 else:
                     print("Failed to unpublish file " + filename + " from public S3 bucket")
 
+    def start_spatial_service(self, item_id, filename):
+        """Creates a spatial service on a ScienceBase service definition (.sd) file in ArcGIS Online.
+        The service definition file must have been published to the public ScienceBase S3 bucket.
+        User will receive an email notification when process is complete.
+               :param item_id: The ID of the ScienceBase item
+               :param filename: The filename of the .sd file (only works for files in the public S3 bucket)
+        """
+        if not self.is_logged_in():
+            print("Please log in and retry.")
+        else:
+            is_published = False
+
+            item = self.get_item(item_id)
+
+            if 'files' in item:
+                for f in item['files']:
+                    if 'name' in f:
+                        if f['name'] == filename:
+                            if 'publishedS3Uri' in f:
+                                is_published = True
+                                break
+            if not is_published:
+                if 'facets' in item:
+                    for facet in item['facets']:
+                        if 'files' in facet:
+                            for f in facet['files']:
+                                if f['name'] == filename:
+                                    if 'publishedS3Uri' in f:
+                                        is_published = True
+
+            if not is_published:
+                print("Error: the .sd file has not been published to the public S3 bucket. Please publish it and retry.")
+
+            else:
+                params = {
+                    "filename": filename,
+                    "item_id": item_id,
+                    "queue_name": "publish_sd_to_agol",
+                    "email": self._username
+                }
+
+                start_spatial_service_url = "https://rwxatj0usl.execute-api.us-west-2.amazonaws.com/prod/startSpatialService"
+
+                self._session.post(start_spatial_service_url, json=params)
+
+                print("Triggered spatial service creation in ArcGIS Online.")
+
     def publish_item(self, item_id):
         """Publish the item, adding PUBLIC read permissions. User must be USGS or in the publisher role.
         :param item_id: The ID of the ScienceBase item

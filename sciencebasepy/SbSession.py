@@ -12,6 +12,7 @@ import os
 import getpass
 import mimetypes
 import requests
+import hashlib
 
 from pkg_resources import get_distribution
 from pkg_resources import DistributionNotFound
@@ -529,19 +530,38 @@ class SbSession:
         :return: The ScienceBase Catalog Item JSON of the updated Item
         """
         url = self._base_upload_file_url
+
+        checksums = []
         files = []
+        params = []
+
         for filename in filenames:
             if isinstance(filename, str):
                 if (os.access(filename, os.F_OK)):
                     files.append(('file', open(filename, 'rb')))
+                    with open(filename, "rb") as f:
+                        file_hash = hashlib.md5()
+                        chunk = f.read(8192)
+                        while chunk:
+                            file_hash.update(chunk)
+                            chunk = f.read(8192)
+                    checksums.append(file_hash.hexdigest())  
                 else:
                     raise Exception("File not found: " + filename)
             else:
                 files.append(('file', filename))
+
         data = {'item': json.dumps(item)}
         params = {} if scrape_file is True else {'scrapeFile':'false'}
         if 'id' in item and item['id']:
             data['id'] = item['id']
+            url = '{0}?id={1}&'.format(self._base_upload_file_url, item['id'])
+        else:
+            url = '{0}?'.format(self._base_upload_file_url)
+
+        for i, checksum in enumerate(checksums):
+            url += 'md5Checksum={0}'.format(checksum) if i == 0 else '&md5Checksum={0}'.format(checksum)
+
         ret = self._session.post(url, params=params, files=files, data=data)
         return self._get_json(ret)
 

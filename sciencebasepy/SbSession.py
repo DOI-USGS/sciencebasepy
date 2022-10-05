@@ -582,7 +582,6 @@ class SbSession:
             raise Exception("File not found: " + filename)
         return retval
 
-
     def replace_file(self, filename, item):
         """Replace a file on a ScienceBase Item.  This method will replace all files named
         the same as the new file, whether they are in the files list or on a facet.

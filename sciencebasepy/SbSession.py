@@ -530,22 +530,14 @@ class SbSession:
         :return: The ScienceBase Catalog Item JSON of the updated Item
         """
         url = self._base_upload_file_url
-
         checksums = []
         files = []
         params = []
-
         for filename in filenames:
             if isinstance(filename, str):
                 if (os.access(filename, os.F_OK)):
                     files.append(('file', open(filename, 'rb')))
-                    with open(filename, "rb") as f:
-                        file_hash = hashlib.md5()
-                        chunk = f.read(8192)
-                        while chunk:
-                            file_hash.update(chunk)
-                            chunk = f.read(8192)
-                    checksums.append(file_hash.hexdigest())  
+                    checksums.append(self.get_file_checksum(filename))  
                 else:
                     raise Exception("File not found: " + filename)
             else:
@@ -578,18 +570,18 @@ class SbSession:
         url = self._base_upload_file_temp_url
 
         if os.access(filename, os.F_OK):
-            #
             # if no mimetype was sent in, try to guess
-            #
             if mimetype is None:
                 mimetype = self._guess_mimetype(filename)
             fname = os.path.basename(filename)
+            checksum = self.get_file_checksum(filename)
             with open(filename, 'rb') as f:
-                ret = self._session.post(url, files=[('files[]', (fname, f, mimetype))])
+                ret = self._session.post(url, params={'md5Checksum': checksum}, files=[('files[]', (fname, f, mimetype))])
                 retval = self._get_json(ret)
         else:
             raise Exception("File not found: " + filename)
         return retval
+
 
     def replace_file(self, filename, item):
         """Replace a file on a ScienceBase Item.  This method will replace all files named
@@ -644,7 +636,22 @@ class SbSession:
         itemfile['pathOnDisk'] = upld_json[0]['fileKey']
         itemfile['dateUploaded'] = upld_json[0]['dateUploaded']
         itemfile['uploadedBy'] = upld_json[0]['uploadedBy']
+        itemfile['checksum']= {'value': self.get_file_checksum(filename), 'type': 'MD5'}
+
         return itemfile
+
+    def get_file_checksum(self, filename):
+        """Get checksum value for a file (md5 Checksum from hashlib package)
+        
+        :param filename: File to get checksum on
+        """
+        with open(filename, 'rb') as f:
+            file_hash = hashlib.md5()
+            chunk = f.read(8192)
+            while chunk:
+                file_hash.update(chunk)
+                chunk = f.read(8192)
+            return file_hash.hexdigest()
 
     def delete_file(self, sb_filename, item):
         """Delete a file on a ScienceBase Item.  This method will delete all files with the provided

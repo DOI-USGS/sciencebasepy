@@ -148,6 +148,9 @@ Updates an existing ScienceBase Item's Hidden Property.
 Upload a file to an existing ScienceBase item. Add the parameter `scrape_file=False` to bypass ScienceBase 
 metadata processing.
 
+* `upload_s3_file(itemid, s3_path)`
+Upload a file from an external S3 bucket to an existing Item in ScienceBase.
+
 * `upload_cloud_file_to_item(item_id, filename)`
 Upload a file to cloud storage on an existing Item in ScienceBase. NOTE: While the Item JSON is returned by this method, it
 does take some time to process files uploaded to cloud storage, so the return JSON may not include the new file.

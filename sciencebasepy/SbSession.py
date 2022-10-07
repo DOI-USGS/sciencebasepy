@@ -391,6 +391,39 @@ class SbSession:
         """
         return self.upload_files_and_update_item(item, [filename], scrape_file)
 
+    def upload_s3_file(self, itemid, s3_path):
+        """Upload a file from an external S3 bucket to an existing Item in ScienceBase
+
+        :param itemid: ScienceBase Catalog Item ID of the item to update
+        :param s3_path: External S3 bucket path, e.g. s3://mys3bucket/12
+        """
+        if not self.is_logged_in():
+            print("Please log in and retry.")
+        else:
+            try:
+                self.get_item(itemid)
+
+                path = s3_path.split("://")[1]
+                bucket = path.split("/")[0]
+                key = path.split("/")[1]
+                filename = key.split("/")[-1]
+
+                params = {
+                    "filename": filename,
+                    "item_id": itemid,
+                    "bucket": bucket,
+                    "key": key
+                }
+
+                upload_s3_file_sciencebasepy_lambda_url = ""
+
+                self._session.post(upload_s3_file_sciencebasepy_lambda_url, json=params)
+
+                print("Triggered upload of S3 file to ScienceBase item.")
+
+            except Exception:
+                print("Error uploading S3 file to ScienceBase item.")
+
     def upload_cloud_file_to_item(self, itemid, filename):
         """Upload a file to cloud storage on an existing Item in ScienceBase
 

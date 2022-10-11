@@ -1438,7 +1438,7 @@ class SbSession:
                     "agol_id_2": agol_id_2
                 }
 
-                stop_spatial_service_url = ""
+                stop_spatial_service_url = "https://qk9hqzs5yf.execute-api.us-west-2.amazonaws.com/prod/stopSpatialService"
 
                 self._session.post(stop_spatial_service_url, json=params)
 

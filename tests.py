@@ -80,6 +80,7 @@ class TestsciencebasepyMethods(unittest.TestCase):
         sb.delete_item(item)
         self.assertIsNotNone(item)
         self.assertIsNotNone(item['files'])
+        self.assertIsNotNone(item['files'][0]['checksum'])
         self.assertFalse('facets' in item)
 
     def test_upload_shapefile_individual_no_scrape(self):
@@ -96,6 +97,7 @@ class TestsciencebasepyMethods(unittest.TestCase):
         sb.delete_item(item)
         self.assertIsNotNone(item)
         self.assertIsNotNone(item['files'])
+        self.assertIsNotNone(item['files'][0]['checksum'])
         self.assertFalse('facets' in item)
 
     def test_add_delete_user_acl(self):

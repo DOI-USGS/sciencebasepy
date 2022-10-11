@@ -555,7 +555,7 @@ class SbSession:
             url += 'md5Checksum={0}'.format(checksum) if i == 0 else '&md5Checksum={0}'.format(checksum)
 
         ret = self._session.post(url, params=params, files=files, data=data)
-        # Clean up any open files
+        # Close any open files
         for f in files:
             f[1].close()
         return self._get_json(ret)

@@ -147,6 +147,11 @@ class SbSessionEx:
         '''
         return client.bulk_cloud_download(selected_rows, self)
 
+    def upload_s3_files(self, input):
+        '''upload external S3 bucket files to ScienceBase Item
+        '''
+        return client.upload_s3_files(input, self)
+
     def unpublish_from_public_bucket(self, input):
         '''unpublish file from public S3 bucket
         '''

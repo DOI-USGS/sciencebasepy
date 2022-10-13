@@ -1424,6 +1424,48 @@ class SbSession:
 
                 print("Triggered spatial service creation in ArcGIS Online.")
 
+    def stop_spatial_service(self, item_id, filename):
+        """Stops a spatial service that had been published on a ScienceBase service definition (.sd) file in ArcGIS Online.
+               :param item_id: The ID of the ScienceBase item
+               :param filename: The filename of the .sd file in ScienceBase on which the ArcGIS Online spatial service had been published
+        """
+        if not self.is_logged_in():
+            print("Please log in and retry.")
+        else:
+            found_agol_facet = False
+
+            item = self.get_item(item_id)
+
+            if 'facets' in item:
+                for facet in item['facets']:
+                    if 'files' in facet:
+                        for f in facet['files']:
+                            if f['name'] == filename:
+                                if facet['serverType'] == 'AGOL_Feature_Server' or facet['serverType'] == 'AGOL_WMTS_Server':
+                                    if 'enabledServices' in facet:
+                                        if len(facet['enabledServices']) == 2:
+                                            agol_id_1 = facet['enabledServices'][0]
+                                            agol_id_2 = facet['enabledServices'][1]
+                                            found_agol_facet = True
+
+            if not found_agol_facet:
+                print(
+                    "Error: the .sd file has not been published to ArcGIS Online from ScienceBase, or there was an error when publishing. Please publish the .sd to ArcGIS Online using start_spatial_service() before attempting to stop the service.")
+
+            else:
+                params = {
+                    "filename": filename,
+                    "item_id": item_id,
+                    "agol_id_1": agol_id_1,
+                    "agol_id_2": agol_id_2
+                }
+
+                stop_spatial_service_url = "https://qk9hqzs5yf.execute-api.us-west-2.amazonaws.com/prod/stopSpatialService"
+
+                self._session.post(stop_spatial_service_url, json=params)
+
+                print("Triggered deletion of spatial service in ArcGIS Online.")
+
     def publish_item(self, item_id):
         """Publish the item, adding PUBLIC read permissions. User must be USGS or in the publisher role.
         :param item_id: The ID of the ScienceBase item

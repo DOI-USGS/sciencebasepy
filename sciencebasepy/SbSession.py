@@ -392,6 +392,30 @@ class SbSession:
         """
         return self.upload_files_and_update_item(item, [filename], scrape_file)
 
+    def upload_s3_files(self, itemid, s3_path, filenames):
+        """Upload a list of files from an external S3 bucket to an existing Item in ScienceBase
+
+        :param itemid: ScienceBase Catalog Item ID of the item to update
+        :param s3_path: External S3 bucket path, e.g. s3://mys3bucket/12 where files to be uploaded are located
+        :param filenames: List of filenames in external S3 bucket, located under s3_path, to be uploaded to Item
+        """
+        if not self._sbSessionEx.is_logged_in():
+            print(f'{self._username} not logged into Keycloak -- cloud services not available')
+        else:
+            try:
+                self.get_item(itemid)
+
+                input = {"filelist": filenames, "id": itemid, "key": s3_path}
+
+                response = self._sbSessionEx.upload_s3_files(input)
+
+                if response:
+                    print("Triggered upload of S3 files to ScienceBase Item")
+                else:
+                    print("Error uploading S3 files to ScienceBase Item")
+            except Exception:
+                print("Error triggering upload of S3 files to ScienceBase Item")
+
     def upload_cloud_file_to_item(self, itemid, filename):
         """Upload a file to cloud storage on an existing Item in ScienceBase
 
@@ -1303,8 +1327,6 @@ class SbSession:
                 print("Successfully published filename " + filename + " to public S3 bucket")
             else:
                 print("Failed to publish file " + filename + " to public S3 bucket")
-
-
 
     def unpublish_array_from_public_bucket(self, item_id, filenames):
         """unpublish a list of files on an item from the public s3 publish bucket

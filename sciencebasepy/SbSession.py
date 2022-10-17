@@ -1462,8 +1462,6 @@ class SbSession:
                     "email": self._username
                 }
 
-                print(params)
-
                 stop_spatial_service_url = "https://qk9hqzs5yf.execute-api.us-west-2.amazonaws.com/prod/stopSpatialService"
 
                 self._session.post(stop_spatial_service_url, json=params)

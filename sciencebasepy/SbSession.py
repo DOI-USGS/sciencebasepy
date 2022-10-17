@@ -1424,6 +1424,7 @@ class SbSession:
                                         if len(facet['enabledServices']) == 2:
                                             agol_id_1 = facet['enabledServices'][0]
                                             agol_id_2 = facet['enabledServices'][1]
+                                            file_path_used = facet['filePathUsed']
                                             found_agol_facet = True
 
             if not found_agol_facet:
@@ -1432,11 +1433,14 @@ class SbSession:
 
             else:
                 params = {
-                    "filename": filename,
+                    "filename": file_path_used,
                     "item_id": item_id,
                     "agol_id_1": agol_id_1,
-                    "agol_id_2": agol_id_2
+                    "agol_id_2": agol_id_2,
+                    "email": self._username
                 }
+
+                print(params)
 
                 stop_spatial_service_url = "https://qk9hqzs5yf.execute-api.us-west-2.amazonaws.com/prod/stopSpatialService"
 

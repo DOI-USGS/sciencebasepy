@@ -1335,6 +1335,7 @@ class SbSession:
         """
         if not self.is_logged_in():
             print("Please log in and retry.")
+            return False
         else:
             is_published = False
 
@@ -1358,6 +1359,7 @@ class SbSession:
 
             if not is_published:
                 print("Error: the .sd file has not been published to the public S3 bucket. Please publish it and retry.")
+                return False
 
             else:
                 params = {
@@ -1372,6 +1374,7 @@ class SbSession:
                 self._session.post(start_spatial_service_url, json=params)
 
                 print("Triggered spatial service creation in ArcGIS Online.")
+                return True
 
     def publish_item(self, item_id):
         """Publish the item, adding PUBLIC read permissions. User must be USGS or in the publisher role.

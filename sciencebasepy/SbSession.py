@@ -1431,42 +1431,47 @@ class SbSession:
         """
         if not self.is_logged_in():
             print("Please log in and retry.")
+            return False
         else:
-            found_agol_facet = False
+            try:
+                item = self.get_item(item_id)
 
-            item = self.get_item(item_id)
+                if 'facets' in item:
+                    for facet in item['facets']:
+                        if 'files' in facet:
+                            for f in facet['files']:
+                                if f['name'] == filename:
+                                    if facet['serverType'] == 'AGOL_Feature_Server' or facet['serverType'] == 'AGOL_WMTS_Server':
+                                        if 'enabledServices' in facet:
+                                            if len(facet['enabledServices']) == 2:
+                                                agol_id_1 = facet['enabledServices'][0]
+                                                agol_id_2 = facet['enabledServices'][1]
+                                                file_path_used = facet['filePathUsed']
+                                                params = {
+                                                    "filename": file_path_used,
+                                                    "item_id": item_id,
+                                                    "agol_id_1": agol_id_1,
+                                                    "agol_id_2": agol_id_2,
+                                                    "email": self._username
+                                                }
+                                                stop_spatial_service_url = "https://qk9hqzs5yf.execute-api.us-west-2.amazonaws.com/prod/stopSpatialService"
+                                                self._session.post(stop_spatial_service_url, json=params)
+                                                print("Triggered deletion of spatial service in ArcGIS Online.")
+                                                return True
 
-            if 'facets' in item:
-                for facet in item['facets']:
-                    if 'files' in facet:
-                        for f in facet['files']:
-                            if f['name'] == filename:
-                                if facet['serverType'] == 'AGOL_Feature_Server' or facet['serverType'] == 'AGOL_WMTS_Server':
-                                    if 'enabledServices' in facet:
-                                        if len(facet['enabledServices']) == 2:
-                                            agol_id_1 = facet['enabledServices'][0]
-                                            agol_id_2 = facet['enabledServices'][1]
-                                            file_path_used = facet['filePathUsed']
-                                            found_agol_facet = True
+                                    elif facet['servicePath'] != '' and facet['serviceId'] != '' and facet['processingState'] == 'success':
+                                        payload = {'operation': 'delete'}
+                                        url = "https://www.sciencebase.gov/catalog/item/createProcessJob/" + item_id
+                                        self._session.get(url, params=payload)
+                                        print("Triggered deletion of spatial service from ScienceBase ArcGIS Server instance.")
+                                        return True
 
-            if not found_agol_facet:
-                print(
-                    "Error: the .sd file has not been published to ArcGIS Online from ScienceBase, or there was an error when publishing. Please publish the .sd to ArcGIS Online using start_spatial_service() before attempting to stop the service.")
+                print("Error: published ArcGIS service not found. Please publish the service before attempting to delete it.")
+                return False
 
-            else:
-                params = {
-                    "filename": file_path_used,
-                    "item_id": item_id,
-                    "agol_id_1": agol_id_1,
-                    "agol_id_2": agol_id_2,
-                    "email": self._username
-                }
-
-                stop_spatial_service_url = "https://qk9hqzs5yf.execute-api.us-west-2.amazonaws.com/prod/stopSpatialService"
-
-                self._session.post(stop_spatial_service_url, json=params)
-
-                print("Triggered deletion of spatial service in ArcGIS Online.")
+            except Exception as e:
+                print("Error: " + repr(e))
+                return False
 
     def publish_item(self, item_id):
         """Publish the item, adding PUBLIC read permissions. User must be USGS or in the publisher role.

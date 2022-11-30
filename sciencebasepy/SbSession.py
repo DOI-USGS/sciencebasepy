@@ -1366,7 +1366,8 @@ class SbSession:
                     "filename": filename,
                     "item_id": item_id,
                     "queue_name": "publish_sd_to_agol",
-                    "email": self._username
+                    "email": self._username,
+                    "type": "single"
                 }
 
                 start_spatial_service_url = "https://rwxatj0usl.execute-api.us-west-2.amazonaws.com/prod/startSpatialService"

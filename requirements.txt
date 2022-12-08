@@ -4,7 +4,7 @@ attrs==20.2.0
 black==20.8b1
 boto3==1.16.9
 botocore==1.19.9
-certifi==2020.6.20
+certifi==2022.12.7
 chardet==3.0.4
 click==7.1.2
 colorama==0.4.4

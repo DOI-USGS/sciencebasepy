@@ -152,6 +152,11 @@ class SbSessionEx:
         '''
         return client.upload_s3_files(input, self)
 
+    def publish_to_public_bucket(self, input):
+        '''publish file from public S3 bucket
+        '''
+        return client.publish_to_public_bucket(input, self)
+
     def unpublish_from_public_bucket(self, input):
         '''unpublish file from public S3 bucket
         '''

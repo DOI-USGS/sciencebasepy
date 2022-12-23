@@ -1326,7 +1326,7 @@ class SbSession:
                 else:
                     print("Failed to unpublish file " + filename + " from public S3 bucket")
 
-    def start_spatial_service(self, item_id, filename):
+    def start_esri_service(self, item_id, filename):
         """Creates a spatial service on a ScienceBase service definition (.sd) file in ArcGIS Online.
         The service definition file must have been published to the public ScienceBase S3 bucket.
         User will receive an email notification when process is complete.

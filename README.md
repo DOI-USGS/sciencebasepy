@@ -179,7 +179,7 @@ Add features to the item footprint from Feature or FeatureCollection geojson.
 * `start_spatial_service(item_id, filename)`
 Creates a spatial service on a published ScienceBase service definition (.sd) file in ArcGIS Online.
 
-* `stop_spatial_service(item_id, filename)`
+* `stop_esri_service(item_id, filename)`
 Stops a spatial service that had been published on a ScienceBase service definition (.sd) file in ArcGIS Online or ArcGIS Server.
 
 * `publish_array_to_public_bucket(item_id, filenames)`

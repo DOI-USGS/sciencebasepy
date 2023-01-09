@@ -1454,14 +1454,20 @@ class SbSession:
                                                     "agol_id_2": agol_id_2,
                                                     "email": self._username
                                                 }
-                                                stop_spatial_service_url = "https://qk9hqzs5yf.execute-api.us-west-2.amazonaws.com/prod/stopSpatialService"
+                                                if self._env == 'beta' or self._env == 'dev':
+                                                    stop_spatial_service_url = "https://02j686fjyf.execute-api.us-west-2.amazonaws.com/prod/stopSpatialService"
+                                                else:
+                                                    stop_spatial_service_url = "https://qk9hqzs5yf.execute-api.us-west-2.amazonaws.com/prod/stopSpatialService"
                                                 self._session.post(stop_spatial_service_url, json=params)
                                                 print("Triggered deletion of spatial service in ArcGIS Online.")
                                                 return True
 
                                     elif facet['servicePath'] != '' and facet['serviceId'] != '' and facet['processingState'] == 'success':
                                         payload = {'operation': 'delete'}
-                                        url = "https://www.sciencebase.gov/catalog/item/createProcessJob/" + item_id
+                                        if self._env == 'beta' or self._env == 'dev':
+                                            url = "https://beta.sciencebase.gov/catalog/item/createProcessJob/" + item_id
+                                        else:
+                                            url = "https://www.sciencebase.gov/catalog/item/createProcessJob/" + item_id
                                         self._session.get(url, params=payload)
                                         print("Triggered deletion of spatial service from ScienceBase ArcGIS Server instance.")
                                         return True

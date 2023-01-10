@@ -1,11 +1,12 @@
 Python ScienceBase Utilities
 ============================
-This Python module provides some basic services for interacting with ScienceBase.  It requires the "requests"
-module to be installed, which can be found at
-[http://docs.python-requests.org/en/latest/](http://docs.python-requests.org/en/latest/).
-If you get security errors also install requests[security]
+This Python module provides fuctionality for interacting with the USGS ScienceBase platform. 
+https://www.sciencebase.gov/catalog/
 
-As of version 2.0.0, Python 2.x is no longer supported.
+It requires the 'requests' module to be installed, which can be found at 
+http://docs.python-requests.org/en/latest/. If you get security errors also install requests[security]. 
+
+As of version 2.0.0, Python 2.x is no longer supported."
 
 Quick Start
 -----------
@@ -19,9 +20,9 @@ in `demo.py`.
 
 There are several iPython notebooks in this repository with example code. For more in-depth information and 
 examples on searching, see 
-[Searching ScienceBase with ScienceBasePy.ipynb](https://github.com/usgs/sciencebasepy/blob/master/Searching%20ScienceBase%20with%20ScienceBasePy.ipynb).
+[Searching ScienceBase with ScienceBasePy.ipynb](https://code.usgs.gov/sas/sdm/sciencebasepy/-/blob/master/Searching%20ScienceBase%20with%20ScienceBasePy.ipynb).
 For batch processing, see 
-[Batch Processing.ipynb](https://github.com/usgs/sciencebasepy/blob/master/Batch%20Processing.ipynb).
+[Batch Processing.ipynb](https://code.usgs.gov/sas/sdm/sciencebasepy/-/blob/master/Batch%20Processing.ipynb).
 
 Module Contents
 ---------------
@@ -56,7 +57,7 @@ and services will not be created.
 
 * `create_item(item_dict)`
 Create a new ScienceBase item.  Documentation on the sbJSON format can be found at
-https://my.usgs.gov/confluence/display/sciencebase/ScienceBase+Item+Core+Model
+https://doimspp.sharepoint.com/sites/usgs-sdm-apps/ScienceBaseProjectDocumentation/SitePages/ScienceBase-Item-Core-Model.aspx
 
 * `create_items(item_dict_list)`
 Create multiple new Items in ScienceBase. item_dict_list: list of item_dict objects representing the ScienceBase Catalog items to create.

@@ -2,7 +2,7 @@
   {
     "name": "sciencebasepy: A Python library for programmatic interaction with the USGS ScienceBase platform",
     "organization": "U.S. Geological Survey",
-    "description": "This Python module provides fuctionality for interacting with ScienceBase. It requires the 'requests' module to be installed, which can be found at http://docs.python-requests.org/en/latest/. If you get security errors also install requests[security]. As of version 2.0.0, Python 2.x is no longer supported.",
+    "description": "This Python module provides functionality for interacting with ScienceBase. It requires the 'requests' module to be installed, which can be found at http://docs.python-requests.org/en/latest/. If you get security errors also install requests[security]. As of version 2.0.0, Python 2.x is no longer supported.",
     "version": "v2.0.10",
     "status": "Production",
 

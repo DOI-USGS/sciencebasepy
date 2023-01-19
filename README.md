@@ -1,12 +1,49 @@
 Python ScienceBase Utilities
 ============================
-This Python module provides fuctionality for interacting with the USGS ScienceBase platform. 
+This Python module provides functionality for interacting with the USGS ScienceBase platform.
 https://www.sciencebase.gov/catalog/
 
-It requires the 'requests' module to be installed, which can be found at 
-http://docs.python-requests.org/en/latest/. If you get security errors also install requests[security]. 
+ScienceBase is a Trusted Digital Repository (TDR) in the U.S. Geological Survey (USGS).
+The platform is developed and maintained by the USGS to provide shared, permission-controlled
+access to scientific data products and bureau resources. Rather than serving merely as a generic
+online storage location, ScienceBase is designed to add value to digital data by exposing 
+well-organized, documented datasets and scientific information over the web. 
+Content within ScienceBase Catalog is stored within a standardized item model with consistent 
+informational facets (e.g., title, abstract, keywords, etc.) and is accessible through both a 
+web browser and an application programming interface (API). This enables powerful querying 
+capabilities and makes it possible to integrate content into dynamic collections and connect 
+ScienceBase-hosted data to external applications and workflows. For additional information, 
+please visit: 
 
-As of version 2.0.0, Python 2.x is no longer supported."
+https://www.sciencebase.gov/about/content/about-sciencebase
+ 
+Data authorship is reserved for USGS employees and individuals or groups working in partnership 
+or as collaborators with the USGS (partner efforts must have one or more USGS participants). 
+View and download access for public items in the system are provided to both registered users 
+and the general public, whereas private items have restricted access constraints. For questions 
+about system access as a data contributor, please contact sciencebase@usgs.gov.
+
+This software library provides API access to interact with ScienceBase via the Python 
+programming language.
+
+Recommended Citation:
+
+Long, J.L., et al., 2023, sciencebasepy: A Python library for programmatic interaction with 
+the USGS ScienceBase platform (Version): U.S. Geological Survey software release, 
+https://doi.org/10.5066/P9X4BIPR.
+
+Credits:
+J.L. Long
+S. Tekell
+J. Allen
+J.R. Sheflin
+K.D. Enns
+K. Raja
+D.A. Ignizio
+
+Earlier Versions:
+Earlier versions of this software were available on a provisional basis. If referencing
+an earlier version is critical to use, it can be referenced by the version tag.
 
 Quick Start
 -----------
@@ -17,6 +54,11 @@ sciencebasepy can be installed with pip:
 Otherwise, download the contents of this repository, and install the sciencebasepy libraries into 
 your python installation by running `python setup.py install`.  Example usage is contained 
 in `demo.py`.
+
+This library requires the 'requests' module to be installed, which can be found at 
+http://docs.python-requests.org/en/latest/. If you get security errors also install requests[security]. 
+
+As of version 2.0.0, Python 2.x is no longer supported.
 
 There are several iPython notebooks in this repository with example code. For more in-depth information and 
 examples on searching, see 
@@ -335,41 +377,45 @@ Example Usage
 
 ````python
     import sciencebasepy
+    import getpass
     import os
 
+    # Establish a session.
     sb = sciencebasepy.SbSession()
 
     # Get a public item.  No need to log in.
     item_json = sb.get_item('505bc673e4b08c986b32bf81')
-    print "Public Item: " + str(item_json)
+    print ("Public Item: " + str(item_json))
 
-    # Get a private item.  Need to log in first.
-    username = raw_input("Username:  ")
+    # Example for working with access-restricted item.  A user will need to log in first.
+    username = getpass.getuser() + '@usgs.gov'
     sb.loginc(str(username))
-    # Need to wait a bit after the login or errors can occur
-    time.sleep(5)
+    print ("You are now connected.")
+    
+    
     item_json = sb.get_item(sb.get_my_items_id())
-    print "My Items: " + str(item_json)
+    print ("My Items: " + str(item_json))
 
     # Create a new item.  The minimum required is a title for the new item, and the parent ID
     new_item = {'title': 'This is a new test item',
         'parentId': sb.get_my_items_id(),
         'provenance': {'annotation': 'Python ScienceBase REST test script'}}
     new_item = sb.create_item(new_item)
-    print "NEW ITEM: " + str(new_item)
+    print ("NEW ITEM: " + str(new_item))
 
     # Upload a file to the newly created item
     new_item = sb.upload_file_to_item(new_item, 'sciencebasepy.py')
-    print "FILE UPDATE: " + str(new_item)
+    print ("FILE UPDATE: " + str(new_item))
 
     # List file info from the newly created item
     ret = sb.get_item_file_info(new_item)
     for fileinfo in ret:
-        print "File " + fileinfo["name"] + ", " + str(fileinfo["size"]) + "bytes, download URL " + fileinfo["url"]
+        print ("File " + fileinfo["name"] + ", " + str(fileinfo["size"]) + "bytes, 
+        download URL " + fileinfo["url"])
 
     # Download zip of files from the newly created item
     ret = sb.get_item_files_zip(new_item)
-    print "Downloaded zip file " + str(ret)
+    print ("Downloaded zip file " + str(ret))
 
     # Download all files attached to the item as individual files, and place them in the
     # tmp directory under the current directory.
@@ -377,15 +423,15 @@ Example Usage
     if not os.path.exists(path):
         os.makedirs(path)
     ret = sb.get_item_files(new_item, path)
-    print "Downloaded files " + str(ret)
+    print ("Downloaded files " + str(ret))
 
     # Delete the newly created item
     ret = sb.delete_item(new_item)
-    print "DELETE: " + str(ret)
+    print ("DELETE: " + str(ret))
 
     # Upload multiple files to create a new item
     ret = sb.upload_files_and_create_item(sb.get_my_items_id(), ['sciencebasepy.py','readme.md'])
-    print str(ret)
+    print (str(ret))
 
     # Search
     items = sb.find_items_by_any_text(username)

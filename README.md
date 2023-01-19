@@ -26,6 +26,10 @@ about system access as a data contributor, please contact sciencebase@usgs.gov.
 This software library provides API access to interact with ScienceBase via the Python 
 programming language.
 
+This code is also available at a public Department of Interior GitHub repository here:
+https://github.com/DOI-USGS/sciencebasepy where public users can
+submit issues or merge requests for issue resolution.
+
 Recommended Citation:
 
 Long, J.L., et al., 2023, sciencebasepy: A Python library for programmatic interaction with 
@@ -33,12 +37,13 @@ the USGS ScienceBase platform (Version): U.S. Geological Survey software release
 https://doi.org/10.5066/P9X4BIPR.
 
 Credits:
-J.L. Long
-S. Tekell
-J. Allen
-J.R. Sheflin
-K.D. Enns
-K. Raja
+
+J.L. Long, 
+S. Tekell, 
+J. Allen, 
+J.R. Sheflin, 
+K.D. Enns, 
+K. Raja, 
 D.A. Ignizio
 
 Earlier Versions:

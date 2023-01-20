@@ -5,7 +5,7 @@ https://www.sciencebase.gov/catalog/
 
 ScienceBase is a Trusted Digital Repository (TDR) in the U.S. Geological Survey (USGS).
 The platform is developed and maintained by the USGS to provide shared, permission-controlled
-access to scientific data products and bureau resources. Rather than serving merely as a generic
+access to scientific data products and Bureau resources. Rather than serving merely as a generic
 online storage location, ScienceBase is designed to add value to digital data by exposing 
 well-organized, documented datasets and scientific information over the web. 
 Content within ScienceBase Catalog is stored within a standardized item model with consistent 
@@ -30,7 +30,8 @@ This code is also available at a public Department of Interior GitHub repository
 https://github.com/DOI-USGS/sciencebasepy where public users can
 submit issues or merge requests for issue resolution.
 
-Recommended Citation:
+Recommended Citation / Credits
+-----------
 
 Long, J.L., et al., 2023, sciencebasepy: A Python library for programmatic interaction with 
 the USGS ScienceBase platform (Version): U.S. Geological Survey software release, 
@@ -77,8 +78,7 @@ The SbSession class provides the following methods:
 
 ### Login
 * `login(username, password)`
-Log into ScienceBase using the username and password.  This causes a cookie to be added to the session
-to be used by subsequent calls.
+Log into ScienceBase using the username and password.  This function will add a cookie to the session to be used by subsequent calls. Valid user credentials are issued to USGS users through Department of Interior Active Directory (AD). Sponsored collaborators can be issued user credentials per request when working in coordination with USGS on science projects. 
 
 * `loginc(username)`
 Log into ScienceBase using the given username, and prompt for the password.  The password is not
@@ -98,7 +98,7 @@ Log out of ScienceBase
 
 ### Create
 Note: When uploading associated files, such as the various files making up a shapefile, or a 
-raster and its associated SLD, be sure to upload them with a single call to 
+raster and its associated Styled Layer Descriptor (SLD) file, be sure to upload them with a single call to 
 `upload_files_and_create_item`. Otherwise, ScienceBase will not create the appropriate facets, 
 and services will not be created.
 
@@ -393,7 +393,7 @@ Example Usage
     print ("Public Item: " + str(item_json))
 
     # Example for working with access-restricted item.  A user will need to log in first.
-    username = getpass.getuser() + '@usgs.gov'
+    username = getpass.getuser() + '@usgs.gov' # (or appropriate username@domain)
     sb.loginc(str(username))
     print ("You are now connected.")
     

@@ -415,7 +415,7 @@ Example Usage
     # List file info from the newly created item
     ret = sb.get_item_file_info(new_item)
     for fileinfo in ret:
-        print ("File " + fileinfo["name"] + ", " + str(fileinfo["size"]) + "bytes, 
+        print ("File " + fileinfo["name"] + ", " + str(fileinfo["size"]) + "bytes, \
         download URL " + fileinfo["url"])
 
     # Download zip of files from the newly created item
@@ -442,7 +442,7 @@ Example Usage
     items = sb.find_items_by_any_text(username)
     while items and 'items' in items:
         for item in items['items']:
-            print item['title']
+            print (item['title'])
         items = sb.next(items)
 
     # Logout

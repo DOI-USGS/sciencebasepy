@@ -111,7 +111,7 @@ Create multiple new Items in ScienceBase. item_dict_list: list of item_dict obje
 
 * `create_hidden_property(item_id, item_dict)`
 Create a new Hidden Property for a Sciencebase item : POST /catalog/item/<item_id>/hiddenProperties
-Documentation of the json can be found at https://code.chs.usgs.gov/sciencebase/dev-docs/wikis/APIs/Catalog/Item-Hidden-Properties
+This function exposes advanced functionality for authenticated users or admins only. For additional documentation on this feature or cases that may motivate its use, please contact the ScienceBase team directly.
 
 * `upload_file_and_create_item(parent_id, filename)`
 Upload a file and create a ScienceBase item. Add the parameter `scrape_file=False` to bypass ScienceBase metadata
@@ -393,7 +393,7 @@ Example Usage
     print ("Public Item: " + str(item_json))
 
     # Example for working with access-restricted item.  A user will need to log in first.
-    username = getpass.getuser() + '@usgs.gov' # (or appropriate username@domain)
+    username = getpass.getuser()
     sb.loginc(str(username))
     print ("You are now connected.")
     

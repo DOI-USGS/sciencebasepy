@@ -33,7 +33,7 @@ submit issues or merge requests for issue resolution.
 Recommended Citation / Credits
 -----------
 
-Long, J.L., et al., 2023, sciencebasepy: A Python library for programmatic interaction with 
+Long, J.L., 2023, sciencebasepy: A Python library for programmatic interaction with 
 the USGS ScienceBase platform (Version): U.S. Geological Survey software release, 
 https://doi.org/10.5066/P9X4BIPR.
 
@@ -105,6 +105,7 @@ and services will not be created.
 * `create_item(item_dict)`
 Create a new ScienceBase item.  Documentation on the sbJSON format can be found at
 https://doimspp.sharepoint.com/sites/usgs-sdm-apps/ScienceBaseProjectDocumentation/SitePages/ScienceBase-Item-Core-Model.aspx
+This link is available to USGS users and external users who request access (email: sciencebase@usgs.gov). These resources will be made public at another documentation page in 2023.
 
 * `create_items(item_dict_list)`
 Create multiple new Items in ScienceBase. item_dict_list: list of item_dict objects representing the ScienceBase Catalog items to create.

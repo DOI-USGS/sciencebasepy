@@ -33,19 +33,8 @@ submit issues or merge requests for issue resolution.
 Recommended Citation / Credits
 -----------
 
-Long, J.L., 2023, sciencebasepy: A Python library for programmatic interaction with 
-the USGS ScienceBase platform (Version): U.S. Geological Survey software release, 
-https://doi.org/10.5066/P9X4BIPR.
+Long, J.L., Viger, R.J., Raja, K., Enns, K.D., Sheflin, J.R., Ignizio, D.A.,2023, sciencebasepy: A Python library for programmatic interaction with the USGS ScienceBase platform (Version): U.S. Geological Survey software release, https://doi.org/10.5066/P9X4BIPR.
 
-Credits:
-
-J.L. Long, 
-S. Tekell, 
-J. Allen, 
-J.R. Sheflin, 
-K.D. Enns, 
-K. Raja, 
-D.A. Ignizio
 
 Earlier Versions:
 Earlier versions of this software were available on a provisional basis. If referencing

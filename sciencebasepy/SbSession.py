@@ -1427,7 +1427,8 @@ class SbSession:
                     key_val = item_id + "/" + filename
 
                     params = {
-                        "key": key_val
+                        "key": key_val,
+                        "sb_env": self._env
                     }
 
                     delete_s3_file_url = "https://ksrs49weqg.execute-api.us-west-2.amazonaws.com/prod/deleteS3Files"
@@ -1440,32 +1441,107 @@ class SbSession:
                     if cuid is None:
                         cuid = ""
 
+                    if filename.endswith(".sd"):
+                        self.stop_spatial_service(item_id, filename)
+
+                        #delete the .sd facet
+                        client_mutation_id = "delete_sd_facet"
+
+                        f = {}
+
+                        if 'facets' in item:
+                            facets = item['facets']
+                        else:
+                            facets = []
+
+                        for facet in facets:
+                            if facet['name'] == filename:
+                                f = facet
+                                break
+
+                        if f in facets:
+                            facets.remove(f)
+
+                        input = {
+                            "clientMutationId": client_mutation_id,
+                            "id": item_id,
+                            "itemPatch": {
+                                "facets": facets
+                            }
+                        }
+
+                        requests_session = requests.session()
+
+                        if self._env == 'beta' or self._env == 'dev':
+                            graphql_url = "https://api-beta.staging.sciencebase.gov/graphql"
+                        else:
+                            graphql_url = "https://api.sciencebase.gov/graphql"
+
+                        token = self._sbSessionEx._token
+
+                        headers = {"Content-Type": "application/json",
+                                   "Accept": "application/json",
+                                   "Authorization": "Bearer " + token
+                                   }
+
+                        query = """ mutation UpdateItem($input: UpdateItemInput!) {
+                                            updateItem(input: $input) {
+                                                item {
+                                                    distributionLinks {
+                                                        uri
+                                                    }
+                                                }
+                                            }
+                                          }
+                                        """
+
+                        failed_retry_time = 10
+                        for tries in range(3):
+                            try:
+                                resp = requests_session.post(
+                                    graphql_url,
+                                    headers=headers,
+                                    json={'query': query, 'variables': {'input': input}}
+                                )
+                                break
+                            except requests.exceptions.Timeout as e:
+                                print("DeleteSdFacet Timeout: " + repr(e))
+                            except requests.exceptions.RequestException as e:
+                                print("DeleteSdFacet RequestException: " + repr(e))
+                            # Wait before we try again
+                            time.sleep(failed_retry_time)
+                            failed_retry_time *= 2
+
+                        print("RESPONSE (GRAPHQL): " + resp.text)
+
+                        if "SyntaxError" in resp.text:
+                            print("SyntaxError: " + resp.text)
+                        else:
+                            print("DeleteSdFacet Completed Successfully")
+
                     input = {"cuid": cuid, "key": key}
 
-                    print("cuid")
-                    print(cuid)
-                    print("key")
-                    print(key)
-
                     response = self._sbSessionEx.delete_cloud_file(input)
+                    print(response)
 
                     # handle deletion of on-premise files published to public bucket
                     if cuid == "":
                         key_val = item_id + "/" + filename
 
                         params = {
-                            "key": key_val
+                            "key": key_val,
+                            "sb_env": self._env
                         }
 
                         delete_s3_file_url = "https://ksrs49weqg.execute-api.us-west-2.amazonaws.com/prod/deleteS3Files"
 
                         resp = self._session.post(delete_s3_file_url, json=params)
 
-                    #if filename.endswith(".sd"):
-                        #self.stop_spatial_service(item_id, filename)
-
                     if 'errors' in response:
                         print("Failed to delete file " + filename)
+                        print("Please try again.")
+                        if 'INTERNAL_SERVER_ERROR' in response:
+                            print("Internal server error. Please check to make sure this file is a cloud file.")
                     else:
                         print("Successfully deleted " + filename + " from ScienceBase item and associated S3 bucket(s)")
 
@@ -1534,33 +1610,31 @@ class SbSession:
 
                 if 'facets' in item:
                     for facet in item['facets']:
-                        if 'files' in facet:
-                            for f in facet['files']:
-                                if f['name'] == filename:
-                                    if facet['serverType'] == 'AGOL_Feature_Server' or facet['serverType'] == 'AGOL_WMTS_Server':
-                                        if 'enabledServices' in facet:
-                                            if len(facet['enabledServices']) == 2:
-                                                agol_id_1 = facet['enabledServices'][0]
-                                                agol_id_2 = facet['enabledServices'][1]
-                                                file_path_used = facet['filePathUsed']
-                                                params = {
-                                                    "filename": file_path_used,
-                                                    "item_id": item_id,
-                                                    "agol_id_1": agol_id_1,
-                                                    "agol_id_2": agol_id_2,
-                                                    "email": self._username
-                                                }
-                                                stop_spatial_service_url = "https://qk9hqzs5yf.execute-api.us-west-2.amazonaws.com/prod/stopSpatialService"
-                                                self._session.post(stop_spatial_service_url, json=params)
-                                                print("Triggered deletion of spatial service in ArcGIS Online.")
-                                                return True
-
-                                    elif facet['servicePath'] != '' and facet['serviceId'] != '' and facet['processingState'] == 'success':
-                                        payload = {'operation': 'delete'}
-                                        url = "https://www.sciencebase.gov/catalog/item/createProcessJob/" + item_id
-                                        self._session.get(url, params=payload)
-                                        print("Triggered deletion of spatial service from ScienceBase ArcGIS Server instance.")
+                        if facet['name'] == filename:
+                            if facet['serverType'] == 'AGOL_Feature_Server' or facet['serverType'] == 'AGOL_WMTS_Server':
+                                if 'enabledServices' in facet:
+                                    if len(facet['enabledServices']) == 2:
+                                        agol_id_1 = facet['enabledServices'][0]
+                                        agol_id_2 = facet['enabledServices'][1]
+                                        file_path_used = facet['filePathUsed']
+                                        params = {
+                                            "filename": file_path_used,
+                                            "item_id": item_id,
+                                            "agol_id_1": agol_id_1,
+                                            "agol_id_2": agol_id_2,
+                                            "email": self._username
+                                        }
+                                        stop_spatial_service_url = "https://qk9hqzs5yf.execute-api.us-west-2.amazonaws.com/prod/stopSpatialService"
+                                        self._session.post(stop_spatial_service_url, json=params)
+                                        print("Triggered deletion of spatial service in ArcGIS Online.")
                                         return True
+
+                            elif facet['servicePath'] != '' and facet['serviceId'] != '' and facet['processingState'] == 'success':
+                                payload = {'operation': 'delete'}
+                                url = "https://www.sciencebase.gov/catalog/item/createProcessJob/" + item_id
+                                self._session.get(url, params=payload)
+                                print("Triggered deletion of spatial service from ScienceBase ArcGIS Server instance.")
+                                return True
 
                 print("Error: published ArcGIS service not found. Please publish the service before attempting to delete it.")
                 return False

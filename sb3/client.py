@@ -220,11 +220,15 @@ def delete_cloud_file(input, sb_session_ex):
         json={'query': query, 'variables': variables}
     )
 
-    if sb_resp.status_code != 200 or 'errors' in sb_resp.json():
-        sb_session_ex.get_logger().error(sb_resp.json())
+    if sb_resp.status_code != 200 or 'errors' in sb_resp:
+        print("Error:")
+        print(sb_resp)
+        print(sb_resp.text)
+        print(sb_resp.status_code)
+        sb_session_ex.get_logger().error(sb_resp)
         raise Exception("Not status 200")
 
-    return sb_resp.json()
+    return sb_resp.text
 
 
 def upload_s3_files(input, sb_session_ex):

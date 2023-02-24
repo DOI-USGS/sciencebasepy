@@ -1442,7 +1442,7 @@ class SbSession:
                         cuid = ""
 
                     if filename.endswith(".sd"):
-                        self.stop_spatial_service(item_id, filename)
+                        self.stop_esri_service(item_id, filename)
 
                         #delete the .sd facet
                         client_mutation_id = "delete_sd_facet"

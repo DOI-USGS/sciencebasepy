@@ -1595,8 +1595,10 @@ class SbSession:
                     "type": "single"
                 }
 
-                start_spatial_service_url = "https://rwxatj0usl.execute-api.us-west-2.amazonaws.com/prod/startSpatialService"
-
+                if self._env == 'beta' or self._env == 'dev':
+                    start_spatial_service_url = "https://gggcfbu5gh.execute-api.us-west-2.amazonaws.com/prod/startSpatialService"
+                else:
+                    start_spatial_service_url = "https://rwxatj0usl.execute-api.us-west-2.amazonaws.com/prod/startSpatialService"
                 self._session.post(start_spatial_service_url, json=params)
 
                 print("Triggered spatial service creation in ArcGIS Online.")

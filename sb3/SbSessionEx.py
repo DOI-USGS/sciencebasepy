@@ -162,6 +162,11 @@ class SbSessionEx:
         '''
         return client.unpublish_from_public_bucket(input, self)
 
+    def delete_cloud_file(self, input):
+        '''delete files from ScienceBase item and S3 content bucket and/or S3 publish bucket
+        '''
+        return client.delete_cloud_file(input, self)
+
     def get_header(self):
         '''get_header
         '''

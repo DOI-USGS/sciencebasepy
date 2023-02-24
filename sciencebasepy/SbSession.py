@@ -1604,7 +1604,7 @@ class SbSession:
                 print("Triggered spatial service creation in ArcGIS Online.")
                 return True
 
-    def stop_spatial_service(self, item_id, filename):
+    def stop_esri_service(self, item_id, filename):
         """Stops a spatial service that had been published on a ScienceBase service definition (.sd) file in ArcGIS Online.
                :param item_id: The ID of the ScienceBase item
                :param filename: The filename of the .sd file in ScienceBase on which the ArcGIS Online spatial service had been published

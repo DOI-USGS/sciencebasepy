@@ -1273,60 +1273,115 @@ class SbSession:
         """
         return self._update_acls(self.ACL_REMOVE, self.ACL_WRITE, "ROLE:%s" % role_name, item_id)
 
-    def publish_to_public_bucket(self, item_id):
-        """ call publish end point from catalog
-            this should publish all files to public s3 publish bucket
-            TODO: Fix documentation
-        """
-        return self._session.post(self._base_item_url + item_id + "/publishFilesToS3")
-
     def publish_array_to_public_bucket(self, item_id, filenames):
-        """ publish a list of files on an item to the public s3 publish bucket
+        """publish a list of files on an item from the public s3 publish bucket
 
         :param item_id: The ID of the ScienceBase item
-        :param filenames: a list of filenames to be published
+        :param filenames: a list of filenames to be unpublished
         """
-        for filename in filenames:
+        if not self._sbSessionEx.is_logged_in():
+            print(f'{self._username} not logged into Keycloak -- cloud services not available')
+        else:
             item = self.get_item(item_id)
-            pathOnDisk = ""
-            cuid = ""
 
-            if 'files' in item:
-                for f in item['files']:
-                    if 'name' in f:
-                        if f['name'] == filename:
-                            if 'pathOnDisk' in f:
-                                pathOnDisk = f['pathOnDisk']
-                            if 'cuid' in f:
-                                cuid = f['cuid']
-                            break
-            if pathOnDisk == "":
-                if 'facets' in item:
-                    for facet in item['facets']:
-                        if 'files' in facet:
-                            for f in facet['files']:
-                                if f['name'] == filename:
-                                    if 'pathOnDisk' in f:
-                                        pathOnDisk = f['pathOnDisk']
-                                    if 'cuid' in f:
-                                        cuid = f['cuid']
-                                    break
+            for filename in filenames:
+                cuid = ""
+                key = ""
+                pathOnDisk = ""
 
-            publishDict = {
-                "filename": filename,
-                "actionValue": "publish",
-                "cuid": cuid,
-                "pathOnDisk": pathOnDisk
-            }
+                if 'files' in item:
+                    for f in item['files']:
+                        if 'name' in f:
+                            if f['name'] == filename:
+                                if 'pathOnDisk' in f:
+                                    pathOnDisk = f['pathOnDisk']
+                                if 'cuid' in f:
+                                    cuid = f['cuid']
+                                if 'key' in f:
+                                    key = f['key']
+                                break
 
-            response = self._session.post(self._base_item_url + item_id + "/publishSingleFileToS3",
-                                          data=json.dumps(publishDict))
-            print(response)
+                if cuid == "":
+                    if 'facets' in item:
+                        for facet in item['facets']:
+                            if 'files' in facet:
+                                for f in facet['files']:
+                                    if f['name'] == filename:
+                                        if 'pathOnDisk' in f:
+                                            pathOnDisk = f['pathOnDisk']
+                                        if 'cuid' in f:
+                                            cuid = f['cuid']
+                                        if 'key' in f:
+                                            key = f['key']
+                                        break
+                    
+                if cuid is None:
+                    cuid = ""
 
-            if response:
-                print("Successfully published filename " + filename + " to public S3 bucket")
-            else:
-                print("Failed to publish file " + filename + " to public S3 bucket")
+                input = {"itemId": item_id, "filename": filename, "action": "publish", "pathOnDisk": pathOnDisk}
+
+                response = self._sbSessionEx.publish_to_public_bucket(input)
+                print(response)
+                if response:
+                    print("Successfully published filename " + filename + " from public S3 bucket")
+                else:
+                    print("Failed to publish file " + filename + " from public S3 bucket")
+
+
+    # def publish_to_public_bucket(self, item_id):
+    #     """ call publish end point from catalog
+    #         this should publish all files to public s3 publish bucket
+    #         TODO: Fix documentation
+    #     """
+    #     return self._session.post(self._base_item_url + item_id + "/publishFilesToS3")
+
+    # def publish_array_to_public_bucket(self, item_id, filenames):
+    #     """ publish a list of files on an item to the public s3 publish bucket
+
+    #     :param item_id: The ID of the ScienceBase item
+    #     :param filenames: a list of filenames to be published
+    #     """
+    #     for filename in filenames:
+    #         item = self.get_item(item_id)
+    #         pathOnDisk = ""
+    #         cuid = ""
+
+    #         if 'files' in item:
+    #             for f in item['files']:
+    #                 if 'name' in f:
+    #                     if f['name'] == filename:
+    #                         if 'pathOnDisk' in f:
+    #                             pathOnDisk = f['pathOnDisk']
+    #                         if 'cuid' in f:
+    #                             cuid = f['cuid']
+    #                         break
+    #         if pathOnDisk == "":
+    #             if 'facets' in item:
+    #                 for facet in item['facets']:
+    #                     if 'files' in facet:
+    #                         for f in facet['files']:
+    #                             if f['name'] == filename:
+    #                                 if 'pathOnDisk' in f:
+    #                                     pathOnDisk = f['pathOnDisk']
+    #                                 if 'cuid' in f:
+    #                                     cuid = f['cuid']
+    #                                 break
+
+    #         publishDict = {
+    #             "filename": filename,
+    #             "actionValue": "publish",
+    #             "cuid": cuid,
+    #             "pathOnDisk": pathOnDisk
+    #         }
+
+    #         response = self._session.post(self._base_item_url + item_id + "/publishSingleFileToS3",
+    #                                       data=json.dumps(publishDict))
+    #         print(response)
+
+    #         if response:
+    #             print("Successfully published filename " + filename + " to public S3 bucket")
+    #         else:
+    #             print("Failed to publish file " + filename + " to public S3 bucket")
 
     def unpublish_array_from_public_bucket(self, item_id, filenames):
         """unpublish a list of files on an item from the public s3 publish bucket

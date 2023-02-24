@@ -12,7 +12,7 @@ colorlog==4.4.0
 coverage==5.3
 flake8==3.8.4
 flake8-polyfill==1.0.2
-future==0.18.2
+future==0.18.3
 gitdb==4.0.5
 GitPython==3.1.11
 idna==2.10

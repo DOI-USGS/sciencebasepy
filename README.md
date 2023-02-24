@@ -215,7 +215,7 @@ to attach it to an Item, the pathOnDisk must be added to an Item files entry, or
 Add features to the item footprint from Feature or FeatureCollection geojson.
 
 * `start_esri_service(item_id, filename)`
-Creates a spatial service on a published ScienceBase service definition (.sd) file in ArcGIS Online.
+Creates a spatial service on a published ScienceBase service definition (.sd) file in ArcGIS Online or ArcGIS Server.
 
 * `stop_esri_service(item_id, filename)`
 Stops a spatial service that had been published on a ScienceBase service definition (.sd) file in ArcGIS Online or ArcGIS Server.

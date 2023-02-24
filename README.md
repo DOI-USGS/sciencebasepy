@@ -1,11 +1,44 @@
 Python ScienceBase Utilities
 ============================
-This Python module provides some basic services for interacting with ScienceBase.  It requires the "requests"
-module to be installed, which can be found at
-[http://docs.python-requests.org/en/latest/](http://docs.python-requests.org/en/latest/).
-If you get security errors also install requests[security]
+This Python module provides functionality for interacting with the USGS ScienceBase platform.
+https://www.sciencebase.gov/catalog/
 
-As of version 2.0.0, Python 2.x is no longer supported.
+ScienceBase is a Trusted Digital Repository (TDR) in the U.S. Geological Survey (USGS).
+The platform is developed and maintained by the USGS to provide shared, permission-controlled
+access to scientific data products and Bureau resources. Rather than serving merely as a generic
+online storage location, ScienceBase is designed to add value to digital data by exposing 
+well-organized, documented datasets and scientific information over the web. 
+Content within ScienceBase Catalog is stored within a standardized item model with consistent 
+informational facets (e.g., title, abstract, keywords, etc.) and is accessible through both a 
+web browser and an application programming interface (API). This enables powerful querying 
+capabilities and makes it possible to integrate content into dynamic collections and connect 
+ScienceBase-hosted data to external applications and workflows. For additional information, 
+please visit: 
+
+https://www.sciencebase.gov/about/content/about-sciencebase
+ 
+Data authorship is reserved for USGS employees and individuals or groups working in partnership 
+or as collaborators with the USGS (partner efforts must have one or more USGS participants). 
+View and download access for public items in the system are provided to both registered users 
+and the general public, whereas private items have restricted access constraints. For questions 
+about system access as a data contributor, please contact sciencebase@usgs.gov.
+
+This software library provides API access to interact with ScienceBase via the Python 
+programming language.
+
+This code is also available at a public Department of Interior GitHub repository here:
+https://github.com/DOI-USGS/sciencebasepy where public users can
+submit issues or merge requests for issue resolution.
+
+Recommended Citation / Credits
+-----------
+
+Long, J.L., Viger, R.J., Raja, K., Enns, K.D., Sheflin, J.R., Ignizio, D.A.,2023, sciencebasepy: A Python library for programmatic interaction with the USGS ScienceBase platform (Version): U.S. Geological Survey software release, https://doi.org/10.5066/P9X4BIPR.
+
+
+Earlier Versions:
+Earlier versions of this software were available on a provisional basis. If referencing
+an earlier version is critical to use, it can be referenced by the version tag.
 
 Quick Start
 -----------
@@ -17,11 +50,16 @@ Otherwise, download the contents of this repository, and install the sciencebase
 your python installation by running `python setup.py install`.  Example usage is contained 
 in `demo.py`.
 
+This library requires the 'requests' module to be installed, which can be found at 
+http://docs.python-requests.org/en/latest/. If you get security errors also install requests[security]. 
+
+As of version 2.0.0, Python 2.x is no longer supported.
+
 There are several iPython notebooks in this repository with example code. For more in-depth information and 
 examples on searching, see 
-[Searching ScienceBase with ScienceBasePy.ipynb](https://github.com/usgs/sciencebasepy/blob/master/Searching%20ScienceBase%20with%20ScienceBasePy.ipynb).
+[Searching ScienceBase with ScienceBasePy.ipynb](https://code.usgs.gov/sas/sdm/sciencebasepy/-/blob/master/Searching%20ScienceBase%20with%20ScienceBasePy.ipynb).
 For batch processing, see 
-[Batch Processing.ipynb](https://github.com/usgs/sciencebasepy/blob/master/Batch%20Processing.ipynb).
+[Batch Processing.ipynb](https://code.usgs.gov/sas/sdm/sciencebasepy/-/blob/master/Batch%20Processing.ipynb).
 
 Module Contents
 ---------------
@@ -29,8 +67,7 @@ The SbSession class provides the following methods:
 
 ### Login
 * `login(username, password)`
-Log into ScienceBase using the username and password.  This causes a cookie to be added to the session
-to be used by subsequent calls.
+Log into ScienceBase using the username and password.  This function will add a cookie to the session to be used by subsequent calls. Valid user credentials are issued to USGS users through Department of Interior Active Directory (AD). Sponsored collaborators can be issued user credentials per request when working in coordination with USGS on science projects. 
 
 * `loginc(username)`
 Log into ScienceBase using the given username, and prompt for the password.  The password is not
@@ -50,20 +87,21 @@ Log out of ScienceBase
 
 ### Create
 Note: When uploading associated files, such as the various files making up a shapefile, or a 
-raster and its associated SLD, be sure to upload them with a single call to 
+raster and its associated Styled Layer Descriptor (SLD) file, be sure to upload them with a single call to 
 `upload_files_and_create_item`. Otherwise, ScienceBase will not create the appropriate facets, 
 and services will not be created.
 
 * `create_item(item_dict)`
 Create a new ScienceBase item.  Documentation on the sbJSON format can be found at
-https://my.usgs.gov/confluence/display/sciencebase/ScienceBase+Item+Core+Model
+https://doimspp.sharepoint.com/sites/usgs-sdm-apps/ScienceBaseProjectDocumentation/SitePages/ScienceBase-Item-Core-Model.aspx
+This link is available to USGS users and external users who request access (email: sciencebase@usgs.gov). These resources will be made public at another documentation page in 2023.
 
 * `create_items(item_dict_list)`
 Create multiple new Items in ScienceBase. item_dict_list: list of item_dict objects representing the ScienceBase Catalog items to create.
 
 * `create_hidden_property(item_id, item_dict)`
 Create a new Hidden Property for a Sciencebase item : POST /catalog/item/<item_id>/hiddenProperties
-Documentation of the json can be found at https://code.chs.usgs.gov/sciencebase/dev-docs/wikis/APIs/Catalog/Item-Hidden-Properties
+This function exposes advanced functionality for authenticated users or admins only. For additional documentation on this feature or cases that may motivate its use, please contact the ScienceBase team directly.
 
 * `upload_file_and_create_item(parent_id, filename)`
 Upload a file and create a ScienceBase item. Add the parameter `scrape_file=False` to bypass ScienceBase metadata
@@ -176,11 +214,11 @@ to attach it to an Item, the pathOnDisk must be added to an Item files entry, or
 * `add_extent(item_id, feature_geojson)`
 Add features to the item footprint from Feature or FeatureCollection geojson.
 
-* `start_spatial_service(item_id, filename)`
-Creates a spatial service on a published ScienceBase service definition (.sd) file in ArcGIS Online.
+* `start_esri_service(item_id, filename)`
+Creates a spatial service on a published ScienceBase service definition (.sd) file in ArcGIS Online or ArcGIS Server.
 
-* `stop_spatial_service(item_id, filename)`
-Stops a spatial service that had been published on a ScienceBase service definition (.sd) file in ArcGIS Online.
+* `stop_esri_service(item_id, filename)`
+Stops a spatial service that had been published on a ScienceBase service definition (.sd) file in ArcGIS Online or ArcGIS Server.
 
 * `publish_array_to_public_bucket(item_id, filenames)`
 Publish a list of files on an item to the public S3 publish bucket.
@@ -252,6 +290,9 @@ performs the action server-side in one call to ScienceBase.
 * `delete_file(sb_filename, item_dict)`
 Delete a file on a ScienceBase Item.  This method will delete all files with 
 the provided name, whether they are in the files list or on a facet.
+
+* `delete_cloud_files(item_id, filenames)`
+Deletes a list of Cloud files on an item from the ScienceBase S3 content bucket and/or S3 publish bucket and updates the item JSON accordingly. Can handle deletion of a file from S3 to clean up backend when the item JSON is out of sync.
 
 * `delete_hidden_property(item_id, hiddenpropertyid)`
 Delete an existing Item's specific Hidden Property item.
@@ -334,41 +375,45 @@ Example Usage
 
 ````python
     import sciencebasepy
+    import getpass
     import os
 
+    # Establish a session.
     sb = sciencebasepy.SbSession()
 
     # Get a public item.  No need to log in.
     item_json = sb.get_item('505bc673e4b08c986b32bf81')
-    print "Public Item: " + str(item_json)
+    print ("Public Item: " + str(item_json))
 
-    # Get a private item.  Need to log in first.
-    username = raw_input("Username:  ")
+    # Example for working with access-restricted item.  A user will need to log in first.
+    username = getpass.getuser()
     sb.loginc(str(username))
-    # Need to wait a bit after the login or errors can occur
-    time.sleep(5)
+    print ("You are now connected.")
+    
+    
     item_json = sb.get_item(sb.get_my_items_id())
-    print "My Items: " + str(item_json)
+    print ("My Items: " + str(item_json))
 
     # Create a new item.  The minimum required is a title for the new item, and the parent ID
     new_item = {'title': 'This is a new test item',
         'parentId': sb.get_my_items_id(),
         'provenance': {'annotation': 'Python ScienceBase REST test script'}}
     new_item = sb.create_item(new_item)
-    print "NEW ITEM: " + str(new_item)
+    print ("NEW ITEM: " + str(new_item))
 
     # Upload a file to the newly created item
     new_item = sb.upload_file_to_item(new_item, 'sciencebasepy.py')
-    print "FILE UPDATE: " + str(new_item)
+    print ("FILE UPDATE: " + str(new_item))
 
     # List file info from the newly created item
     ret = sb.get_item_file_info(new_item)
     for fileinfo in ret:
-        print "File " + fileinfo["name"] + ", " + str(fileinfo["size"]) + "bytes, download URL " + fileinfo["url"]
+        print ("File " + fileinfo["name"] + ", " + str(fileinfo["size"]) + "bytes, \
+        download URL " + fileinfo["url"])
 
     # Download zip of files from the newly created item
     ret = sb.get_item_files_zip(new_item)
-    print "Downloaded zip file " + str(ret)
+    print ("Downloaded zip file " + str(ret))
 
     # Download all files attached to the item as individual files, and place them in the
     # tmp directory under the current directory.
@@ -376,21 +421,21 @@ Example Usage
     if not os.path.exists(path):
         os.makedirs(path)
     ret = sb.get_item_files(new_item, path)
-    print "Downloaded files " + str(ret)
+    print ("Downloaded files " + str(ret))
 
     # Delete the newly created item
     ret = sb.delete_item(new_item)
-    print "DELETE: " + str(ret)
+    print ("DELETE: " + str(ret))
 
     # Upload multiple files to create a new item
     ret = sb.upload_files_and_create_item(sb.get_my_items_id(), ['sciencebasepy.py','readme.md'])
-    print str(ret)
+    print (str(ret))
 
     # Search
     items = sb.find_items_by_any_text(username)
     while items and 'items' in items:
         for item in items['items']:
-            print item['title']
+            print (item['title'])
         items = sb.next(items)
 
     # Logout

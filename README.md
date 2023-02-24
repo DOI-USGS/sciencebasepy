@@ -215,7 +215,7 @@ to attach it to an Item, the pathOnDisk must be added to an Item files entry, or
 Add features to the item footprint from Feature or FeatureCollection geojson.
 
 * `start_esri_service(item_id, filename)`
-Creates a spatial service on a published ScienceBase service definition (.sd) file in ArcGIS Online.
+Creates a spatial service on a published ScienceBase service definition (.sd) file in ArcGIS Online or ArcGIS Server.
 
 * `stop_esri_service(item_id, filename)`
 Stops a spatial service that had been published on a ScienceBase service definition (.sd) file in ArcGIS Online or ArcGIS Server.
@@ -290,6 +290,9 @@ performs the action server-side in one call to ScienceBase.
 * `delete_file(sb_filename, item_dict)`
 Delete a file on a ScienceBase Item.  This method will delete all files with 
 the provided name, whether they are in the files list or on a facet.
+
+* `delete_cloud_files(item_id, filenames)`
+Deletes a list of Cloud files on an item from the ScienceBase S3 content bucket and/or S3 publish bucket and updates the item JSON accordingly. Can handle deletion of a file from S3 to clean up backend when the item JSON is out of sync.
 
 * `delete_hidden_property(item_id, hiddenpropertyid)`
 Delete an existing Item's specific Hidden Property item.

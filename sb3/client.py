@@ -171,6 +171,33 @@ def bulk_cloud_download(selected_rows, sb_session_ex):
 
     return sb_resp.json()
 
+def publish_to_public_bucket(input, sb_session_ex):
+    query = """
+                mutation handleMFActions($input: ManageFileInput!) {
+    handleMFActions(input: $input) {
+      percent
+      error
+    }
+  }
+            """
+
+    variables = {"input": input}
+
+    requests_session = requests.session()
+
+    sb_resp = requests_session.post(
+        sb_session_ex.get_graphql_url(),
+        headers=sb_session_ex.get_header(),
+        json={'query': query, 'variables': variables}
+    )
+
+    if sb_resp.status_code != 200:
+        sb_resp_json = sb_resp.json()
+        sb_session_ex.get_logger().error(sb_resp_json)
+        raise Exception("Not status 200")
+
+    return sb_resp.json()
+
 
 def unpublish_from_public_bucket(input, sb_session_ex):
     query = """
@@ -199,6 +226,36 @@ def unpublish_from_public_bucket(input, sb_session_ex):
         raise Exception("Not status 200")
 
     return sb_resp.json()
+
+
+def delete_cloud_file(input, sb_session_ex):
+    query = """
+                mutation deleteFile($input: DeleteFileInput!){
+                    deleteFile(input: $input){
+                        id
+                    }
+                }
+            """
+
+    variables = {"input": input}
+
+    requests_session = requests.session()
+
+    sb_resp = requests_session.post(
+        sb_session_ex.get_graphql_url(),
+        headers=sb_session_ex.get_header(),
+        json={'query': query, 'variables': variables}
+    )
+
+    if sb_resp.status_code != 200 or 'errors' in sb_resp:
+        print("Error:")
+        print(sb_resp)
+        print(sb_resp.text)
+        print(sb_resp.status_code)
+        sb_session_ex.get_logger().error(sb_resp)
+        raise Exception("Not status 200")
+
+    return sb_resp.text
 
 
 def upload_s3_files(input, sb_session_ex):

@@ -156,10 +156,16 @@ class SbSessionEx:
         '''publish file from public S3 bucket
         '''
         return client.publish_to_public_bucket(input, self)
+
     def unpublish_from_public_bucket(self, input):
         '''unpublish file from public S3 bucket
         '''
         return client.unpublish_from_public_bucket(input, self)
+
+    def delete_cloud_file(self, input):
+        '''delete files from ScienceBase item and S3 content bucket and/or S3 publish bucket
+        '''
+        return client.delete_cloud_file(input, self)
 
     def get_header(self):
         '''get_header

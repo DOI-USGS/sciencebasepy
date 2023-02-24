@@ -1595,20 +1595,17 @@ class SbSession:
                     "type": "single"
                 }
 
-                if self._env == 'beta' or self._env == 'dev':
-                    start_spatial_service_url = "https://gggcfbu5gh.execute-api.us-west-2.amazonaws.com/prod/startSpatialService"
-                else:
-                    start_spatial_service_url = "https://rwxatj0usl.execute-api.us-west-2.amazonaws.com/prod/startSpatialService"
+                start_spatial_service_url = "https://rwxatj0usl.execute-api.us-west-2.amazonaws.com/prod/startSpatialService"
 
                 self._session.post(start_spatial_service_url, json=params)
 
                 print("Triggered spatial service creation in ArcGIS Online.")
                 return True
 
-    def stop_esri_service(self, item_id, filename):
-        """Stops a spatial service that had been published on a ScienceBase service definition (.sd) file in ArcGIS Online or ArcGIS Server.
+    def stop_spatial_service(self, item_id, filename):
+        """Stops a spatial service that had been published on a ScienceBase service definition (.sd) file in ArcGIS Online.
                :param item_id: The ID of the ScienceBase item
-               :param filename: The filename of the .sd file in ScienceBase on which the ArcGIS Online or ArcGIS Server spatial service had been published
+               :param filename: The filename of the .sd file in ScienceBase on which the ArcGIS Online spatial service had been published
         """
         if not self.is_logged_in():
             print("Please log in and retry.")
@@ -1644,10 +1641,7 @@ class SbSession:
                                 elif 'servicePath' in facet and 'serviceId' in facet and 'processingState' in facet:
                                     if facet['servicePath'] != '' and facet['serviceId'] != '' and facet['processingState'] == 'success':
                                         payload = {'operation': 'delete'}
-                                        if self._env == 'beta' or self._env == 'dev':
-                                            url = "https://beta.sciencebase.gov/catalog/item/createProcessJob/" + item_id
-                                        else:
-                                            url = "https://www.sciencebase.gov/catalog/item/createProcessJob/" + item_id
+                                        url = "https://www.sciencebase.gov/catalog/item/createProcessJob/" + item_id
                                         self._session.get(url, params=payload)
                                         print("Triggered deletion of spatial service from ScienceBase ArcGIS Server instance.")
                                         return True

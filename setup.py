@@ -5,13 +5,13 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name='sciencebasepy',
-    version='2.0.8',
+    version='2.0.10',
     author="USGS ScienceBase Development Team",
     author_email="sciencebase@usgs.gov",
     description="Python ScienceBase Utilities",
-    long_description=long_description,
+    long_description='This Python module provides functionality for interacting with the USGS ScienceBase platform.',
     long_description_content_type="text/markdown",
-    url='https://github.com/usgs/sciencebasepy',
+    url='https://code.usgs.gov/sas/sdm/sciencebasepy',
     packages=setuptools.find_packages(),
     classifiers=[
         "License :: Public Domain",
@@ -31,6 +31,9 @@ setuptools.setup(
     ],
     install_requires=[
         "requests",
-        "progress"
+        "requests-mock",
+        "progress",
+        "pytest",
+        "charset-normalizer"
     ]
 )

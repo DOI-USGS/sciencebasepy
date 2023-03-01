@@ -1,6 +1,6 @@
 from sciencebasepy import SbSession
 
-FILE_NAME = 'tests/resources/sample_error.png'
+FILE_NAME = 'tests/resources/Python.jpg'
 
 sb = SbSession()
 CREATE_ITEM = True
@@ -8,7 +8,7 @@ CREATE_ITEM = True
 # Login to ScienceBase
 username = input("Username:  ")
 sb.loginc(str(username))
-#sb.debug() # Uncomment this line for verboase output
+#sb.debug() # Uncomment this line for verbose output
 
 if CREATE_ITEM:
     # Create test item

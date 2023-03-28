@@ -1,4 +1,4 @@
-Python ScienceBase Utilities
+Python ScienceBase Utilities Sciencebasepy
 ============================
 This Python module provides functionality for interacting with the USGS ScienceBase platform.
 https://www.sciencebase.gov/catalog/

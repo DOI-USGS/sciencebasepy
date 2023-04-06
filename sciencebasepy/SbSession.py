@@ -13,6 +13,7 @@ import getpass
 import mimetypes
 import requests
 import hashlib
+import time
 
 from pkg_resources import get_distribution
 from pkg_resources import DistributionNotFound
@@ -430,7 +431,17 @@ class SbSession:
             mimetype = self._guess_mimetype(filename)
             response = self._sbSessionEx.upload_cloud_file_upload_session(itemid, filename, mimetype)
             if 'data' in response and 'completeMultiPartUpload' in response['data'] and 'Successful' in response['data']['completeMultiPartUpload']:
-                ret = self.get_item(itemid)
+                path_on_disk = ""
+                while path_on_disk == "":
+                    ret = self.get_item(itemid)
+                    time.sleep(3)
+                    print("Completing upload...Please wait.")
+                    if 'files' in ret:
+                        for f in ret['files']:
+                            if 'name' in f:
+                                if f['name'] == filename:
+                                    if 'pathOnDisk' in f:
+                                        path_on_disk = f['pathOnDisk']
             else:
                 raise Exception('Cloud upload failed for', filename)
         return ret
@@ -1312,15 +1323,10 @@ class SbSession:
                                         cuid = f['cuid']
                                     break
 
-            publishDict = {
-                "filename": filename,
-                "actionValue": "publish",
-                "cuid": cuid,
-                "pathOnDisk": pathOnDisk
-            }
+            input = {"itemId": item_id, "filename": filename, "action": "publish", "pathOnDisk": pathOnDisk}
 
-            response = self._session.post(self._base_item_url + item_id + "/publishSingleFileToS3",
-                                          data=json.dumps(publishDict))
+            response = self._sbSessionEx.publish_to_public_bucket(input)
+
             print(response)
 
             if response:

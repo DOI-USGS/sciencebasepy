@@ -171,6 +171,7 @@ def bulk_cloud_download(selected_rows, sb_session_ex):
 
     return sb_resp.json()
 
+
 def publish_to_public_bucket(input, sb_session_ex):
     query = """
                 mutation handleMFActions($input: ManageFileInput!) {

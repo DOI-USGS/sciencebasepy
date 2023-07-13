@@ -431,6 +431,7 @@ class SbSession:
             mimetype = self._guess_mimetype(filename)
             response = self._sbSessionEx.upload_cloud_file_upload_session(itemid, filename, mimetype)
             if 'data' in response and 'completeMultiPartUpload' in response['data'] and 'Successful' in response['data']['completeMultiPartUpload']:
+                just_fname = os.path.split(filename)[1]
                 path_on_disk = ""
                 while path_on_disk == "":
                     ret = self.get_item(itemid)
@@ -439,7 +440,7 @@ class SbSession:
                     if 'files' in ret:
                         for f in ret['files']:
                             if 'name' in f:
-                                if f['name'] == filename:
+                                if f['name'] == just_fname:
                                     if 'pathOnDisk' in f:
                                         path_on_disk = f['pathOnDisk']
             else:

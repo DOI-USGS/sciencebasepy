@@ -112,6 +112,7 @@ class SbSession:
         :return: The SbSession object with the user logged in
         """
         # Login to Keycloak for SB3 calls
+        self._username = username
         self._sbSessionEx = SbSessionEx(self._env).login(username, password)
         self._update_headers_keycloak()
 

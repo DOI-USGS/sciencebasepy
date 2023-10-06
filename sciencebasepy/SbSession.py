@@ -95,9 +95,8 @@ class SbSession:
     def refresh_token(self):
         """ Refresh the access and refresh tokens
         """      
-        token_resp_json = self._sbSessionEx.refresh_token() 
-        
-        self.add_token(token_resp_json)
+        self._sbSessionEx.refresh_token() 
+        self._update_headers_keycloak()
 
     def _refresh_check(self):
         """Refresh our Keycloak token if it's going to expire within 10 min

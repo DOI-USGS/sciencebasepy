@@ -58,13 +58,11 @@ class SbSessionEx:
             self._refresh_token = authenticator.get_refresh_token()
             self._client_id = authenticator.keycloak_client_config.client_id
             self._token_server_uri = authenticator.keycloak_client_config.get_token_server_uri()
-            print(authenticator.keycloak_client_config.get_token_server_uri())
             self._token_expire = authenticator.get_token_expire()
             self._token_expire_refresh = authenticator.get_refresh_token_expire()
             self._token_expire_time = self._token_expire + (datetime.today()).timestamp()
             self._is_logged_in = True
         except Exception as e:
-            print(e)
             self._logging.error(f"Keycloak login failed for {username} -- cloud services not available")
             self._is_logged_in = False
 

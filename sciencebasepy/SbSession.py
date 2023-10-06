@@ -81,6 +81,23 @@ class SbSession:
             pass
         self._session.headers.update({'User-Agent': self._session.headers['User-Agent'] + sciencebasepy_agent})
 
+    def add_token(self, token_json):
+        """Add Keycloak access token for authentication
+
+        :param token_json: json object obtained from "Copy API Key" button in ScienceBase Manager
+        """
+        self._sbSessionEx = SbSessionEx(self._env)
+        self._sbSessionEx.add_token(token_json=token_json)
+        self._update_headers_keycloak()
+
+        self._last_token_update = time.time()
+
+    def refresh_token(self):
+        """ Refresh the access and refresh tokens
+        """      
+        token_resp_json = self._sbSessionEx.refresh_token() 
+        
+        self.add_token(token_resp_json)
     def login(self, username, password):
         """Log into ScienceBase
 
@@ -90,8 +107,16 @@ class SbSession:
         """
         # Login to Keycloak for SB3 calls
         self._sbSessionEx = SbSessionEx(self._env).login(username, password)
+        self._update_headers_keycloak()
 
         return self
+    
+    def _update_headers_keycloak(self):
+        """Updates the session's headers with the keycloak authorization headers
+        """
+        self._session.headers.update({'content-type': 'application/json'})
+        self._session.headers.update({'accept': 'application/json'})
+        self._session.headers.update({'authorization': 'Bearer ' + self._sbSessionEx._token})
 
     # Commented out when we moved to Keycloak authentication
     # def logout(self):

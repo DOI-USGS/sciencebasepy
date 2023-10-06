@@ -23,7 +23,6 @@ class SbSession:
     """SbSession encapsulates a session with ScienceBase, and provides methods for working with
     ScienceBase Catalog Items.
     """
-    _josso_url = None
     _base_sb_url = None
     _base_item_url = None
     _base_items_url = None
@@ -52,16 +51,13 @@ class SbSession:
         if env == 'beta':
             self._base_sb_url = "https://beta.sciencebase.gov/catalog/"
             self._base_directory_url = "https://beta.sciencebase.gov/directory/"
-            self._josso_url = "https://my-beta.usgs.gov/josso/signon/usernamePasswordLogin.do"
             self._users_id = "4f4e4772e4b07f02db47e231"
         elif env == 'dev':
             self._base_sb_url = "http://localhost:8090/catalog/"
             self._base_directory_url = "https://beta.sciencebase.gov/directory/"
-            self._josso_url = "https://my-beta.usgs.gov/josso/signon/usernamePasswordLogin.do"
         else:
             self._base_sb_url = "https://www.sciencebase.gov/catalog/"
             self._base_directory_url = "https://www.sciencebase.gov/directory/"
-            self._josso_url = "https://my.usgs.gov/josso/signon/usernamePasswordLogin.do"
             self._users_id = "4f4e4772e4b07f02db47e231"
 
         self._base_item_url = self._base_sb_url + "item/"
@@ -92,34 +88,17 @@ class SbSession:
         :param password: The ScienceBase password for the given user
         :return: The SbSession object with the user logged in
         """
-        # Save username
-        self._username = username
-
-        # Login and save JOSSO Session ID
-        headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-        payload = {
-            'josso_cmd': 'josso', 
-            'josso_username':username, 
-            'josso_password':password,
-            'josso_back_to': self._base_sb_url + 'josso_security_check'
-        }
-
-        self._session.post(self._josso_url, data=payload, headers=headers)
-        if ('JOSSO_SESSIONID' not in self._session.cookies):
-            raise Exception("Login failed")
-        self._jossosessionid = self._session.cookies['JOSSO_SESSIONID']
-        self._session.headers.update({'MYUSGS-JOSSO-SESSION-ID': self._jossosessionid})
-
         # Login to Keycloak for SB3 calls
         self._sbSessionEx = SbSessionEx(self._env).login(username, password)
 
         return self
 
-    def logout(self):
-        """Log out of ScienceBase"""
-        self._session.post(self._base_sb_url + 'j_spring_security_logout')
-        self._session.cookies.clear_session_cookies()
-        self._session.params = {}
+    # Commented out when we moved to Keycloak authentication
+    # def logout(self):
+    #     """Log out of ScienceBase"""
+    #     self._session.post(self._base_sb_url + 'j_spring_security_logout')
+    #     self._session.cookies.clear_session_cookies()
+    #     self._session.params = {}
 
     def loginc(self, username, tries=3):
         """Log into ScienceBase, prompting for the password
@@ -150,12 +129,13 @@ class SbSession:
         """
         return self.get_json(self._base_item_url + 'ping')
 
-    def get_session_info(self):
-        """Get the JOSSO session information for the current session
+    # Commented out when we moved to Keycloak authentication
+    # def get_session_info(self):
+    #     """Get the JOSSO session information for the current session
 
-        :return: ScienceBase Josso session info
-        """
-        return self.get_json(self._base_sb_url + 'jossoHelper/sessionInfo?includeJossoSessionId=true')
+    #     :return: ScienceBase Josso session info
+    #     """
+    #     return self.get_json(self._base_sb_url + 'jossoHelper/sessionInfo?includeJossoSessionId=true')
 
     def get_item(self, itemid, params=None):
         """Get the ScienceBase Item JSON with the given ID

@@ -192,10 +192,13 @@ class SbSessionEx:
             "authorization": "Bearer " + self._token,
         }
 
-def _keycloak_login(username, password, realm, server_url):
-    '''keycloak_login
-    '''
-    # Developer note: For some reason this method will not work inside the SbSessionEx class
+def _keycloak_authenticator(realm, server_url):
+    """returns Authenticator for a specified realm and url
+
+    Args:
+        realm (_type_): _description_
+        server_url (_type_): _description_
+    """
     authenticator = auth.DirectAccessAuthenticator({
         "realm": realm,
         "auth-server-url": server_url,
@@ -204,6 +207,14 @@ def _keycloak_login(username, password, realm, server_url):
         "public-client": True,
         "confidential-port": 0,
     })
+
+    return authenticator
+
+def _keycloak_login(username, password, realm, server_url):
+    '''keycloak_login
+    '''
+    # Developer note: For some reason this method will not work inside the SbSessionEx class
+    authenticator = _keycloak_authenticator(realm, server_url) 
     authenticator.authenticate(username, password)
 
     return authenticator

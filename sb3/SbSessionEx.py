@@ -200,7 +200,7 @@ def _keycloak_login(username, password, realm, server_url):
         "realm": realm,
         "auth-server-url": server_url,
         "ssl-required": "external",
-        "resource": "sciencebasepy",
+        "resource": "files-ui",
         "public-client": True,
         "confidential-port": 0,
     })

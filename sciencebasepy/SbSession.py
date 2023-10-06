@@ -107,7 +107,7 @@ class SbSession:
         :return: The SbSession object with the user logged in
         """
         while tries > 0:
-            password = getpass.getpass()
+            password = getpass.getpass('Active Directory password')
             try:
                 return self.login(username, password)
             except Exception:

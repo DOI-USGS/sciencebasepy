@@ -151,7 +151,7 @@ class SbSession:
         
         :return: Whether the SbSession is logged in and active in ScienceBase.
         """
-        return self.get_session_info()['isLoggedIn']
+        return self._sbSessionEx.is_logged_in()
 
     def ping(self):
         """Ping ScienceBase.  A very low-cost operation to determine whether ScienceBase is available.

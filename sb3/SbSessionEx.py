@@ -85,9 +85,14 @@ class SbSessionEx:
 
 
     def is_logged_in(self):
-        '''is_logged_in
+        '''Checks if the current refresh token can be refreshed. 
+           If it has expired or can't be refreshed the user is not logged in
         '''
-        return self._is_logged_in
+        try:
+            self.refresh_token()
+            return True
+        except TokenRefreshFailed:
+            return False
 
     def get_current_user(self):
         '''get_current_user
@@ -126,7 +131,7 @@ class SbSessionEx:
             )
             self._logging.info("Token Refreshed.")
         else:
-            raise Exception("Token Refreshed Failed.")
+            raise TokenRefreshFailed()
 
     def refresh_token_before_expire(self, refresh_amount):
         """Refresh token if token has not expired, but will expire with in some time,
@@ -214,3 +219,7 @@ def _keycloak_login(username, password, realm, server_url):
     authenticator.authenticate(username, password)
 
     return authenticator
+
+class TokenRefreshFailed(Exception):
+    "Raised when a Keycloak refresh fails"
+    pass

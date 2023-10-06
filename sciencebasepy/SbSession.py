@@ -98,6 +98,13 @@ class SbSession:
         token_resp_json = self._sbSessionEx.refresh_token() 
         
         self.add_token(token_resp_json)
+
+    def _refresh_check(self):
+        """Refresh our Keycloak token if it's going to expire within 10 min
+        """
+        ten_minutes = 600
+        self._sbSessionEx.refresh_token_before_expire(ten_minutes)
+
     def login(self, username, password):
         """Log into ScienceBase
 
@@ -168,6 +175,7 @@ class SbSession:
         :param params: Allows you to specify query params, such as {'fields':'title,ancestors'} for ?fields=title,ancestors
         :return: JSON for the ScienceBase Item with the given ID
         """
+        self._refresh_check()
         ret = self._session.get(self._base_item_url + itemid, params=params)
         return self._get_json(ret)
 
@@ -177,6 +185,7 @@ class SbSession:
         :param item_id: ID of the ScienceBase Item
         :return: JSON for the ScienceBase Item with the given ID
         """
+        self._refresh_check()
         ret = self._session.get(self._base_item_url + item_id + '/hiddenProperties')
         return self._get_json(ret)
 
@@ -187,6 +196,7 @@ class SbSession:
         :param hidden_property_id: ID of hidden property
         :return: JSON for the ScienceBase Item's Hidden Property with the given ID
         """
+        self._refresh_check()
         ret = self._session.get(self._base_item_url + item_id + '/hiddenProperties/' + hidden_property_id)
         return self._get_json(ret)
 
@@ -197,6 +207,7 @@ class SbSession:
         :return: Item Hidden Property JSON containing the first page of matching ScienceBase Items. Use the next() method for
         subsequent pages.
         """
+        self._refresh_check()
         ret = {}
         if hidden_property:
             params = {"max": 1000}
@@ -220,6 +231,7 @@ class SbSession:
         #
         # Retrieve all of the hidden property results 
         #
+        self._refresh_check()
         ret = []
         properties = []
         
@@ -255,12 +267,14 @@ class SbSession:
         :param hidden_property: ScienceBase Item Hidden Property JSON: {"type": ..., "value": ...}
         :return: List of ScienceBase Item IDs containing the given hidden property
         """
+        self._refresh_check()
         ret = []
         for item_hidden_property in self.find_hidden_property(hidden_property):
             ret.append(item_hidden_property["itemId"])
         return ret
 
     def create_item(self, item_json):
+        self._refresh_check()
         """Create a new Item in ScienceBase
 
         :param item_json: JSON representing the ScienceBase Catalog item to create
@@ -270,6 +284,7 @@ class SbSession:
         return self._get_json(ret)
 
     def create_items(self, items_json):
+        self._refresh_check()
         """Create new Items in ScienceBase
 
         :param items_json: JSON list representing the ScienceBase Catalog items to create
@@ -285,10 +300,12 @@ class SbSession:
         :param hidden_property_json: data (for the JSON) representing the hidden property to create
         :return: JSON of hidden property after creation
         """
+        self._refresh_check()
         ret = self._session.post(self._base_item_url + item_id + '/hiddenProperties/', data=json.dumps(hidden_property_json))
         return self._get_json(ret)
 
     def update_item(self, item_json):
+        self._refresh_check()
         """Update an existing ScienceBase Item
 
         :param item_json: JSON representing the ScienceBase Catalog item to update
@@ -305,6 +322,7 @@ class SbSession:
         :param hidden_property_json: data for updated hidden property
         :return: Full item JSON from ScienceBase Catalog after update
         """
+        self._refresh_check()
         ret = self._session.put(self._base_item_url + item_id + '/hiddenProperties/' + hidden_property_id, data=json.dumps(hidden_property_json))
         return self._get_json(ret)
 
@@ -314,6 +332,7 @@ class SbSession:
         :param items_json: List of ScienceBase Catalog Item JSON to update
         :return: ScienceBase JSON response
         """
+        self._refresh_check()
         ret = self._session.put(self._base_items_url, data=json.dumps(items_json))
         return self._get_json(ret)
 
@@ -323,6 +342,7 @@ class SbSession:
         :param item_json: JSON representing the ScienceBase Catalog item to delete
         :return: True if the item was successfully deleted
         """
+        self._refresh_check()
         ret = self._session.delete(self._base_item_url + item_json['id'], data=json.dumps(item_json))
         self._check_errors(ret)
         return True
@@ -334,6 +354,7 @@ class SbSession:
         :param hidden_property_id: ID of hidden property
         :return: True if the item was successfully deleted
         """
+        self._refresh_check()
         ret = self._session.delete(self._base_item_url + item_id + '/hiddenProperties/' + hidden_property_id)
         self._check_errors(ret)
         return True
@@ -343,6 +364,7 @@ class SbSession:
         :param itemid: ID of the Item to undelete
         :return: JSON of the undeleted Item
         """
+        self._refresh_check()
         ret = self._session.post(self._base_undelete_item_url, params={'itemId': itemid})
         self._check_errors(ret)
         return self._get_json(ret)
@@ -354,6 +376,7 @@ class SbSession:
         :param itemIds: List of Item IDs to delete
         :return: True if the items were successfully deleted
         """
+        self._refresh_check()
         for i in range(0, len(itemIds), self._max_item_count):
             ids_json = []
             for itemId in itemIds[i:i + self._max_item_count]:
@@ -369,6 +392,7 @@ class SbSession:
         :param parentid: ID of the new parent Item
         :return: The JSON of the moved Item
         """
+        self._refresh_check()
         ret = self._session.post(self._base_move_item_url, params={'itemId': itemid, 'destId': parentid})
         self._check_errors(ret)
         return self._get_json(ret)
@@ -380,6 +404,7 @@ class SbSession:
         :param parentid: ScienceBase Catalog Item ID of the new parent Item
         :return: A count of the number of Items moved
         """
+        self._refresh_check()
         count = 0
         if itemids:
             for itemid in itemids:
@@ -570,6 +595,7 @@ class SbSession:
         :param scrape_file: Whether to scrape metadata and create extensions from special files
         :return: The ScienceBase Catalog Item JSON of the updated Item
         """
+        self._refresh_check()
         url = self._base_upload_file_url
         checksums = []
         files = []
@@ -610,6 +636,7 @@ class SbSession:
         :param mimetype: MIME type of the file
         :return: JSON response from ScienceBase
         """
+        self._refresh_check()
         retval = None
         url = self._base_upload_file_temp_url
 
@@ -634,6 +661,7 @@ class SbSession:
         :param item: ScienceBase Catalog Item JSON of the Item on which to replace the file
         :return: ScienceBase Catalog Item JSON of the updated Item
         """
+        self._refresh_check()
         fname = os.path.basename(filename)
         #
         # replace file in files list
@@ -675,6 +703,7 @@ class SbSession:
         #
         # Upload file and point file JSON at it
         #
+        self._refresh_check()
         upld_json = self.upload_file(filename, itemfile['contentType'])
         itemfile['pathOnDisk'] = upld_json[0]['fileKey']
         itemfile['dateUploaded'] = upld_json[0]['dateUploaded']
@@ -704,6 +733,7 @@ class SbSession:
         :param item: ScienceBase Catalog Item JSON of the Item on which to delete the file
         :return: ScienceBase Catalog Item JSON of the updated Item
         """
+        self._refresh_check()
         fname = sb_filename
         #
         # remove file in files list
@@ -743,6 +773,7 @@ class SbSession:
         :param destination:  Destination directory in which to store the zip file
         :return: The full name and path of the downloaded file
         """
+        self._refresh_check()
         #
         # First check that there are files attached to the item, otherwise the call
         # to ScienceBase will return an empty zip file
@@ -771,6 +802,7 @@ class SbSession:
         :return: A list of dictionaries containing url, name and size of each file
 
         """
+        self._refresh_check()
         retval = []
         if item:
             #
@@ -817,6 +849,7 @@ class SbSession:
         :param progress_bar: Boolean to turn on progress bar printing
         :return: The full name and path of the downloaded file
         """
+        self._refresh_check()
         complete_name = os.path.join(destination, local_filename)
         print("downloading " + url + " to " + complete_name)
         response = self._session.get(url, stream=True)
@@ -855,6 +888,7 @@ class SbSession:
         :param progress_bar: Boolean to turn on progress bar printing
         :return: The ScienceBase Catalog file info JSON response
         """
+        self._refresh_check()
         file_info = self.get_item_file_info(item)
         for finfo in file_info:            
             self.download_file(finfo['url'], finfo['name'], destination, progress_bar)
@@ -865,6 +899,7 @@ class SbSession:
 
         :return: The ScienceBase Catalog Item ID of the logged in user's My Items folder
         """
+        self._refresh_check()
         ret = None
         if self._username:
             params = {'q': '', 'lq': 'title.untouched:"' + self._username + '"'}
@@ -884,6 +919,7 @@ class SbSession:
         :param parentid: ScienceBase Catalog Item ID of the item for which to look for children
         :return: A List of ScienceBase Catalog Item IDs of the direct children
         """
+        self._refresh_check()
         retval = []
         items = self.find_items({'filter':'parentIdExcludingLinks=' + parentid, 'max': self._max_item_count})
         while items and 'items' in items:
@@ -899,6 +935,7 @@ class SbSession:
         :param parentid: ScienceBase Catalog Item ID of the item for which to look for descendants
         :return: A List of ScienceBase Catalog Item IDs of the descendants
         """
+        self._refresh_check()
         retval = []
         items = self.find_items({'filter':'ancestorsExcludingLinks=' + parentid, 'max': self._max_item_count})
         while items and 'items' in items:
@@ -913,6 +950,7 @@ class SbSession:
         :param itemid: ScienceBase Catalog Item ID of the item for which to return shortcuts
         :return: A list of ScienceBase Catalog Item IDs to which the Item is shortcutted
         """
+        self._refresh_check()
         retval = []
         items = self.find_items({'filter':'linkParentId=' + itemid})
         while items and 'items' in items:
@@ -928,6 +966,7 @@ class SbSession:
         :param parentid: ScienceBase Catalog Item ID of item containing the shortcut
         :return: JSON response from ScienceBase Catalog
         """
+        self._refresh_check()
         ret = self._session.post(self._base_shortcut_item_url, params={'itemId':itemid, 'destId':parentid})
         return self._get_json(ret)
 
@@ -938,6 +977,7 @@ class SbSession:
         :param parentid: ScienceBase Catalog Item ID of item containing the shortcut
         :return: JSON response from ScienceBase Catalog
         """
+        self._refresh_check()
         ret = self._session.post(self._base_unlink_item_url, params={'itemId':itemid, 'destId':parentid})
         return self._get_json(ret)
 
@@ -947,6 +987,7 @@ class SbSession:
         :param url: OPeNDAP URL to query
         :return: ScienceBase Catalog Item facet JSON with information on the OPeNDAP service
         """
+        self._refresh_check()
         data = self._get_json(self._session.post(self._base_sb_url + 'items/scrapeNetCDFOPeNDAP', params={'url': url}))
         facet = {}
         facet['className'] = 'gov.sciencebase.catalog.item.facet.NetCDFOPeNDAPFacet'
@@ -970,6 +1011,7 @@ class SbSession:
         :param feature_geojson: GeoJSON describing the extent to create
         :return: ScienceBase Catalog Item JSON of the updated item.
         """
+        self._refresh_check()
         features = feature_geojson['features'] if feature_geojson['type'] == "FeatureCollection" else [feature_geojson]
         # Get the item from ScienceBase
         item = self.get_item(item_id)

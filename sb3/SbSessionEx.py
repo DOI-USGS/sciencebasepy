@@ -72,6 +72,22 @@ class SbSessionEx:
 
         return self
 
+    def add_token(self, token_json):
+        """Add in a token as a json or dictionary
+
+        Args:
+            token_json (_type_): _description_
+        """
+        self._token = token_json['access_token']
+        self._refresh_token = token_json['refresh_token']
+        authenticator = _keycloak_authenticator(self._realm, self._auth_server_url)
+        self._client_id = authenticator.keycloak_client_config.client_id
+        self._token_server_uri = (
+            authenticator.keycloak_client_config.get_token_server_uri()
+        )
+        self.refresh_token()
+
+
     def is_logged_in(self):
         '''is_logged_in
         '''

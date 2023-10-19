@@ -10,7 +10,6 @@ import logging
 import json
 import os
 import getpass
-import mimetypes
 import requests
 import hashlib
 import time
@@ -1204,17 +1203,6 @@ class SbSession:
         o = urlparse.urlsplit(url)
         q = [x for x in urlparse.parse_qsl(o.query) if "josso" not in x]
         return urlparse.urlunsplit((o.scheme, o.netloc, o.path, urlencode(q), o.fragment))
-    
-    def _guess_mimetype(self, filename):
-        """Guess mimetype of file
-
-        :param filename: Name of file for which to guess mimetype
-        :return: mimetype of file, or None if it cannot be guessed
-        """
-        mimetype, _ = mimetypes.guess_type(filename)
-        if mimetype is None:
-            mimetype = 'application/octet-stream'
-        return mimetype
 
     def debug(self):
         """Turn on HTTP logging for debugging purposes.

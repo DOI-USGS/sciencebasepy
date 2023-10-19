@@ -4,23 +4,32 @@ from pathlib import Path
 import os
 import requests
 from progress.bar import Bar
+import mimetypes
 
 from sb3 import querys
 
 _CHUNK_SIZE = 104857600  # 104857600 == 100MB
 _REFRESH_TOKEN_SUBTRACTED = 600  # 10 * 60
 
-def upload_cloud_file_upload_session(itemid, file_path, mimetype, sb_session_ex):
-    '''upload_cloud_file_upload_session
-    :param itemid ID of the ScienceBase Item to which to upload the file
-    :param filename File name
-    :param filepath Full path to the file
-    :param sbsession_ex SbSessionEx which has been logged in via Keycloak
-    '''
+def upload_cloud_file_upload_session(itemid, file_path, mimetype=None, sb_session_ex=None): 
+    """_summary_
+
+    :param itemid: (str) The identifier of the item to upload the file to
+    :param file_path: Local file path to the file to upload
+    :param mimetype: (str) The mime type of the file to upload.
+                     If None is provided will guess the file type based on extension.
+    :param sb_session_ex: (SBSessionEx) The session to use for the operation.
+
+    :return: (json) The json item return from ScienceBase
+    """
+
     sb_session_ex.get_logger().info("upload_large_file_upload_session....")
     total_size = Path(file_path).stat().st_size
     total_chunks = int(total_size / _CHUNK_SIZE) + 1
     fpath = f'{itemid}/{os.path.basename(file_path)}'
+
+    if mimetype is None:
+        mimetype = _guess_mimetype(file_path)
 
     query_create_multi_part = querys.create_multipart_upload_session(fpath, mimetype, sb_session_ex.get_current_user())
 
@@ -134,7 +143,6 @@ def upload_cloud_file_upload_session(itemid, file_path, mimetype, sb_session_ex)
 
     return sb_resp.json()
 
-
 def _read_in_chunks(file_object, chunk_size=_CHUNK_SIZE):
     """Lazy function (generator) to read a file piece by piece.
     Default chunk size: 1000k."""
@@ -143,7 +151,6 @@ def _read_in_chunks(file_object, chunk_size=_CHUNK_SIZE):
         if not data:
             break
         yield data
-
 
 def bulk_cloud_download(selected_rows, sb_session_ex):
     query = """
@@ -170,7 +177,6 @@ def bulk_cloud_download(selected_rows, sb_session_ex):
         raise Exception("Not status 200")
 
     return sb_resp.json()
-
 
 def publish_to_public_bucket(input, sb_session_ex):
     query = """
@@ -199,7 +205,6 @@ def publish_to_public_bucket(input, sb_session_ex):
 
     return sb_resp.json()
 
-
 def unpublish_from_public_bucket(input, sb_session_ex):
     query = """
                 mutation unpublishFile($input: UnpublishFileInput!){
@@ -227,7 +232,6 @@ def unpublish_from_public_bucket(input, sb_session_ex):
         raise Exception("Not status 200")
 
     return sb_resp.json()
-
 
 def delete_cloud_file(input, sb_session_ex):
     query = """
@@ -258,8 +262,7 @@ def delete_cloud_file(input, sb_session_ex):
 
     return sb_resp.text
 
-
-def upload_s3_files(input, sb_session_ex):
+def upload_s3_files(input, sb_session_ex): 
     query = """
                 mutation uploadS3Files($input: UploadS3FilesInput!){
                     uploadS3Files(input: $input){

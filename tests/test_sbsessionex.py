@@ -1,3 +1,5 @@
+import os
+import getpass
 import requests
 import requests_mock
 from sb3 import auth, client
@@ -10,7 +12,7 @@ adapter = requests_mock.Adapter()
 
 @pytest.mark.usefixtures('unstub')
 class SbSessionEx:
-    def getGraphQLURL(self):
+    def get_graphql_url(self):
         return "https://api-beta.staging.sciencebase.gov/graphql"
 
     def get_header(self):
@@ -20,18 +22,24 @@ class SbSessionEx:
             "authorization": f"Bearer AUTHORIZATION_TOKEN",
         }
 
-    def getLogger(self):
+    def get_logger(self):
         return logging
+    
+    def get_current_user(self):
+        return f"{getpass.getuser()}@usgs.gov"
 
+    def refresh_token_before_expire(self, refresh_amount):
+        return True
 
-class TestAuthenticator:
+class TestClient:
+
     def test_upload(self, requests_mock, monkeypatch):
 
         session = SbSessionEx()
 
-        itemId = "5f9982f1d34e9cff790bd2fe"
-        filename = "sample_error.png"
-        file_path = "tests/resources/sample_error.png"
+        item_id = "5f9982f1d34e9cff790bd2fe"
+        dname = os.path.dirname(__file__)
+        file_path = os.path.join(dname, "data/Python.jpg")
         GRAPHQL_URL = "https://api-beta.staging.sciencebase.gov/graphql"
 
         upload_url_repsonse = """
@@ -73,6 +81,6 @@ class TestAuthenticator:
             status_code=200,
         )
 
-        client.upload_test_with_graphql_upload_session(
-            itemId, filename, file_path, session=session
+        client.upload_cloud_file_upload_session(
+            item_id, file_path, mimetype=None, sb_session_ex=session
         )

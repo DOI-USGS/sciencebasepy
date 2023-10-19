@@ -70,7 +70,7 @@ class TestsciencebasepyMethods(unittest.TestCase):
 
     def test_upload_shapefile_no_scrape(self):
         sb = SbSession('beta').login(self.TEST_USER, self.TEST_PASSWORD)
-        file_dir = 'test/data/FHP_Great_Lakes_Basin_boundary'
+        file_dir = 'tests/data/FHP_Great_Lakes_Basin_boundary'
         files = ["%s/%s" % (file_dir, f) for f in listdir(file_dir) if isfile(join(file_dir, f))]
 
         my_items_id = sb.get_my_items_id()
@@ -85,7 +85,7 @@ class TestsciencebasepyMethods(unittest.TestCase):
 
     def test_upload_shapefile_individual_no_scrape(self):
         sb = SbSession('beta').login(self.TEST_USER, self.TEST_PASSWORD)
-        file_dir = 'test/data/FHP_Great_Lakes_Basin_boundary'
+        file_dir = 'tests/data/FHP_Great_Lakes_Basin_boundary'
         files = ["%s/%s" % (file_dir, f) for f in listdir(file_dir) if isfile(join(file_dir, f))]
 
         # Updating existing item with shapefile, uploading files individually

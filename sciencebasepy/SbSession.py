@@ -43,6 +43,7 @@ class SbSession:
     _max_item_count = 1000
     _env = None
     _sbSessionEx = None
+    _refresh_time_limit = 600
 
     def __init__(self, env=None):
         """Initialize session and set JSON headers"""
@@ -92,7 +93,7 @@ class SbSession:
         self._last_token_update = time.time()
 
     def refresh_token(self):
-        """ Refresh the access and refresh tokens
+        """ Force refresh the access and refresh tokens
         """      
         self._sbSessionEx.refresh_token() 
         self._update_headers_keycloak()
@@ -100,8 +101,7 @@ class SbSession:
     def _refresh_check(self):
         """Refresh our Keycloak token if it's going to expire within 10 min
         """
-        ten_minutes = 600
-        self._sbSessionEx.refresh_token_before_expire(ten_minutes)
+        self._sbSessionEx.refresh_token_before_expire(self._refresh_time_limit)
 
     def login(self, username, password):
         """Log into ScienceBase
@@ -122,14 +122,11 @@ class SbSession:
         """
         self._session.headers.update({'content-type': 'application/json'})
         self._session.headers.update({'accept': 'application/json'})
-        self._session.headers.update({'authorization': 'Bearer ' + self._sbSessionEx._token})
+        self._session.headers.update({'authorization': 'Bearer ' + self._sbSessionEx.get_access_token()})
 
-    # Commented out when we moved to Keycloak authentication
-    # def logout(self):
-    #     """Log out of ScienceBase"""
-    #     self._session.post(self._base_sb_url + 'j_spring_security_logout')
-    #     self._session.cookies.clear_session_cookies()
-    #     self._session.params = {}
+    def logout(self):
+        """Log out of ScienceBase by revoking the Keycloak tokens"""
+        self._sbSessionEx.revoke_token()
 
     def loginc(self, username, tries=3):
         """Log into ScienceBase, prompting for the password
@@ -624,6 +621,7 @@ class SbSession:
         # Close any open files
         for f in files:
             f[1].close()
+        return ret
         return self._get_json(ret)
 
     def upload_file(self, filename, mimetype=None):
@@ -1517,17 +1515,7 @@ class SbSession:
 
                         requests_session = requests.session()
 
-                        if self._env == 'beta' or self._env == 'dev':
-                            graphql_url = "https://api-beta.staging.sciencebase.gov/graphql"
-                        else:
-                            graphql_url = "https://api.sciencebase.gov/graphql"
-
-                        token = self._sbSessionEx._token
-
-                        headers = {"Content-Type": "application/json",
-                                   "Accept": "application/json",
-                                   "Authorization": "Bearer " + token
-                                   }
+                        graphql_url = self._sbSessionEx.get_graphql_url()
 
                         query = """ mutation UpdateItem($input: UpdateItemInput!) {
                                             updateItem(input: $input) {
@@ -1545,7 +1533,7 @@ class SbSession:
                             try:
                                 resp = requests_session.post(
                                     graphql_url,
-                                    headers=headers,
+                                    headers=self._sbSessionEx.get_header(),
                                     json={'query': query, 'variables': {'input': input}}
                                 )
                                 break

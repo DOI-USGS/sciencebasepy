@@ -157,13 +157,12 @@ class SbSession:
         """
         return self.get_json(self._base_item_url + 'ping')
 
-    # Commented out when we moved to Keycloak authentication
-    # def get_session_info(self):
-    #     """Get the JOSSO session information for the current session
+    def get_session_info(self):
+        """Get the JOSSO session information for the current session
 
-    #     :return: ScienceBase Josso session info
-    #     """
-    #     return self.get_json(self._base_sb_url + 'jossoHelper/sessionInfo?includeJossoSessionId=true')
+        :return: ScienceBase Josso session info
+        """
+        return self.get_json(self._base_sb_url + 'jossoHelper/sessionInfo?includeJossoSessionId=true')
 
     def get_item(self, itemid, params=None):
         """Get the ScienceBase Item JSON with the given ID

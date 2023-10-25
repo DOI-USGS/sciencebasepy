@@ -52,13 +52,16 @@ class SbSession:
             self._base_sb_url = "https://beta.sciencebase.gov/catalog/"
             self._base_directory_url = "https://beta.sciencebase.gov/directory/"
             self._users_id = "4f4e4772e4b07f02db47e231"
+            self._sb_manager_url = "https://beta.staging.sciencebase.gov/manager/"
         elif env == 'dev':
             self._base_sb_url = "http://localhost:8090/catalog/"
             self._base_directory_url = "https://beta.sciencebase.gov/directory/"
+            self._sb_manager_url = "https://dev.staging.sciencebase.gov/manager/"
         else:
             self._base_sb_url = "https://www.sciencebase.gov/catalog/"
             self._base_directory_url = "https://www.sciencebase.gov/directory/"
             self._users_id = "4f4e4772e4b07f02db47e231"
+            self._sb_manager_url = "https://sciencebase.usgs.gov/manager/"
 
         self._base_item_url = self._base_sb_url + "item/"
         self._base_items_url = self._base_sb_url + "items/"
@@ -80,6 +83,21 @@ class SbSession:
         except DistributionNotFound:
             pass
         self._session.headers.update({'User-Agent': self._session.headers['User-Agent'] + sciencebasepy_agent})
+
+    def get_token(self):
+        """Convenience function to help users in obtaining a token for authentication.
+
+        Opens SB manager in the default system browser and 
+        prints instructions for copying and using the token
+        """
+        print("A browser window/tab should momentarily open with ScienceBase Manager")
+        print("Sign in using active directory or login.gov")
+        print("Click the user icon in the upper right and select 'Copy API token'")
+        print("This copies the token to your clipboard")
+        print("Use this value in the add_token function as the token_json parameter")
+        time.sleep(4)
+        import webbrowser
+        webbrowser.open(self._sb_manager_url, new=1, autoraise=True)
 
     def add_token(self, token_json):
         """Add Keycloak access token for authentication

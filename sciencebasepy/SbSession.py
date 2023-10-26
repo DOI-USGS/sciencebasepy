@@ -119,7 +119,10 @@ class SbSession:
     def _refresh_check(self):
         """Refresh our Keycloak token if it's going to expire within 10 min
         """
-        self._sbSessionEx.refresh_token_before_expire(self._refresh_time_limit)
+        if self._sbSessionEx is None:
+            return False
+        else:
+            return self._sbSessionEx.refresh_token_before_expire(self._refresh_time_limit)
 
     def login(self, username, password):
         """Log into ScienceBase
@@ -166,7 +169,10 @@ class SbSession:
         
         :return: Whether the SbSession is logged in and active in ScienceBase.
         """
-        return self._sbSessionEx.is_logged_in()
+        if self._sbSessionEx is None:
+            return False
+        else:
+            return self._sbSessionEx.is_logged_in()
 
     def ping(self):
         """Ping ScienceBase.  A very low-cost operation to determine whether ScienceBase is available.

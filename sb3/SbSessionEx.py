@@ -51,6 +51,8 @@ class SbSessionEx:
 
         try:
             self._authenticator.authenticate(username, password)
+        except auth.TokenAuthenticationFailed as e:
+            raise
         except Exception as e:
             self._logging.error(f"Keycloak login failed for {username} -- cloud services not available")
             raise
@@ -149,6 +151,7 @@ class SbSessionEx:
         if refresh_amount is None:
             refresh_amount = self._auto_refresh_time
         current_time = (datetime.today()).timestamp() + refresh_amount
+        current_time = datetime.fromtimestamp(current_time)
         return self._authenticator.get_token_expiry() - current_time
 
     def revoke_token(self):

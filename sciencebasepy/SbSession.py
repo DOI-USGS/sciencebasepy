@@ -141,7 +141,6 @@ class SbSession:
     def _update_headers_keycloak(self):
         """Updates the session's headers with the keycloak authorization headers
         """
-        self._session.headers.update({'content-type': 'application/json'})
         self._session.headers.update({'accept': 'application/json'})
         self._session.headers.update({'authorization': 'Bearer ' + self._sbSessionEx.get_access_token()})
 

@@ -22,16 +22,18 @@ class SbSessionEx:
         self._env = env
         self._logging = logging
         self._auto_refresh_time=auth_refresh_time
-        self._client_id = 'files-ui'
         if env == "beta":
             self._graphql_url = "https://api-beta.staging.sciencebase.gov/graphql"
             self._realm = "ScienceBase-B"
+            self._client_id = 'catalog'
         elif env == "dev":
             self._graphql_url = "http://localhost:4000/graphql"
             self._realm = "ScienceBase-B"
+            self._client_id = 'catalog'
         else:
             self._graphql_url = "https://api.sciencebase.gov/graphql"
             self._realm = "ScienceBase"
+            self._client_id = 'files-ui'
 
         self._authenticator = auth.DirectAccessAuthenticator(self._auth_server_url, self._realm, self._client_id)
 

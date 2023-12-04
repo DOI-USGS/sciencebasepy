@@ -53,6 +53,7 @@ class SbSession:
             self._base_directory_url = "https://beta.sciencebase.gov/directory/"
             self._users_id = "4f4e4772e4b07f02db47e231"
             self._sb_manager_url = "https://beta.staging.sciencebase.gov/manager/"
+            # self._sb_manager_url = 'http://localhost:3000/manager'
         elif env == 'dev':
             self._base_sb_url = "http://localhost:8090/catalog/"
             self._base_directory_url = "https://beta.sciencebase.gov/directory/"
@@ -292,22 +293,22 @@ class SbSession:
         return ret
 
     def create_item(self, item_json):
-        self._refresh_check()
         """Create a new Item in ScienceBase
 
         :param item_json: JSON representing the ScienceBase Catalog item to create
         :return: Full item JSON from ScienceBase Catalog after creation
         """
+        self._refresh_check()
         ret = self._session.post(self._base_item_url, data=json.dumps(item_json))
         return self._get_json(ret)
 
     def create_items(self, items_json):
-        self._refresh_check()
         """Create new Items in ScienceBase
 
         :param items_json: JSON list representing the ScienceBase Catalog items to create
         :return: Full items JSON from ScienceBase Catalog after creation
         """
+        self._refresh_check()
         ret = self._session.post(self._base_items_url + "upsert/", data=json.dumps(items_json))
         return self._get_json(ret)
 
@@ -323,12 +324,12 @@ class SbSession:
         return self._get_json(ret)
 
     def update_item(self, item_json):
-        self._refresh_check()
         """Update an existing ScienceBase Item
 
         :param item_json: JSON representing the ScienceBase Catalog item to update
         :return: Full item JSON from ScienceBase Catalog after update
         """
+        self._refresh_check()
         ret = self._session.put(self._base_item_url + item_json['id'], data=json.dumps(item_json))
         return self._get_json(ret)
 
@@ -361,9 +362,7 @@ class SbSession:
         :return: True if the item was successfully deleted
         """
         self._refresh_check()
-        ret = self._session.delete(self._base_item_url + item_json['id'], data=json.dumps(item_json))
-        self._check_errors(ret)
-        return True
+        return self._sbSessionEx.delete_item(item_json['id']) 
 
     def delete_hidden_property(self, item_id, hidden_property_id):
         """Delete an existing Hidden Property from a ScienceBase Item

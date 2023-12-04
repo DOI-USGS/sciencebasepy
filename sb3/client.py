@@ -286,3 +286,29 @@ def upload_s3_files(input, sb_session_ex):
         raise Exception("Not status 200")
 
     return sb_resp.json()
+
+
+def delete_item(input, sb_session_ex):
+    query = """
+            mutation DeleteItemQuery($input: DeleteItemInput!){
+                deleteItem(input: $input){
+                    itemId
+                }
+            }
+        """
+
+    variables = {"input": input}
+
+    requests_session = requests.session()
+
+    sb_resp = requests_session.post(
+        sb_session_ex.get_graphql_url(),
+        headers=sb_session_ex.get_header(),
+        json={'query': query, 'variables': variables}
+    )
+
+    if sb_resp.status_code != 200 or 'errors' in sb_resp.json():
+        sb_session_ex.get_logger().error(sb_resp.json())
+        raise Exception("Not status 200")
+
+    return sb_resp.json()

@@ -168,7 +168,7 @@ class DirectAccessAuthenticator:
         return f"{self._keycloak_uri}/realms/{self._realm}/protocol/openid-connect/token"
 
     def get_revoke_server_uri(self):
-        return f"{self._keycloak_uri}/realms/{self._realm}/protocol/openid-connect/revoke"
+        return f"{self._keycloak_uri}/realms/{self._realm}/protocol/openid-connect/logout"
 
     def __str__(self):
         return json.dumps(self.auth_token) 

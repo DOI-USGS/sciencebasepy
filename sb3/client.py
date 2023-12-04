@@ -287,7 +287,6 @@ def upload_s3_files(input, sb_session_ex):
 
     return sb_resp.json()
 
-
 def delete_item(input, sb_session_ex):
     query = """
             mutation DeleteItemQuery($input: DeleteItemInput!){
@@ -312,3 +311,14 @@ def delete_item(input, sb_session_ex):
         raise Exception("Not status 200")
 
     return sb_resp.json()
+
+def _guess_mimetype(filename):
+    """Guess mimetype of file
+
+    :param filename: Name of file for which to guess mimetype
+    :return: mimetype of file, or 'application/octet-stream' if it cannot be guessed
+    """
+    mimetype, _ = mimetypes.guess_type(filename)
+    if mimetype is None:
+        mimetype = 'application/octet-stream'
+    return mimetype

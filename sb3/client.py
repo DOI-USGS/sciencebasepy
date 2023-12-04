@@ -109,6 +109,7 @@ def upload_cloud_file_upload_session(itemid, file_path, mimetype=None, sb_sessio
                 raise Exception("Not status 200")
 
             eTag = res.headers["ETag"]
+            print(eTag)
             parts_header.append({"ETag": eTag, "PartNumber": part_number})
             prog_bar.next()
 
@@ -286,3 +287,14 @@ def upload_s3_files(input, sb_session_ex):
         raise Exception("Not status 200")
 
     return sb_resp.json()
+
+def _guess_mimetype(filename):
+    """Guess mimetype of file
+
+    :param filename: Name of file for which to guess mimetype
+    :return: mimetype of file, or 'application/octet-stream' if it cannot be guessed
+    """
+    mimetype, _ = mimetypes.guess_type(filename)
+    if mimetype is None:
+        mimetype = 'application/octet-stream'
+    return mimetype

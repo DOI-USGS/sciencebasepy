@@ -17,6 +17,7 @@ import time
 from pkg_resources import get_distribution
 from pkg_resources import DistributionNotFound
 from sb3.SbSessionEx import SbSessionEx
+from sb3 import client
 
 class SbSession:
     """SbSession encapsulates a session with ScienceBase, and provides methods for working with
@@ -122,7 +123,11 @@ class SbSession:
         if self._sbSessionEx is None:
             return False
         else:
-            return self._sbSessionEx.refresh_token_before_expire(self._refresh_time_limit)
+            try:
+                return self._sbSessionEx.refresh_token_before_expire(self._refresh_time_limit)
+            except:
+                return False
+        return True
 
     def login(self, username, password):
         """Log into ScienceBase
@@ -477,8 +482,7 @@ class SbSession:
         if not self._sbSessionEx.is_logged_in():
             print(f'{self._username} not logged into Keycloak -- cloud services not available')
         else:
-            mimetype = self._guess_mimetype(filename)
-            response = self._sbSessionEx.upload_cloud_file_upload_session(itemid, filename, mimetype)
+            response = self._sbSessionEx.upload_cloud_file_upload_session(itemid, filename)
             if 'data' in response and 'completeMultiPartUpload' in response['data'] and 'Successful' in response['data']['completeMultiPartUpload']:
                 just_fname = os.path.split(filename)[1]
                 path_on_disk = ""
@@ -663,11 +667,12 @@ class SbSession:
         if os.access(filename, os.F_OK):
             # if no mimetype was sent in, try to guess
             if mimetype is None:
-                mimetype = self._guess_mimetype(filename)
+                mimetype = client._guess_mimetype(filename)
             fname = os.path.basename(filename)
             checksum = self.get_file_checksum(filename)
             with open(filename, 'rb') as f:
                 ret = self._session.post(url, params={'md5Checksum': checksum}, files=[('files[]', (fname, f, mimetype))])
+                return ret
                 retval = self._get_json(ret)
         else:
             raise Exception("File not found: " + filename)

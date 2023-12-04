@@ -22,16 +22,19 @@ class SbSessionEx:
         self._env = env
         self._logging = logging
         self._auto_refresh_time=auth_refresh_time
-        self._client_id = 'files-ui'
         if env == "beta":
             self._graphql_url = "https://api-beta.staging.sciencebase.gov/graphql"
             self._realm = "ScienceBase-B"
+            self._client_id = 'catalog'
         elif env == "dev":
             self._graphql_url = "http://localhost:4000/graphql"
             self._realm = "ScienceBase-B"
+            self._client_id = 'catalog'
         else:
             self._graphql_url = "https://api.sciencebase.gov/graphql"
             self._realm = "ScienceBase"
+            self._client_id = 'files-ui'
+            # self._client_id = 'catalog' #TODO: change _client_id to this when sbgraphql/catalog auth branches are finalized and in production
 
         self._authenticator = auth.DirectAccessAuthenticator(self._auth_server_url, self._realm, self._client_id)
 
@@ -116,6 +119,15 @@ class SbSessionEx:
         '''delete files from ScienceBase item and S3 content bucket and/or S3 publish bucket
         '''
         return client.delete_cloud_file(input, self)
+    
+    def delete_item(self, item_id):
+        """Delete an existing ScienceBase Item
+
+        :param item_id: ID of the ScienceBase Item to delete
+        :return: True if the item was successfully deleted
+        """
+        input = {'itemId': item_id}
+        return client.delete_item(input, self)
 
     def get_access_token(self):
         """_summary_
@@ -135,11 +147,7 @@ class SbSessionEx:
         :refresh_amount: Amount subtracted (is seconds) from expired token value, that will trigger token refresh
         :return: True, if refresh is done, False, refresh is not triggered
         """
-        if refresh_amount is None:
-            refresh_amount = self._auto_refresh_time
-        refresh_time = (datetime.today()).timestamp() + refresh_amount
-
-        if self._authenticator.get_token_expiry().timestamp() - refresh_time < 0:
+        if self._authenticator.get_token_expiry().timestamp() - datetime.today().timestamp() < 0:
             self._authenticator.refresh_token()
             return True
         return False

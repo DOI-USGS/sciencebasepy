@@ -109,7 +109,6 @@ def upload_cloud_file_upload_session(itemid, file_path, mimetype=None, sb_sessio
                 raise Exception("Not status 200")
 
             eTag = res.headers["ETag"]
-            print(eTag)
             parts_header.append({"ETag": eTag, "PartNumber": part_number})
             prog_bar.next()
 
@@ -288,13 +287,28 @@ def upload_s3_files(input, sb_session_ex):
 
     return sb_resp.json()
 
-def _guess_mimetype(filename):
-    """Guess mimetype of file
 
-    :param filename: Name of file for which to guess mimetype
-    :return: mimetype of file, or 'application/octet-stream' if it cannot be guessed
-    """
-    mimetype, _ = mimetypes.guess_type(filename)
-    if mimetype is None:
-        mimetype = 'application/octet-stream'
-    return mimetype
+def delete_item(input, sb_session_ex):
+    query = """
+            mutation DeleteItemQuery($input: DeleteItemInput!){
+                deleteItem(input: $input){
+                    itemId
+                }
+            }
+        """
+
+    variables = {"input": input}
+
+    requests_session = requests.session()
+
+    sb_resp = requests_session.post(
+        sb_session_ex.get_graphql_url(),
+        headers=sb_session_ex.get_header(),
+        json={'query': query, 'variables': variables}
+    )
+
+    if sb_resp.status_code != 200 or 'errors' in sb_resp.json():
+        sb_session_ex.get_logger().error(sb_resp.json())
+        raise Exception("Not status 200")
+
+    return sb_resp.json()

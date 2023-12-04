@@ -1,4 +1,4 @@
-'''Unit Test Suite for scinecebasepy'''
+'''Unit Test Suite for sciencebasepy'''
 import unittest
 import getpass
 from os import listdir

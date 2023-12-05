@@ -646,7 +646,6 @@ class SbSession:
         # Close any open files
         for f in files:
             f[1].close()
-        return ret
         return self._get_json(ret)
 
     def upload_file(self, filename, mimetype=None):

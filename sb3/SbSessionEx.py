@@ -33,8 +33,7 @@ class SbSessionEx:
         else:
             self._graphql_url = "https://api.sciencebase.gov/graphql"
             self._realm = "ScienceBase"
-            self._client_id = 'files-ui'
-            # self._client_id = 'catalog' #TODO: change _client_id to this when sbgraphql/catalog auth branches are finalized and in production
+            self._client_id = 'catalog'
 
         self._authenticator = auth.DirectAccessAuthenticator(self._auth_server_url, self._realm, self._client_id)
 
@@ -140,11 +139,10 @@ class SbSessionEx:
         """Refresh tokens in ScienceBaseEx"""
         return self._authenticator.get_refresh_token()
 
-    def refresh_token_before_expire(self, refresh_amount=None):
+    def refresh_token_before_expire(self):
         """Refresh token if token has not expired, but will expire within some time,
         if token will expire with in that time then refresh will be triggered
 
-        :refresh_amount: Amount subtracted (is seconds) from expired token value, that will trigger token refresh
         :return: True, if refresh is done, False, refresh is not triggered
         """
         if self._authenticator.get_token_expiry().timestamp() - datetime.today().timestamp() < 0:
@@ -152,15 +150,12 @@ class SbSessionEx:
             return True
         return False
 
-    def refresh_token_time_remaining(self, refresh_amount=None):
+    def refresh_token_time_remaining(self):
         """Use for printing remaining time
         useful for debugging session timeout
         """
-        if refresh_amount is None:
-            refresh_amount = self._auto_refresh_time
-        current_time = (datetime.today()).timestamp() + refresh_amount
-        current_time = datetime.fromtimestamp(current_time)
-        return self._authenticator.get_token_expiry() - current_time
+        current_time = datetime.today().timestamp()
+        return self._authenticator.get_token_expiry().timestamp() - current_time
 
     def revoke_token(self):
         """Revoke the tokens for the current session

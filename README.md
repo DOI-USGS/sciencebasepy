@@ -443,5 +443,16 @@ Example Usage
 ````
 
 # Developer Notes
+Run the unit tests by executing the following in the project directory:
+```console
+python -m unittest
+```
+
+Run the pytests by executing the following in the project/tests directory:
+```console
+pytest
+```
+
+
 
 To publish to pypi, follow the instructions [here](https://packaging.python.org/tutorials/packaging-projects/)

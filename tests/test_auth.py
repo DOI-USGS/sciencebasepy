@@ -5,6 +5,7 @@ from sb3 import SbSessionEx
 import sciencebasepy as pysb
 import json
 import time
+import datetime
 
 
 KEYCLOAK_URI = "https://www.sciencebase.gov/auth"
@@ -127,5 +128,7 @@ class TestSBSession():
         assert sb_session._sbSessionEx.get_access_token() == "PW_TOKEN_STRING"
 
         #Mock that the token is about to expire, so it get's refreshed here
-        sb_session._sbSessionEx.refresh_token_before_expire(refresh_amount=2800)
+        sb_session._sbSessionEx._authenticator._token_expiry = datetime.datetime.now() - datetime.timedelta(minutes=15)
+        
+        sb_session._sbSessionEx.refresh_token_before_expire()
         assert sb_session._sbSessionEx.get_access_token() == "TOKEN_REFRESH_STRING"

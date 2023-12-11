@@ -1,6 +1,6 @@
 from sciencebasepy import SbSession
 
-FILE_NAME = 'tests/resources/Python.jpg'
+FILE_NAME = 'tests/data/Python.jpg'
 
 sb = SbSession()
 CREATE_ITEM = True

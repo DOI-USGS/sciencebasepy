@@ -125,7 +125,7 @@ class SbSession:
             return False
         else:
             try:
-                return self._sbSessionEx.refresh_token_before_expire(self._refresh_time_limit)
+                return self._sbSessionEx.refresh_token_before_expire()
             except:
                 return False
         return True

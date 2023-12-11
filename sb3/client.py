@@ -9,7 +9,6 @@ import mimetypes
 from sb3 import querys
 
 _CHUNK_SIZE = 104857600  # 104857600 == 100MB
-_REFRESH_TOKEN_SUBTRACTED = 600  # 10 * 60
 
 def upload_cloud_file_upload_session(itemid, file_path, mimetype=None, sb_session_ex=None): 
     """_summary_
@@ -36,7 +35,7 @@ def upload_cloud_file_upload_session(itemid, file_path, mimetype=None, sb_sessio
     sb_session_ex.get_logger().info(query_create_multi_part)
 
     # Refresh token add amount to expire
-    sb_session_ex.refresh_token_before_expire(_REFRESH_TOKEN_SUBTRACTED)
+    sb_session_ex.refresh_token_before_expire()
     requests_session = requests.session()
 
     sb_resp = requests_session.post(
@@ -73,11 +72,11 @@ def upload_cloud_file_upload_session(itemid, file_path, mimetype=None, sb_sessio
             part_number = part_number + 1
 
             # Refresh token add amount to expire
-            sb_session_ex.refresh_token_before_expire(_REFRESH_TOKEN_SUBTRACTED)
+            sb_session_ex.refresh_token_before_expire()
 
             sb_session_ex.get_logger().info(
                 "time remaining : "
-                + str(sb_session_ex.refresh_token_time_remaining(_REFRESH_TOKEN_SUBTRACTED))
+                + str(sb_session_ex.refresh_token_time_remaining())
             )
 
             queryCreatePresignedUrlPart = querys.get_presigned_url_for_chunk(
@@ -125,7 +124,7 @@ def upload_cloud_file_upload_session(itemid, file_path, mimetype=None, sb_sessio
 
     sb_session_ex.get_logger().info(query_create_multi_part)
 
-    sb_session_ex.refresh_token_before_expire(_REFRESH_TOKEN_SUBTRACTED)
+    sb_session_ex.refresh_token_before_expire()
 
     sb_resp = requests_session.post(
         sb_session_ex.get_graphql_url(),

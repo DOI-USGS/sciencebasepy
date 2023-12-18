@@ -287,6 +287,21 @@ def upload_s3_files(input, sb_session_ex):
     return sb_resp.json()
 
 def delete_item(input, sb_session_ex):
+    """
+    Deletes an item using the ScienceBase GraphQL API.
+
+    Args:
+        input (dict): The input parameters for the delete operation.
+                        {}
+        sb_session_ex (object): An instance of the ScienceBaseSessionEx class.
+
+    Returns:
+        dict: The response from the ScienceBase API.
+
+    Raises:
+        Exception: If the response status code is not 200 or if there are errors in the response.
+    """
+
     query = """
             mutation DeleteItemQuery($input: DeleteItemInput!){
                 deleteItem(input: $input){

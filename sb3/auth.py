@@ -61,30 +61,21 @@ class DirectAccessAuthenticator:
         :raises TokenAuthenticationFailed: if the revoke operation fails
         """
         refresh_token = self.get_refresh_token()
-        access_token = self.get_access_token()
 
         data = {
             "client_id": self._client_id,
-            "token": access_token,
+            "refresh_token": refresh_token
         }
         token_resp = requests.post(self.get_revoke_server_uri(), data=data)
-        if token_resp.status_code == 200:
-            pass
-        else:
-            raise TokenAuthenticationFailed(token_resp, "Token Revoke")
-        
-        data = {
-            "client_id": self._client_id,
-            "token": refresh_token,
-        }
-        token_resp = requests.post(self.get_revoke_server_uri(), data=data)
-        if token_resp.status_code == 200:
+        if token_resp.status_code == 204:
             pass
         else:
             raise TokenAuthenticationFailed(token_resp, "Token Revoke")
 
         self.token = None
         self._token_expiry = None
+        
+        return True
 
     def refresh_token(self):
         """Refresh the token request on the server

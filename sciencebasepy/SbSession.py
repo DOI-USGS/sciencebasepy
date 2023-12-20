@@ -725,6 +725,7 @@ class SbSession:
                 new_facets.append(facet)
             item['facets'] = new_facets
         self.update_item(item)
+        return item
 
     def _replace_file(self, filename, itemfile):
         """Upload a file to ScienceBase and update file json with new path on disk.

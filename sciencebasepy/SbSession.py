@@ -115,7 +115,7 @@ class SbSession:
     def refresh_token(self):
         """ Force refresh the access and refresh tokens
         """      
-        self._sbSessionEx.refresh_token() 
+        self._sbSessionEx.refresh_token_before_expire() 
         self._update_headers_keycloak()
 
     def _refresh_check(self):
@@ -125,7 +125,7 @@ class SbSession:
             return False
         else:
             try:
-                return self._sbSessionEx.refresh_token_before_expire()
+                return self.refresh_token()
             except:
                 return False
         return True

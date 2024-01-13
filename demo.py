@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from sciencebasepy import SbSession
 
 FILE_NAME = 'tests/data/Python.jpg'

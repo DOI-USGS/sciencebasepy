@@ -1,3 +1,19 @@
+[tool.poetry]
+name = "sciencebasepy"
+version = "2.0.14"
+description = ""
+authors = ["DOI-USGS"]
+license = "CC-BY-4.0"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+charset-normalizer = "^3.3.2"
+progress = "^1.6"
+pytest = "^7.4.4"
+requests = "^2.31.0"
+requests-mock = "^1.11.0"
+
 [build-system]
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"

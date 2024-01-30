@@ -567,12 +567,14 @@ class SbSession:
 
                 selected_rows.append(selected_row)
 
-            response = self._sbSessionEx.bulk_cloud_download(selected_rows)
-            if response:
-                for uri in response['data']['getS3DownloadUrl']:
-                    download_links.append(uri['downloadUri'])
-            else:
-                raise Exception('Tokenized S3 link generation failed for ' + itemid)
+            for i in range(0, len(selected_rows), 10):
+                chunk = selected_rows[i:i+10]
+                response = self._sbSessionEx.bulk_cloud_download(chunk)
+                if response:
+                    for uri in response['data']['getS3DownloadUrl']:
+                        download_links.append(uri['downloadUri'])
+                else:
+                    raise Exception('Tokenized S3 link generation failed for ' + itemid)
         return download_links
 
     def download_cloud_files(self, filenames, download_links, destination='.'):

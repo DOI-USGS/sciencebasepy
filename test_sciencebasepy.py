@@ -10,6 +10,7 @@ class TestsciencebasepyMethods(unittest.TestCase):
     BETA_TEST_COMMUNITY_ID = '54d518d8e4b0afcce73d1a65'
     TEST_USER = None
     TEST_PASSWORD = None
+    SB_ENVIRONMENT = 'beta'
 
     @classmethod
     def setUpClass(cls):
@@ -19,18 +20,18 @@ class TestsciencebasepyMethods(unittest.TestCase):
         cls.TEST_PASSWORD = getpass.getpass()
 
     def test_get_item(self):
-        sb = SbSession('beta').login(self.TEST_USER, self.TEST_PASSWORD)
+        sb = SbSession(self.SB_ENVIRONMENT).login(self.TEST_USER, self.TEST_PASSWORD)
         item = sb.get_item(self.SB_CATALOG_ITEM_ID)
         self.assertTrue(item is not None)
         self.assertEqual(item['title'], 'ScienceBase Catalog')
 
     def test_get_hidden_properties(self):
-        sb = SbSession('beta').login(self.TEST_USER, self.TEST_PASSWORD)
+        sb = SbSession(self.SB_ENVIRONMENT).login(self.TEST_USER, self.TEST_PASSWORD)
         hidden_properties = sb.get_hidden_properties(self.SB_CATALOG_ITEM_ID)
         self.assertTrue(str(hidden_properties.get("value")) is not None)
 
     def test_create_get_update_delete_hidden_property(self):
-        sb = SbSession('beta').login(self.TEST_USER, self.TEST_PASSWORD)
+        sb = SbSession(self.SB_ENVIRONMENT).login(self.TEST_USER, self.TEST_PASSWORD)
         new_hidden_property = {'type': 'Note',
                                'value': 'test hidden note create'}
         hidden_property = sb.create_hidden_property(self.SB_CATALOG_ITEM_ID, new_hidden_property)
@@ -51,7 +52,7 @@ class TestsciencebasepyMethods(unittest.TestCase):
         self.assertEqual(delete_hidden_property, True)
 
     def test_ancestors_field_in_find_items(self):
-        sb = SbSession('beta').login(self.TEST_USER, self.TEST_PASSWORD)
+        sb = SbSession(self.SB_ENVIRONMENT).login(self.TEST_USER, self.TEST_PASSWORD)
         itemsJson = sb.find_items({'parentId':self.BETA_TEST_COMMUNITY_ID, 'fields':'parentId,ancestors'})
         self.assertTrue(itemsJson['items'] is not None)
         self.assertTrue(isinstance(itemsJson['items'], list))
@@ -62,14 +63,14 @@ class TestsciencebasepyMethods(unittest.TestCase):
         self.assertTrue(item['parentId'] in item['ancestors'])
 
     def test_ancestors_field_in_get_item(self):
-        sb = SbSession('beta').login(self.TEST_USER, self.TEST_PASSWORD)
+        sb = SbSession(self.SB_ENVIRONMENT).login(self.TEST_USER, self.TEST_PASSWORD)
         item = sb.get_item(self.BETA_TEST_COMMUNITY_ID, {'fields':'parentId,ancestors'})
         self.assertTrue(isinstance(item['ancestors'], list))
         self.assertTrue(item['parentId'] is not None)
         self.assertTrue(item['parentId'] in item['ancestors'])
 
     def test_upload_shapefile_no_scrape(self):
-        sb = SbSession('beta').login(self.TEST_USER, self.TEST_PASSWORD)
+        sb = SbSession(self.SB_ENVIRONMENT).login(self.TEST_USER, self.TEST_PASSWORD)
         file_dir = 'tests/data/FHP_Great_Lakes_Basin_boundary'
         files = ["%s/%s" % (file_dir, f) for f in listdir(file_dir) if isfile(join(file_dir, f))]
 
@@ -84,7 +85,7 @@ class TestsciencebasepyMethods(unittest.TestCase):
         self.assertFalse('facets' in item)
 
     def test_upload_shapefile_individual_no_scrape(self):
-        sb = SbSession('beta').login(self.TEST_USER, self.TEST_PASSWORD)
+        sb = SbSession(self.SB_ENVIRONMENT).login(self.TEST_USER, self.TEST_PASSWORD)
         file_dir = 'tests/data/FHP_Great_Lakes_Basin_boundary'
         files = ["%s/%s" % (file_dir, f) for f in listdir(file_dir) if isfile(join(file_dir, f))]
 
@@ -101,7 +102,7 @@ class TestsciencebasepyMethods(unittest.TestCase):
         self.assertFalse('facets' in item)
 
     def test_add_delete_user_acl(self):
-        sb = SbSession('beta').login(self.TEST_USER, self.TEST_PASSWORD)
+        sb = SbSession(self.SB_ENVIRONMENT).login(self.TEST_USER, self.TEST_PASSWORD)
         item = sb.create_item({'title': "ACL Test", 'parentId': sb.get_my_items_id()})
         acls = sb.get_permissions(item['id'])
         self.assertFalse('USER:wilsonl@usgs.gov' in acls['read']['acl'])
@@ -120,7 +121,7 @@ class TestsciencebasepyMethods(unittest.TestCase):
         sb.delete_item(item)
 
     def test_add_delete_role_acl(self):
-        sb = SbSession('beta').login(self.TEST_USER, self.TEST_PASSWORD)
+        sb = SbSession(self.SB_ENVIRONMENT).login(self.TEST_USER, self.TEST_PASSWORD)
         item = sb.create_item({'title': "ACL Test", 'parentId': sb.get_my_items_id()})
         acls = sb.get_permissions(item['id'])
         self.assertFalse('ROLE:ScienceBase_DataAdmin' in acls['read']['acl'])
@@ -139,7 +140,7 @@ class TestsciencebasepyMethods(unittest.TestCase):
         sb.delete_item(item)
 
     def test_set_permissions(self):
-        sb = SbSession('beta').login(self.TEST_USER, self.TEST_PASSWORD)
+        sb = SbSession(self.SB_ENVIRONMENT).login(self.TEST_USER, self.TEST_PASSWORD)
         item = sb.create_item({'title': "ACL Test", 'parentId': sb.get_my_items_id()})
         acls = sb.get_permissions(item['id'])
         self.assertFalse('USER:spongebob@bikini_bottom.net' in acls['read']['acl'])
@@ -150,17 +151,17 @@ class TestsciencebasepyMethods(unittest.TestCase):
         sb.delete_item(item)
 
     def test_has_public_read(self):
-        sb = SbSession('beta').login(self.TEST_USER, self.TEST_PASSWORD)
+        sb = SbSession(self.SB_ENVIRONMENT).login(self.TEST_USER, self.TEST_PASSWORD)
         acls = sb.get_permissions(sb.get_my_items_id())
         self.assertFalse(sb.has_public_read(acls))   
 
     def test_print_acls(self): 
-        sb = SbSession('beta').login(self.TEST_USER, self.TEST_PASSWORD)
+        sb = SbSession(self.SB_ENVIRONMENT).login(self.TEST_USER, self.TEST_PASSWORD)
         acls = sb.get_permissions(sb.get_my_items_id())
         sb.print_acls(acls)
 
     def test_publish_unpublish_item(self):    
-        sb = SbSession('beta').login(self.TEST_USER, self.TEST_PASSWORD)
+        sb = SbSession(self.SB_ENVIRONMENT).login(self.TEST_USER, self.TEST_PASSWORD)
         item = sb.create_item({'title': "ACL Test", 'parentId': self.BETA_TEST_COMMUNITY_ID})
         self.assertFalse(sb.has_public_read(sb.get_permissions(item['id'])))
         acls = sb.publish_item(item['id'])
@@ -169,7 +170,7 @@ class TestsciencebasepyMethods(unittest.TestCase):
         self.assertFalse(sb.has_public_read(item['id']))
 
     def test_relationships(self):
-        sb = SbSession('beta').login(self.TEST_USER, self.TEST_PASSWORD)
+        sb = SbSession(self.SB_ENVIRONMENT).login(self.TEST_USER, self.TEST_PASSWORD)
         item1 = sb.create_item({'title': "Project", 'parentId': sb.get_my_items_id()})
         item2 = sb.create_item({'title': "Product", 'parentId': sb.get_my_items_id()})
         result = sb.create_related_item_link(item1['id'], item2['id'])

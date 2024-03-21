@@ -160,7 +160,8 @@ class SbSessionEx:
     def revoke_token(self):
         """Revoke the tokens for the current session
         """
-        self._authenticator.revoke_token()
+        if self._authenticator.revoke_token():
+            return True
 
     def get_header(self):
         '''get_header

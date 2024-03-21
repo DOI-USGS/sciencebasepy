@@ -115,7 +115,7 @@ class SbSession:
     def refresh_token(self):
         """ Force refresh the access and refresh tokens
         """      
-        self._sbSessionEx.refresh_token() 
+        self._sbSessionEx.refresh_token_before_expire() 
         self._update_headers_keycloak()
 
     def _refresh_check(self):
@@ -125,7 +125,7 @@ class SbSession:
             return False
         else:
             try:
-                return self._sbSessionEx.refresh_token_before_expire()
+                return self.refresh_token()
             except:
                 return False
         return True
@@ -152,7 +152,18 @@ class SbSession:
 
     def logout(self):
         """Log out of ScienceBase by revoking the Keycloak tokens"""
-        self._sbSessionEx.revoke_token()
+        if self._sbSessionEx.revoke_token():
+            # Reset the session
+            self._session = requests.Session()
+            self._session.headers.update({'Accept': 'application/json'})
+            sciencebasepy_agent = ' sciencebase-sciencebasepy'
+            try:
+                sciencebasepy_agent += f'/{get_distribution("sciencebasepy").version}'
+            except DistributionNotFound:
+                pass
+            self._session.headers.update({'User-Agent': self._session.headers['User-Agent'] + sciencebasepy_agent})
+            # Print out message
+            print ('You have now been logged out.')
 
     def loginc(self, username, tries=3):
         """Log into ScienceBase, prompting for the password
@@ -714,6 +725,7 @@ class SbSession:
                 new_facets.append(facet)
             item['facets'] = new_facets
         self.update_item(item)
+        return item
 
     def _replace_file(self, filename, itemfile):
         """Upload a file to ScienceBase and update file json with new path on disk.
@@ -726,7 +738,7 @@ class SbSession:
         # Upload file and point file JSON at it
         #
         self._refresh_check()
-        upld_json = self.upload_file(filename, itemfile['contentType'])
+        upld_json = self.upload_file(filename, itemfile['contentType']).json()
         itemfile['pathOnDisk'] = upld_json[0]['fileKey']
         itemfile['dateUploaded'] = upld_json[0]['dateUploaded']
         itemfile['uploadedBy'] = upld_json[0]['uploadedBy']

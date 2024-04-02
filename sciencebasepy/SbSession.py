@@ -589,7 +589,7 @@ class SbSession:
         for i in range(len(download_links)):
             filename = filenames[i]
             link = download_links[i]
-            self.download_file(link, filename, destination)
+            self.download_file(link, filename, destination, False, True)
 
     def upload_file_and_create_item(self, parentid, filename, scrape_file=True):
         """Upload a file and create a new Item in ScienceBase
@@ -876,7 +876,7 @@ class SbSession:
                             retval.append(finfo)
         return retval
 
-    def download_file(self, url, local_filename, destination='.', progress_bar=False):
+    def download_file(self, url, local_filename, destination='.', progress_bar=False, use_requests=False):
         """Download file from URL
 
         :param url: ScienceBase Catalog Item file download URL
@@ -888,7 +888,13 @@ class SbSession:
         self._refresh_check()
         complete_name = os.path.join(destination, local_filename)
         print("downloading " + url + " to " + complete_name)
-        response = self._session.get(url, stream=True)
+        response = None
+        # if downloading a presigned URL cloud resource, use requests.get
+        # to avoid multiple authorizations error:
+        if use_requests == True: 
+            response = requests.get(url, stream=True)
+        else:
+            response = self._session.get(url, stream=True)
 
         # https://stackoverflow.com/a/15645088/3362993
         download_length = 0

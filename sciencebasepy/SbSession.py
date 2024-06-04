@@ -1662,22 +1662,49 @@ class SbSession:
                 return False
 
             else:
-                params = {
-                    "filename": filename,
-                    "item_id": item_id,
-                    "queue_name": "publish_sd_to_agol",
-                    "email": self._username,
-                    "type": "single"
-                }
+                input = {"itemId": item_id, 
+                        "fileName": filename, 
+                        "taskType": "publish"}
 
-                if self._env == 'beta' or self._env == 'dev':
-                    start_spatial_service_url = "https://gggcfbu5gh.execute-api.us-west-2.amazonaws.com/prod/startSpatialService"
+                requests_session = requests.session()
+
+                graphql_url = self._sbSessionEx.get_graphql_url()
+
+                query = """ mutation triggerAgolTask($input: triggerAgolTaskInput!) {
+                                triggerAgolTask(input: $input) {
+                                    itemId
+                                    fileName
+                                    taskInitialized
+                                    statusCode
+                                }
+                            }
+                        """
+
+                failed_retry_time = 10
+                for tries in range(3):
+                    try:
+                        resp = requests_session.post(
+                            graphql_url,
+                            headers=self._sbSessionEx.get_header(),
+                            json={'query': query, 'variables': {'input': input}}
+                        )
+                        break
+                    except requests.exceptions.Timeout as e:
+                        print("TriggerAgolTask Timeout: " + repr(e))
+                    except requests.exceptions.RequestException as e:
+                        print("TriggerAgolTask RequestException: " + repr(e))
+                    # Wait before we try again
+                    time.sleep(failed_retry_time)
+                    failed_retry_time *= 2
+
+                print("RESPONSE (GRAPHQL): " + resp.text)
+
+                if "SyntaxError" in resp.text:
+                    print("SyntaxError: " + resp.text)
+                    return False
                 else:
-                    start_spatial_service_url = "https://rwxatj0usl.execute-api.us-west-2.amazonaws.com/prod/startSpatialService"
-                self._session.post(start_spatial_service_url, json=params)
-
-                print("Triggered spatial service creation in ArcGIS Online.")
-                return True
+                    print("Triggered spatial service creation in ArcGIS Online.")
+                    return True
 
     def stop_esri_service(self, item_id, filename):
         """Stops a spatial service that had been published on a ScienceBase service definition (.sd) file in ArcGIS Online or ArcGIS Server.
@@ -1696,25 +1723,50 @@ class SbSession:
                         if facet['name'] == filename:
                             if 'serverType' in facet:
                                 if facet['serverType'] == 'AGOL_Feature_Server' or facet['serverType'] == 'AGOL_WMTS_Server':
-                                    if 'enabledServices' in facet:
-                                        if len(facet['enabledServices']) == 2:
-                                            agol_id_1 = facet['enabledServices'][0]
-                                            agol_id_2 = facet['enabledServices'][1]
-                                            file_path_used = facet['filePathUsed']
-                                            params = {
-                                                "filename": file_path_used,
-                                                "item_id": item_id,
-                                                "agol_id_1": agol_id_1,
-                                                "agol_id_2": agol_id_2,
-                                                "email": self._username
-                                            }
-                                            if self._env == 'beta' or self._env == 'dev':
-                                                stop_spatial_service_url = "https://02j686fjyf.execute-api.us-west-2.amazonaws.com/prod/stopSpatialService"
-                                            else:
-                                                stop_spatial_service_url = "https://qk9hqzs5yf.execute-api.us-west-2.amazonaws.com/prod/stopSpatialService"
-                                            self._session.post(stop_spatial_service_url, json=params)
-                                            print("Triggered deletion of spatial service in ArcGIS Online.")
-                                            return True
+                                    input = {"itemId": item_id, 
+                                            "fileName": filename, 
+                                            "taskType": "delete"}
+
+                                    requests_session = requests.session()
+
+                                    graphql_url = self._sbSessionEx.get_graphql_url()
+
+                                    query = """ mutation triggerAgolTask($input: triggerAgolTaskInput!) {
+                                                    triggerAgolTask(input: $input) {
+                                                        itemId
+                                                        fileName
+                                                        taskInitialized
+                                                        statusCode
+                                                    }
+                                                }
+                                            """
+
+                                    failed_retry_time = 10
+                                    for tries in range(3):
+                                        try:
+                                            resp = requests_session.post(
+                                                graphql_url,
+                                                headers=self._sbSessionEx.get_header(),
+                                                json={'query': query, 'variables': {'input': input}}
+                                            )
+                                            break
+                                        except requests.exceptions.Timeout as e:
+                                            print("TriggerAgolTask Timeout: " + repr(e))
+                                        except requests.exceptions.RequestException as e:
+                                            print("TriggerAgolTask RequestException: " + repr(e))
+                                        # Wait before we try again
+                                        time.sleep(failed_retry_time)
+                                        failed_retry_time *= 2
+
+                                    print("RESPONSE (GRAPHQL): " + resp.text)
+
+                                    if "SyntaxError" in resp.text:
+                                        print("SyntaxError: " + resp.text)
+                                        return False
+                                    else:
+                                        print("Triggered spatial service deletion in ArcGIS Online.")
+                                        return True
+                                        
                                 elif 'servicePath' in facet and 'serviceId' in facet and 'processingState' in facet:
                                     if facet['servicePath'] != '' and facet['serviceId'] != '' and facet['processingState'] == 'success':
                                         payload = {'operation': 'delete'}

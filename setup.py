@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name='sciencebasepy',
-    version='2.0.15',
+    version='2.0.17',
     author="USGS ScienceBase Development Team",
     author_email="sciencebase@usgs.gov",
     description="Python ScienceBase Utilities",

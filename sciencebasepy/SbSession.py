@@ -1767,16 +1767,16 @@ class SbSession:
                                         print("Triggered spatial service deletion in ArcGIS Online.")
                                         return True
                                         
-                                elif 'servicePath' in facet and 'serviceId' in facet and 'processingState' in facet:
-                                    if facet['servicePath'] != '' and facet['serviceId'] != '' and facet['processingState'] == 'success':
-                                        payload = {'operation': 'delete'}
-                                        if self._env == 'beta' or self._env == 'dev':
-                                            url = "https://beta.sciencebase.gov/catalog/item/createProcessJob/" + item_id
-                                        else:
-                                            url = "https://www.sciencebase.gov/catalog/item/createProcessJob/" + item_id
-                                        self._session.get(url, params=payload)
-                                        print("Triggered deletion of spatial service from ScienceBase ArcGIS Server instance.")
-                                        return True
+                            elif 'servicePath' in facet and 'serviceId' in facet and 'processingState' in facet:
+                                if facet['servicePath'] != '' and facet['serviceId'] != '' and facet['processingState'] == 'success':
+                                    payload = {'operation': 'delete'}
+                                    if self._env == 'beta' or self._env == 'dev':
+                                        url = "https://beta.sciencebase.gov/catalog/item/createProcessJob/" + item_id
+                                    else:
+                                        url = "https://www.sciencebase.gov/catalog/item/createProcessJob/" + item_id
+                                    self._session.get(url, params=payload)
+                                    print("Triggered deletion of spatial service from ScienceBase ArcGIS Server instance.")
+                                    return True
 
                 print("Error: published ArcGIS service not found. Please publish the service before attempting to delete it.")
                 return False

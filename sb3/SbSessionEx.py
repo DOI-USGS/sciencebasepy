@@ -139,14 +139,21 @@ class SbSessionEx:
         """Refresh tokens in ScienceBaseEx"""
         return self._authenticator.get_refresh_token()
 
-    def refresh_token_before_expire(self):
+    def refresh_token(self):
+        """Force refresh of token"""
+        self._authenticator.refresh_token()
+        return True
+
+    def refresh_token_before_expire(self, time_remaining=600):
         """Refresh token if token has not expired, but will expire within some time,
         if token will expire with in that time then refresh will be triggered
 
+        :param time_remaining in seconds, before token expiry, to trigger refresh
+
         :return: True, if refresh is done, False, refresh is not triggered
         """
-        if self._authenticator.get_token_expiry().timestamp() - datetime.today().timestamp() < 0:
-            self._authenticator.refresh_token()
+        if self._authenticator.get_token_expiry().timestamp() - datetime.today().timestamp() <= time_remaining:
+            self.refresh_token()
             return True
         return False
 

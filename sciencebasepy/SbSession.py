@@ -112,10 +112,17 @@ class SbSession:
 
         self._last_token_update = time.time()
 
-    def refresh_token(self):
+    def refresh_token(self, refresh_time_limit=None):
         """ Force refresh the access and refresh tokens
-        """      
-        self._sbSessionEx.refresh_token_before_expire() 
+
+        :param refresh_time_limit: The time limit in seconds before the token expires to refresh the token
+        """
+        if refresh_time_limit is None:
+            # No time limit specified, force refresh the token
+            self._sbSessionEx.refresh_token() 
+        else:
+            # Time limit specified, refresh the token only if it's going to expire within the time limit
+            self._sbSessionEx.refresh_token_before_expire(time_remaining=refresh_time_limit)
         self._update_headers_keycloak()
 
     def _refresh_check(self):
@@ -125,7 +132,7 @@ class SbSession:
             return False
         else:
             try:
-                return self.refresh_token()
+                return self.refresh_token(refresh_time_limit=self._refresh_time_limit)
             except:
                 return False
         return True
@@ -1767,16 +1774,16 @@ class SbSession:
                                         print("Triggered spatial service deletion in ArcGIS Online.")
                                         return True
                                         
-                                elif 'servicePath' in facet and 'serviceId' in facet and 'processingState' in facet:
-                                    if facet['servicePath'] != '' and facet['serviceId'] != '' and facet['processingState'] == 'success':
-                                        payload = {'operation': 'delete'}
-                                        if self._env == 'beta' or self._env == 'dev':
-                                            url = "https://beta.sciencebase.gov/catalog/item/createProcessJob/" + item_id
-                                        else:
-                                            url = "https://www.sciencebase.gov/catalog/item/createProcessJob/" + item_id
-                                        self._session.get(url, params=payload)
-                                        print("Triggered deletion of spatial service from ScienceBase ArcGIS Server instance.")
-                                        return True
+                            elif 'servicePath' in facet and 'serviceId' in facet and 'processingState' in facet:
+                                if facet['servicePath'] != '' and facet['serviceId'] != '' and facet['processingState'] == 'success':
+                                    payload = {'operation': 'delete'}
+                                    if self._env == 'beta' or self._env == 'dev':
+                                        url = "https://beta.sciencebase.gov/catalog/item/createProcessJob/" + item_id
+                                    else:
+                                        url = "https://www.sciencebase.gov/catalog/item/createProcessJob/" + item_id
+                                    self._session.get(url, params=payload)
+                                    print("Triggered deletion of spatial service from ScienceBase ArcGIS Server instance.")
+                                    return True
 
                 print("Error: published ArcGIS service not found. Please publish the service before attempting to delete it.")
                 return False

@@ -476,7 +476,7 @@ class SbSession:
             try:
                 self.get_item(itemid)
 
-                input = {"filelist": filenames, "id": itemid, "key": s3_path}
+                input = {"filelist": filenames, "id": itemid, "key": s3_path, "username": self._username}
 
                 response = self._sbSessionEx.upload_s3_files(input)
 

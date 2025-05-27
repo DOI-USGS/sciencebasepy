@@ -69,6 +69,8 @@ class SbSessionEx:
         """
         self._authenticator.authenticate_with_token(token_json)
 
+        self._username = self._authenticator.get_username()
+
     def is_logged_in(self):
         '''Checks if the current refresh token can be refreshed. 
            If it has expired or can't be refreshed the user is not logged in

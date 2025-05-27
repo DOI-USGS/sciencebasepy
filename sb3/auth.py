@@ -162,7 +162,27 @@ class DirectAccessAuthenticator:
         return f"{self._keycloak_uri}/realms/{self._realm}/protocol/openid-connect/logout"
 
     def __str__(self):
-        return json.dumps(self.auth_token) 
+        return json.dumps(self.auth_token)
+    
+    def get_username(self):
+        """Fetches the username from the Keycloak userinfo endpoint.
+
+        :return: (str) The username associated with the access token
+        """
+        if self._auth_token is None:
+            raise ValueError("Authentication token is missing. Authenticate first.")
+
+        headers = {
+            "Authorization": f"Bearer {self.get_access_token()}"
+        }
+        userinfo_url = f"{self._keycloak_uri}/realms/{self._realm}/protocol/openid-connect/userinfo"
+
+        response = requests.get(userinfo_url, headers=headers)
+        if response.status_code == 200:
+            userinfo = response.json()
+            return userinfo.get("preferred_username")
+        else:
+            raise TokenAuthenticationFailed(response, "Fetching User Info")
 
 class TokenAuthenticationFailed(Exception):
     """Exception raised for errors returned when authenticating

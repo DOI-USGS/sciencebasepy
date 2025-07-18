@@ -180,3 +180,24 @@ class SbSessionEx:
             "accept": "application/json",
             "authorization": "Bearer " + self._authenticator.get_access_token(),
         }
+    
+    def scrape_fgdc_xml(self, item_id, file_name, bucket, file_type):
+        '''
+        Scrape FGDC metadata XML for a given file stored in the cloud.
+
+        Parameters:
+            item_id (str): The ScienceBase Item ID associated with the file.
+            file_name (str): The name of the file to retrieve and parse.
+            bucket (str): The name of the S3 bucket containing the file.
+            file_type (str): The MIME type of the FGDC metadata file.
+
+        Returns:
+            dict or bool: The parsed metadata as a dictionary if successful, or False if the operation fails.
+        '''
+
+        input = {'action':'update_item',
+                'bucket':bucket,
+                'fileName':file_name,
+                'fileType':file_type,
+                'itemId':item_id}
+        return client.scrape_fgdc_xml(input, self)

@@ -516,6 +516,61 @@ class SbSession:
                 raise Exception('Cloud upload failed for', filename)
         return ret
 
+    def scrape_S3_fgdc_xml(self, itemid, filename):
+        """
+        Executes a GraphQL mutation to convert FGDC XML metadata into ScienceBase JSON.
+
+        This function sends a mutation request to the ScienceBase GraphQL API using the provided metadata input and
+        session context. It's typically used to ingest or update metadata stored in S3 into a ScienceBase item.
+
+        Parameters:
+            input (dict): Mutation payload with keys:
+                - action (str): Operation type (e.g., 'update_item')
+                - bucket (str): Name of the S3 bucket containing the FGDC XML file
+                - fileName (str): The target filename to process
+                - fileType (str): MIME type of the FGDC file (e.g., 'application/fgdc+xml')
+                - itemId (str): ScienceBase item ID to update
+            sb_session_ex (SbSessionEx): Authenticated ScienceBase session object providing headers, endpoint URL,
+                and a logger for diagnostics.
+
+        Returns:
+            str: Raw response text from the ScienceBase GraphQL endpoint, typically containing the item ID or status.
+
+        Raises:
+            Exception: If the HTTP response status is not 200 or if GraphQL errors are returned.
+
+        Example:
+            >>> input = {
+            >>>     'action': 'update_item',
+            >>>     'bucket': 'my-s3-bucket',
+            >>>     'fileName': 'metadata.xml',
+            >>>     'fileType': 'application/fgdc+xml',
+            >>>     'itemId': '123abc'
+            >>> }
+            >>> scrape_fgdc_xml(input, sb_session_ex)
+        """
+        if not self._sbSessionEx.is_logged_in():
+            print(f'{self._username} not logged into Keycloak -- cloud services not available')
+            return False
+        
+        item = self.get_item(itemid)
+        files = item.get('files', {})
+        file_match = next((item for item in files if item['name'] == filename), None)
+        if not file_match:
+            print(f"{filename} not found in item's files")
+            return False
+        bucket = file_match.get('bucket', None)
+        if not bucket:
+            print(f"bucket not found in file's json")
+            return False
+        content_type = file_match.get('contentType', '')
+        if not content_type == 'application/fgdc+xml':
+            print(f"{filename} not of type 'application/fgdc+xml'")
+            return False
+
+        response = self._sbSessionEx.scrape_fgdc_xml(itemid, filename, bucket, content_type)
+        return response
+
     def generate_S3_download_links(self, itemid, filenames):
         """generate list of bulk cloud file download tokens
 

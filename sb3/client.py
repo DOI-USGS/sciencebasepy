@@ -336,3 +336,51 @@ def _guess_mimetype(filename):
     if mimetype is None:
         mimetype = 'application/octet-stream'
     return mimetype
+
+def scrape_fgdc_xml(input, sb_session_ex):
+    """
+    Send a GraphQL mutation to convert FGDC XML metadata into ScienceBase JSON format.
+
+    Parameters:
+        input (dict): A dictionary containing mutation input fields, typically including:
+            - action (str): Type of operation (e.g., 'update_item')
+            - bucket (str): S3 bucket containing the XML file
+            - fileName (str): Name of the FGDC XML file
+            - fileType (str): MIME type of the file
+            - itemId (str): ScienceBase Item ID
+        sb_session_ex (SbSessionEx): An extended ScienceBase session object with methods for authentication,
+            headers, GraphQL URL retrieval, and logging.
+
+    Returns:
+        str: Raw response text from the ScienceBase GraphQL endpoint if the request is successful.
+
+    Raises:
+        Exception: If the HTTP response status is not 200 or if the response contains GraphQL errors.
+    """
+    query = """
+                mutation xmlToSbJson($input: xmlToSbJsonInput!){
+                    xmlToSbJson(input: $input){
+                        id
+                    }
+                }
+            """
+
+    variables = {"input": input}
+
+    requests_session = requests.session()
+
+    sb_resp = requests_session.post(
+        sb_session_ex.get_graphql_url(),
+        headers=sb_session_ex.get_header(),
+        json={'query': query, 'variables': variables}
+    )
+
+    if sb_resp.status_code != 200 or 'errors' in sb_resp:
+        print("Error:")
+        print(sb_resp)
+        print(sb_resp.text)
+        print(sb_resp.status_code)
+        sb_session_ex.get_logger().error(sb_resp)
+        raise Exception("Not status 200")
+
+    return sb_resp.text

@@ -530,6 +530,7 @@ class SbSession:
                 - fileName (str): The target filename to process
                 - fileType (str): MIME type of the FGDC file (e.g., 'application/fgdc+xml')
                 - itemId (str): ScienceBase item ID to update
+                - pathOnDisk(str): __s3__
             sb_session_ex (SbSessionEx): Authenticated ScienceBase session object providing headers, endpoint URL,
                 and a logger for diagnostics.
 
@@ -545,7 +546,8 @@ class SbSession:
             >>>     'bucket': 'my-s3-bucket',
             >>>     'fileName': 'metadata.xml',
             >>>     'fileType': 'application/fgdc+xml',
-            >>>     'itemId': '123abc'
+            >>>     'itemId': '123abc',
+            >>>     'pathOnDisk': '__s3__'
             >>> }
             >>> scrape_fgdc_xml(input, sb_session_ex)
         """
@@ -567,8 +569,9 @@ class SbSession:
         if not content_type == 'application/fgdc+xml':
             print(f"{filename} not of type 'application/fgdc+xml'")
             return False
+        path_on_disk = '__s3__'
 
-        response = self._sbSessionEx.scrape_fgdc_xml(itemid, filename, bucket, content_type)
+        response = self._sbSessionEx.scrape_fgdc_xml(itemid, filename, bucket, content_type, path_on_disk)
         return response
 
     def generate_S3_download_links(self, itemid, filenames):

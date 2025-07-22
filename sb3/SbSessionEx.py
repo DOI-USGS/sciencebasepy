@@ -181,7 +181,7 @@ class SbSessionEx:
             "authorization": "Bearer " + self._authenticator.get_access_token(),
         }
     
-    def scrape_fgdc_xml(self, item_id, file_name, bucket, file_type):
+    def scrape_fgdc_xml(self, item_id, file_name, bucket, file_type, path_on_disk):
         '''
         Scrape FGDC metadata XML for a given file stored in the cloud.
 
@@ -199,5 +199,6 @@ class SbSessionEx:
                 'bucket':bucket,
                 'fileName':file_name,
                 'fileType':file_type,
-                'itemId':item_id}
+                'itemId':item_id,
+                'pathOnDisk':path_on_disk}
         return client.scrape_fgdc_xml(input, self)

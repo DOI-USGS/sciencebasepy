@@ -358,9 +358,9 @@ def scrape_fgdc_xml(input, sb_session_ex):
         Exception: If the HTTP response status is not 200 or if the response contains GraphQL errors.
     """
     query = """
-                mutation xmlToSbJson($input: xmlToSbJsonInput!){
+                mutation xmlToSbJsonFgdcxmlQuery($input: xmlToSbJsonInput!){
                     xmlToSbJson(input: $input){
-                        id
+                        item
                     }
                 }
             """

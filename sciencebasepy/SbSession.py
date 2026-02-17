@@ -14,8 +14,11 @@ import requests
 import hashlib
 import time
 
-from pkg_resources import get_distribution
-from pkg_resources import DistributionNotFound
+# from pkg_resources import get_distribution
+# from pkg_resources import DistributionNotFound
+
+from importlib.metadata import version, PackageNotFoundError
+
 from sb3.SbSessionEx import SbSessionEx
 from sb3 import client
 
@@ -81,8 +84,10 @@ class SbSession:
         self._session.headers.update({'Accept': 'application/json'})
         sciencebasepy_agent = ' sciencebase-sciencebasepy'
         try:
-            sciencebasepy_agent += f'/{get_distribution("sciencebasepy").version}'
-        except DistributionNotFound:
+            # sciencebasepy_agent += f'/{get_distribution("sciencebasepy").version}'
+            sciencebasepy_agent += f'/{version("sciencebasepy")}'
+        # except DistributionNotFound:
+        except PackageNotFoundError:
             pass
         self._session.headers.update({'User-Agent': self._session.headers['User-Agent'] + sciencebasepy_agent})
 

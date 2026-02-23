@@ -170,8 +170,8 @@ class SbSession:
             self._session.headers.update({'Accept': 'application/json'})
             sciencebasepy_agent = ' sciencebase-sciencebasepy'
             try:
-                sciencebasepy_agent += f'/{get_distribution("sciencebasepy").version}'
-            except DistributionNotFound:
+                sciencebasepy_agent += f'/{version("sciencebasepy")}'
+            except PackageNotFoundError:
                 pass
             self._session.headers.update({'User-Agent': self._session.headers['User-Agent'] + sciencebasepy_agent})
             # Print out message

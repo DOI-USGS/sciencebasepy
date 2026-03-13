@@ -68,7 +68,7 @@ The SbSession class provides the following methods:
 ### Login
 
 #### Token Authentication
-With the exception of service accounts, most users will require an API token to login. Refer to the `Authentication Options.ipynb` notebook for a suggested workflow.
+With the exception of service accounts, most users will require an API token to login. Refer to [Authentication Options.ipynb](https://code.usgs.gov/sas/sdm/sciencebasepy/-/blob/master/Authentication%20Options.ipynb) for a suggested workflow.
 
 * `get_token()`
 Convenience function to help users obtain an API token for authentication.

@@ -239,7 +239,8 @@ Creates a spatial service on a published ScienceBase service definition (.sd) fi
 Stops a spatial service that had been published on a ScienceBase service definition (.sd) file in ArcGIS Online or ArcGIS Server.
 
 * `publish_array_to_public_bucket(item_id, filenames)`
-Publish a list of files on an item to the public S3 publish bucket.
+Publish a list of files on an item to the public S3 publish bucket. Public files should not
+contain any sensitive or controlled data.
 
 * `unpublish_array_from_public_bucket(item_id, filenames)`
 Unpublish a list of files on an item from the public S3 publish bucket.

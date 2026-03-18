@@ -66,12 +66,30 @@ Module Contents
 The SbSession class provides the following methods:
 
 ### Login
+
+#### Token Authentication
+With the exception of service accounts, most users will require an API token to login. Refer to [Authentication Options.ipynb](https://code.usgs.gov/sas/sdm/sciencebasepy/-/blob/master/Authentication%20Options.ipynb) for a suggested workflow.
+
+* `get_token()`
+Convenience function to help users obtain an API token for authentication.
+
+* `add_token(token_json)`
+Log in to ScienceBase using the given API token.
+
+* `refresh_token()`
+Force refresh the API access and refresh tokens.
+
+#### Password Authentication
+Password-based authentication is only available for service accounts, but can be the best solution for "headless" tasks, such as automated server jobs. Please contact the ScienceBase team if this describes your use case.
+
 * `login(username, password)`
 Log into ScienceBase using the username and password.  This function will add a cookie to the session to be used by subsequent calls. Valid user credentials are issued to USGS users through Department of Interior Active Directory (AD). Sponsored collaborators can be issued user credentials per request when working in coordination with USGS on science projects. 
 
 * `loginc(username)`
 Log into ScienceBase using the given username, and prompt for the password.  The password is not
 echoed to the console.  Provided as a convenience for interactive scripts.
+
+#### Login Resources
 
 * `is_logged_in()`
 Return whether the SbSession is logged in and active in ScienceBase
@@ -221,7 +239,8 @@ Creates a spatial service on a published ScienceBase service definition (.sd) fi
 Stops a spatial service that had been published on a ScienceBase service definition (.sd) file in ArcGIS Online or ArcGIS Server.
 
 * `publish_array_to_public_bucket(item_id, filenames)`
-Publish a list of files on an item to the public S3 publish bucket.
+Publish a list of files on an item to the public S3 publish bucket. Public files should not
+contain any sensitive or controlled data.
 
 * `unpublish_array_from_public_bucket(item_id, filenames)`
 Unpublish a list of files on an item from the public S3 publish bucket.

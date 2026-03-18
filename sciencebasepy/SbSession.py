@@ -104,7 +104,7 @@ class SbSession:
         import webbrowser
         webbrowser.open(self._sb_manager_url, new=1, autoraise=True)
 
-    def add_token(self, token_json):
+    def add_token(self, token_json: dict):
         """Add Keycloak access token for authentication
 
         :param token_json: json object obtained from "Copy API Key" button in ScienceBase Manager

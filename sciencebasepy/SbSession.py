@@ -869,6 +869,42 @@ class SbSession:
             item['facets'] = new_facets
         self.update_item(item)
 
+    @staticmethod
+    def _safe_path(destination, filename):
+        """Resolve a file path and ensure it stays within the destination directory.
+
+        Prevents path traversal attacks (CWE-22) where a server-supplied filename
+        containing '../' or an absolute path could write files outside the intended
+        destination directory.
+
+        :param destination: The intended destination directory
+        :param filename: The server-supplied filename to validate
+        :return: The safe, resolved full path within destination
+        :raises ValueError: If the filename would escape the destination directory
+        """
+        # Strip the filename down to its basename to remove directory components.
+        # This handles both relative traversal (../../../etc/passwd) and
+        # absolute paths (/tmp/evil.txt).
+        safe_name = os.path.basename(filename)
+
+        # Reject empty or degenerate names that reduce to nothing
+        if not safe_name or safe_name in ('.', '..'):
+            raise ValueError(
+                f"Unsafe or empty filename rejected: {filename!r}"
+            )
+
+        # Build the full path and verify it resolves under destination
+        dest_real = os.path.realpath(destination)
+        full_path = os.path.realpath(os.path.join(dest_real, safe_name))
+
+        if not full_path.startswith(dest_real + os.sep) and full_path != dest_real:
+            raise ValueError(
+                f"Path traversal detected: {filename!r} resolves to "
+                f"{full_path!r} which is outside destination {dest_real!r}"
+            )
+
+        return full_path
+
     def get_item_files_zip(self, item, destination='.'):
         """Download all files from a ScienceBase Item as a zip.  The zip is created server-side
         and streamed to the client.
@@ -890,7 +926,7 @@ class SbSession:
         # Download the zip
         #
         r = self._session.get(self._base_download_files_url + item['id'], stream=True)
-        local_filename = os.path.join(destination, item['id'] + ".zip")
+        local_filename = self._safe_path(destination, item['id'] + ".zip")
 
         with open(local_filename, 'wb') as f:
             for chunk in r.iter_content(chunk_size=1024):
@@ -954,7 +990,7 @@ class SbSession:
         :return: The full name and path of the downloaded file
         """
         self._refresh_check()
-        complete_name = os.path.join(destination, local_filename)
+        complete_name = self._safe_path(destination, local_filename)
         print("downloading " + url + " to " + complete_name)
         response = None
         # if downloading a presigned URL cloud resource, use requests.get

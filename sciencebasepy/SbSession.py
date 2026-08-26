@@ -31,6 +31,7 @@ class SbSession:
     _base_items_url = None
     _base_upload_file_url = None
     _base_item_link_url = None
+    _base_item_links_url = None
     _base_upload_file_temp_url = None
     _base_download_files_url = None
     _base_move_item_url = None
@@ -74,6 +75,7 @@ class SbSession:
         self._base_download_files_url = self._base_sb_url + "file/get/"
         self._base_upload_file_temp_url = self._base_sb_url + "file/upload/"
         self._base_item_link_url = self._base_sb_url + "itemLink/"
+        self._base_item_links_url = self._base_sb_url + "itemLinks/"
         self._base_move_item_url = self._base_items_url + "move/"
         self._base_undelete_item_url = self._base_item_url + "undelete/"
         self._base_shortcut_item_url = self._base_items_url + "addLink/"
@@ -2009,7 +2011,7 @@ class SbSession:
         :param item_id: Item ID
         :return: ItemLink JSON
         """
-        return self.get_json('%s%s' % (self._base_item_link_url, item_id))
+        return self.get_json('%s%s' % (self._base_item_links_url, item_id))
 
     def create_item_link(self, from_item_id, to_item_id, link_type_id, reverse=False):
         """Create an ItemLink (relationship) between the two items of the specified type.

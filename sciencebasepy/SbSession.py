@@ -31,6 +31,7 @@ class SbSession:
     _base_items_url = None
     _base_upload_file_url = None
     _base_item_link_url = None
+    _base_item_links_url = None
     _base_upload_file_temp_url = None
     _base_download_files_url = None
     _base_move_item_url = None
@@ -74,6 +75,7 @@ class SbSession:
         self._base_download_files_url = self._base_sb_url + "file/get/"
         self._base_upload_file_temp_url = self._base_sb_url + "file/upload/"
         self._base_item_link_url = self._base_sb_url + "itemLink/"
+        self._base_item_links_url = self._base_sb_url + "itemLinks/"
         self._base_move_item_url = self._base_items_url + "move/"
         self._base_undelete_item_url = self._base_item_url + "undelete/"
         self._base_shortcut_item_url = self._base_items_url + "addLink/"
@@ -2006,10 +2008,28 @@ class SbSession:
     def get_item_links(self, item_id):
         """Get ItemLink (relationship) JSON describing relationships involving the Item with the given ID.
 
+        If the Item has no links, Catalog responds with HTTP 404 and a body of {"total": 0, ...}.
+        In that case this method returns the body instead of raising an exception.
+        If the Item is missing or not readable, an exception is still raised.
+
         :param item_id: Item ID
         :return: ItemLink JSON
         """
-        return self.get_json('%s%s' % (self._base_item_link_url, item_id))
+        url = '%s%s' % (self._base_item_links_url, item_id)
+        try:
+            return self.get_json(url)
+        except Exception:
+            # The catalog returns 404 with {"total": 0, ...} for an Item that has no links,
+            # and 404 with {"Error": ...} when the Item is missing or not readable.
+            ret = self._session.get(url, headers={'Accept': 'application/json'})
+            if ret.status_code == 404:
+                try:
+                    body = ret.json()
+                except ValueError:
+                    body = None
+                if isinstance(body, dict) and 'total' in body:
+                    return body
+            raise
 
     def create_item_link(self, from_item_id, to_item_id, link_type_id, reverse=False):
         """Create an ItemLink (relationship) between the two items of the specified type.

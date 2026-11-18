@@ -1,21 +1,10 @@
 """
-Regression check for get_item_links() once the server-side itemLinks JSON bug is fixed.
+Regression check for get_item_links() against beta.
 
-Background:
-    - sciencebasepy's get_item_links() was hitting the wrong URL (singular 'itemLink/{id}'),
-      which 404'd. That's fixed -- it now hits the correct plural 'itemLinks/{id}' endpoint.
-    - As of the investigation on 2026-08-25, the ScienceBase Catalog server was returning an
-      empty {} from that JSON endpoint even for items with confirmed real links (verified via
-      the equivalent HTML view). That's a server-side bug reported to catalogsas.
+Needs a fresh token.json ({"access_token": ..., "refresh_token": ...}) from the
+beta ScienceBase Manager. Refresh tokens are single-use: copy, then run immediately.
 
-Once catalogsas confirms/deploys a fix, rerun this script to verify the whole chain end to end:
-client URL -> server JSON response -> real link data returned.
-
-Usage:
-    1. Get a fresh token from ScienceBase Manager ("Copy API Token")
-    2. Save it to token.json in the repo root as:
-       {"access_token": "...", "refresh_token": "..."}
-    3. Run: python3 tests/verify_item_links_fix.py
+Exit codes: 0 pass, 1 fail, 3 unexpected shape.
 """
 import sys
 import json
@@ -23,56 +12,57 @@ import json
 sys.path.insert(0, '.')
 from sciencebasepy import SbSession
 
-# Known item with ~94 real linked items (confirmed via HTML view during investigation)
-KNOWN_LINKED_ITEM_ID = "51102e04e4b048b5cead853b"
-EXPECTED_MIN_LINKS = 1  # server bug returns {} (0 links) -- any real link count proves the fix
+ENV = "beta"
+LINKED_ITEM_ID = "6949a428c289a43ccbef6495"  # 1 link on beta
+EMPTY_ITEM_ID = "51102e04e4b048b5cead853b"   # expected 0 links on beta -- confirm
 
 
 def main():
-    sb = SbSession()
-
+    sb = SbSession(env=ENV)
     with open("token.json") as f:
-        token = json.load(f)
-    sb.add_token(token)
-
+        sb.add_token(json.load(f))
     if not sb.is_logged_in():
-        print("FAIL: could not log in with token.json. Get a fresh token and try again.")
+        print("FAIL: not logged in")
         sys.exit(1)
+    print(f"env={ENV} url={sb._base_item_links_url}")
 
-    print(f"Logged in: True")
-    print(f"_base_item_links_url: {sb._base_item_links_url}")
-    print()
-
-    # 1. Confirm the client hits the correct URL (no more 404 on the old singular path)
+    # 1. item with links: must return a dict with a non-empty itemLinks list
     try:
-        result = sb.get_item_links(KNOWN_LINKED_ITEM_ID)
+        result = sb.get_item_links(LINKED_ITEM_ID)
     except Exception as e:
-        print(f"FAIL: get_item_links() raised an exception: {e}")
-        print("The URL fix may have regressed.")
+        print(f"FAIL: get_item_links({LINKED_ITEM_ID}) raised: {e}")
         sys.exit(1)
+    print(f"linked item raw: {json.dumps(result)[:500]}")
 
-    print(f"get_item_links() raw result: {result!r}")
-    print()
+    if not isinstance(result, dict) or "itemLinks" not in result:
+        print("UNEXPECTED shape (want dict with 'itemLinks')")
+        sys.exit(3)
+    links = result["itemLinks"]
+    if not isinstance(links, list) or len(links) < 1 or result.get("total", 0) < 1:
+        print(f"FAIL: expected >=1 link, got total={result.get('total')} len={len(links)}")
+        sys.exit(1)
+    print(f"PASS: total={result['total']} returned={len(links)}")
 
-    # 2. Check whether real link data is now coming back
-    if isinstance(result, dict) and not result:
-        print("STATUS: Server still returns {} (empty).")
-        print("The client-side URL fix is confirmed correct, but the server-side")
-        print("itemLinks JSON bug is NOT yet fixed. Re-run this script after catalogsas")
-        print("deploys their fix.")
-        sys.exit(2)
+    # 2. item with no links: should return the zero-result body, not raise
+    try:
+        empty = sb.get_item_links(EMPTY_ITEM_ID)
+    except Exception as e:
+        print(f"FAIL: zero-link item raised: {e}")
+        sys.exit(1)
+    if not (isinstance(empty, dict) and empty.get("total") == 0):
+        print(f"FAIL: zero-link item returned unexpected body: {empty!r}")
+        sys.exit(1)
+    print(f"PASS: zero-link item returned {json.dumps(empty)[:200]}")
 
-    if isinstance(result, list) and len(result) >= EXPECTED_MIN_LINKS:
-        print(f"PASS: Server fix confirmed! Got {len(result)} link(s) back as JSON.")
-        sys.exit(0)
+    # 3. nonexistent item: must still raise
+    try:
+        sb.get_item_links("000000000000000000000000")
+        print("FAIL: nonexistent item did not raise")
+        sys.exit(1)
+    except Exception as e:
+        print(f"PASS: nonexistent item raised: {e}")
 
-    if isinstance(result, dict) and result:
-        print(f"PASS (probably): Server returned non-empty data: {result}")
-        print("Inspect the shape above to confirm it matches expected ItemLink JSON.")
-        sys.exit(0)
-
-    print(f"UNEXPECTED: Got a result that doesn't match any known pattern: {result!r}")
-    sys.exit(3)
+    sys.exit(0)
 
 
 if __name__ == "__main__":

@@ -11,3 +11,4 @@ settings.json
 sciencebasepy.egg-info/
 dist/
 .vscode/
+token.json
